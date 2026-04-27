@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -39,6 +37,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
+import net.primal.android.core.compose.picker.BasePickerListItem
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.picker.WalletPickerContract.UiEvent
@@ -192,23 +191,10 @@ private fun WalletListItem(
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
-    ListItem(
+    BasePickerListItem(
         modifier = modifier,
-        colors = ListItemDefaults.colors(
-            containerColor = if (selected) {
-                AppTheme.extraColorScheme.surfaceVariantAlt1
-            } else {
-                AppTheme.extraColorScheme.surfaceVariantAlt2
-            },
-        ),
-        headlineContent = {
-            Text(
-                text = wallet.displayName(),
-                style = AppTheme.typography.bodyLarge,
-                maxLines = 1,
-                color = AppTheme.colorScheme.onSurface,
-            )
-        },
+        title = wallet.displayName(),
+        selected = selected,
         supportingContent = {
             Text(
                 modifier = Modifier.padding(top = 4.dp),

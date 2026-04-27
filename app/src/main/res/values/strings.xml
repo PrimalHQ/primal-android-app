@@ -720,15 +720,23 @@
     <string name="new_explore_user_search_placeholder">Search users</string>
     <string name="new_explore_fab_content_description">Open new Explore</string>
 
+    <!-- Explore tab header picker -->
+    <string name="explore_section_explore_title">Explore</string>
+    <string name="explore_section_explore_subtitle">Find people, feeds, media</string>
+    <string name="explore_section_feed_gallery_title">Feed Gallery</string>
+    <string name="explore_section_feed_gallery_subtitle">Browse feed gallery</string>
+    <string name="explore_section_follow_packs_title">Follow Packs</string>
+    <string name="explore_section_follow_packs_subtitle">Curated lists of users to follow</string>
+    <string name="explore_section_zaps_title">Zaps</string>
+    <string name="explore_section_zaps_subtitle">Top zaps on Nostr today</string>
+    <string name="explore_section_media_title">Media</string>
+    <string name="explore_section_media_subtitle">Top images and videos on Nostr today</string>
+    <string name="explore_search_bar_hint">Search…</string>
+
     <string name="account_drawer_title">Account</string>
     <string name="account_drawer_subtitle">Options and settings</string>
     <string name="explore_feed_save_feed">Save</string>
     <string name="explore_feed_remove_feed">Remove</string>
-    <string name="explore_feeds_tab">Feeds</string>
-    <string name="explore_people_tab">People</string>
-    <string name="explore_zaps_tab">Zaps</string>
-    <string name="explore_media_tab">Media</string>
-    <string name="explore_topics_tab">Topics</string>
     <string name="explore_feeds_dvm_details_action_button_add">Add to home feeds</string>
     <string name="explore_feeds_dvm_details_action_button_remove">Remove from home feeds</string>
     <string name="explore_trending_people_no_content">Unable to load trending people. Please try again.</string>

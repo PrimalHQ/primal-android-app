@@ -50,8 +50,10 @@ import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.feeds.list.FeedListOverlayContent
 import net.primal.android.feeds.list.ui.model.FeedUi
-import net.primal.android.main.explore.home.NewExploreTabContent
-import net.primal.android.main.explore.home.NewExploreTabTopAppBar
+import net.primal.android.main.explore.ExploreHomeContent
+import net.primal.android.main.explore.ExploreTopAppBar
+import net.primal.android.main.explore.section.ExploreSection
+import net.primal.android.main.explore.section.ExploreSectionListOverlayContent
 import net.primal.android.main.feeds.NoteFeedTopAppBar
 import net.primal.android.main.feeds.NoteFeedsContent
 import net.primal.android.main.feeds.NoteFeedsContract
@@ -71,7 +73,6 @@ import net.primal.android.navigation.navigateToAdvancedSearch
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
-import net.primal.android.navigation.navigateToProfile
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.navigateToSearch
 import net.primal.android.navigation.noteCallbacksHandler
@@ -155,7 +156,10 @@ fun MainScreen(
     }
 
     val focusModeEnabled = when (activeTab) {
-        PrimalTopLevelDestination.Wallet -> false
+        PrimalTopLevelDestination.Wallet,
+        PrimalTopLevelDestination.Explore,
+        -> false
+
         else -> LocalContentDisplaySettings.current.focusModeEnabled
     }
 
@@ -204,6 +208,10 @@ private fun MainScreenTopAppBar(
     readsActiveFeed: FeedUi?,
     homePagerState: PagerState,
     readsPagerState: PagerState,
+    exploreActiveSection: ExploreSection,
+    onExploreSectionPickerRequest: () -> Unit,
+    onExploreSearchClick: () -> Unit,
+    onExploreAdvancedSearchClick: () -> Unit,
     homeFeeds: List<FeedUi>,
     readsFeeds: List<FeedUi>,
 ) {
@@ -247,13 +255,18 @@ private fun MainScreenTopAppBar(
         }
 
         PrimalTopLevelDestination.Explore -> {
-            NewExploreTabTopAppBar(
+            ExploreTopAppBar(
+                activeSection = exploreActiveSection,
+                onExploreSectionPickerRequest = onExploreSectionPickerRequest,
+                onSearchClick = onExploreSearchClick,
+                onAdvancedSearchClick = onExploreAdvancedSearchClick,
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 onAvatarClick = onAvatarClick,
                 onAvatarSwipeDown = onAvatarSwipeDown,
                 scrollBehavior = scrollBehavior,
+                chevronExpanded = chevronExpanded,
                 titleOverride = titleOverride,
                 subtitleOverride = subtitleOverride,
             )
@@ -295,8 +308,12 @@ private fun ScaffoldTopAppBar(
     feedPickerVisible: Boolean,
     readPickerVisible: Boolean,
     walletPickerVisible: Boolean,
+    exploreSectionPickerVisible: Boolean,
     sharedState: MainScreenSharedState,
     toggleOverlay: (ActiveOverlay) -> Unit,
+    onExploreSearchClick: () -> Unit,
+    onExploreAdvancedSearchClick: () -> Unit,
+    exploreActiveSection: ExploreSection,
     homeFeeds: List<FeedUi>,
     readsFeeds: List<FeedUi>,
 ) {
@@ -321,7 +338,10 @@ private fun ScaffoldTopAppBar(
         onWalletPickerRequest = { toggleOverlay(ActiveOverlay.WalletPicker) },
         titleOverride = drawerTitle,
         subtitleOverride = drawerSubtitle,
-        chevronExpanded = feedPickerVisible || readPickerVisible || walletPickerVisible,
+        chevronExpanded = feedPickerVisible ||
+            readPickerVisible ||
+            walletPickerVisible ||
+            exploreSectionPickerVisible,
         avatarCdnImage = mainState.activeAccountAvatarCdnImage,
         avatarLegendaryCustomization = mainState.activeAccountLegendaryCustomization,
         avatarBlossoms = mainState.activeAccountBlossoms,
@@ -329,6 +349,10 @@ private fun ScaffoldTopAppBar(
         readsActiveFeed = sharedState.readsActiveFeed.value,
         homePagerState = sharedState.homePagerState,
         readsPagerState = sharedState.readsPagerState,
+        exploreActiveSection = exploreActiveSection,
+        onExploreSectionPickerRequest = { toggleOverlay(ActiveOverlay.ExploreSectionPicker) },
+        onExploreSearchClick = onExploreSearchClick,
+        onExploreAdvancedSearchClick = onExploreAdvancedSearchClick,
         homeFeeds = homeFeeds,
         readsFeeds = readsFeeds,
     )
@@ -389,15 +413,15 @@ private fun MainScreenContent(
                         navController = navController,
                     )
 
-                    PrimalTopLevelDestination.Explore -> NewExploreTabContent(
+                    PrimalTopLevelDestination.Explore -> ExploreHomeContent(
+                        pagerState = sharedState.explorePagerState,
                         paddingValues = paddingValues,
                         noteCallbacks = noteCallbacks,
-                        onProfileClick = { navController.navigateToProfile(profileId = it) },
-                        onSearchUsersClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-                        onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
+                        snackbarHostState = sharedState.snackbarHostState,
                         onFollowPackClick = { profileId, identifier ->
                             navController.navigateToFollowPack(profileId, identifier)
                         },
+                        onGoToWallet = onGoToWallet,
                     )
 
                     PrimalTopLevelDestination.Alerts -> NotificationsContent(
@@ -428,6 +452,7 @@ private class MainScreenSharedState(
     val snackbarHostState: SnackbarHostState,
     val homeActiveFeed: MutableState<FeedUi?>,
     val readsActiveFeed: MutableState<FeedUi?>,
+    val explorePagerState: PagerState,
     val homePagerState: PagerState,
     val readsPagerState: PagerState,
     val homeShouldAnimateScrollToTop: MutableState<Boolean>,
@@ -452,6 +477,7 @@ private fun rememberMainScreenSharedState(
         snackbarHostState = remember { SnackbarHostState() },
         homeActiveFeed = remember { mutableStateOf(null) },
         readsActiveFeed = remember { mutableStateOf(null) },
+        explorePagerState = rememberPagerState(pageCount = { ExploreSection.entries.size }),
         homePagerState = homePagerState,
         readsPagerState = readsPagerState,
         homeShouldAnimateScrollToTop = remember { mutableStateOf(false) },
@@ -465,6 +491,7 @@ private fun rememberMainScreenSharedState(
     )
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreenScaffold(
@@ -491,7 +518,10 @@ private fun MainScreenScaffold(
     val feedPickerVisible = activeOverlay == ActiveOverlay.FeedPicker
     val readPickerVisible = activeOverlay == ActiveOverlay.ReadPicker
     val walletPickerVisible = activeOverlay == ActiveOverlay.WalletPicker
+    val exploreSectionPickerVisible = activeOverlay == ActiveOverlay.ExploreSectionPicker
     val accountDrawerVisible = activeOverlay == ActiveOverlay.AccountDrawer
+    val exploreActiveSection = ExploreSection.entries
+        .getOrElse(sharedState.explorePagerState.currentPage) { ExploreSection.Explore }
 
     val streamState = LocalStreamState.current
     LaunchedEffect(activeOverlay) {
@@ -520,8 +550,12 @@ private fun MainScreenScaffold(
                 feedPickerVisible = feedPickerVisible,
                 readPickerVisible = readPickerVisible,
                 walletPickerVisible = walletPickerVisible,
+                exploreSectionPickerVisible = exploreSectionPickerVisible,
                 sharedState = sharedState,
                 toggleOverlay = ::toggleOverlay,
+                onExploreSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
+                onExploreAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
+                exploreActiveSection = exploreActiveSection,
                 homeFeeds = homeState.feeds,
                 readsFeeds = readsState.feeds,
             )
@@ -548,6 +582,8 @@ private fun MainScreenScaffold(
                 feedPickerVisible = feedPickerVisible,
                 readPickerVisible = readPickerVisible,
                 walletPickerVisible = walletPickerVisible,
+                exploreSectionPickerVisible = exploreSectionPickerVisible,
+                exploreActiveSection = exploreActiveSection,
                 sharedState = sharedState,
                 onDismissOverlay = { activeOverlay = null },
                 onDrawerDestinationClick = onDrawerDestinationClick,
@@ -576,12 +612,15 @@ private fun MainScreenFab(activeTab: PrimalTopLevelDestination, navController: N
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun MainScreenOverlays(
     accountDrawerVisible: Boolean,
     feedPickerVisible: Boolean,
     readPickerVisible: Boolean,
     walletPickerVisible: Boolean,
+    exploreSectionPickerVisible: Boolean,
+    exploreActiveSection: ExploreSection,
     sharedState: MainScreenSharedState,
     onDismissOverlay: () -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
@@ -652,6 +691,32 @@ private fun MainScreenOverlays(
     ) {
         WalletPickerOverlayContent(
             onDismiss = onDismissOverlay,
+        )
+    }
+
+    ExploreSectionPickerOverlay(
+        visible = exploreSectionPickerVisible,
+        activeSection = exploreActiveSection,
+        explorePagerState = sharedState.explorePagerState,
+        onDismissOverlay = onDismissOverlay,
+    )
+}
+
+@Composable
+private fun ExploreSectionPickerOverlay(
+    visible: Boolean,
+    activeSection: ExploreSection,
+    explorePagerState: PagerState,
+    onDismissOverlay: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    PrimalOverlay(visible = visible, onDismiss = onDismissOverlay) {
+        ExploreSectionListOverlayContent(
+            activeSection = activeSection,
+            onSectionClick = { section ->
+                scope.launch { explorePagerState.scrollToPage(section.ordinal) }
+                onDismissOverlay()
+            },
         )
     }
 }
@@ -774,4 +839,5 @@ private enum class ActiveOverlay {
     FeedPicker,
     ReadPicker,
     WalletPicker,
+    ExploreSectionPicker,
 }
