@@ -20,10 +20,7 @@ import net.primal.android.core.compose.picker.BasePickerListItem
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun ExploreSectionListOverlayContent(
-    activeSection: ExploreSection,
-    onSectionClick: (ExploreSection) -> Unit,
-) {
+fun ExploreSectionListOverlayContent(activeSection: ExploreSection, onSectionClick: (ExploreSection) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
