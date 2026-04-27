@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
@@ -41,8 +43,10 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.main.explore.feeds.ExploreFeeds
-import net.primal.android.main.explore.filter.ExploreFilter
 import net.primal.android.main.explore.people.ExplorePeople
+import net.primal.android.main.explore.section.ExploreSection
+import net.primal.android.main.explore.section.toSubtitle
+import net.primal.android.main.explore.section.toTitle
 import net.primal.android.main.explore.zaps.ExploreZaps
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -54,7 +58,7 @@ import net.primal.domain.links.CdnImage
 
 @Composable
 internal fun ExploreHomeContent(
-    activeFilter: ExploreFilter,
+    pagerState: PagerState,
     paddingValues: PaddingValues,
     noteCallbacks: NoteCallbacks,
     snackbarHostState: SnackbarHostState,
@@ -64,42 +68,44 @@ internal fun ExploreHomeContent(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
 
-    when (activeFilter) {
-        ExploreFilter.Explore -> ExplorePlaceholder(paddingValues = paddingValues)
+    HorizontalPager(state = pagerState) { pageIndex ->
+        when (ExploreSection.entries[pageIndex]) {
+            ExploreSection.Explore -> ExplorePlaceholder(paddingValues = paddingValues)
 
-        ExploreFilter.FeedGallery -> ExploreFeeds(
-            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-            paddingValues = paddingValues,
-            onGoToWallet = onGoToWallet,
-            onUiError = { uiError: UiError ->
-                uiScope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = uiError.resolveUiErrorMessage(context),
-                        duration = SnackbarDuration.Short,
-                    )
-                }
-            },
-        )
+            ExploreSection.FeedGallery -> ExploreFeeds(
+                modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                onGoToWallet = onGoToWallet,
+                onUiError = { uiError: UiError ->
+                    uiScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = uiError.resolveUiErrorMessage(context),
+                            duration = SnackbarDuration.Short,
+                        )
+                    }
+                },
+            )
 
-        ExploreFilter.FollowPacks -> ExplorePeople(
-            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-            paddingValues = paddingValues,
-            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-            onFollowPackClick = onFollowPackClick,
-        )
+            ExploreSection.FollowPacks -> ExplorePeople(
+                modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                onFollowPackClick = onFollowPackClick,
+            )
 
-        ExploreFilter.Zaps -> ExploreZaps(
-            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-            paddingValues = paddingValues,
-            noteCallbacks = noteCallbacks,
-        )
+            ExploreSection.Zaps -> ExploreZaps(
+                modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                noteCallbacks = noteCallbacks,
+            )
 
-        ExploreFilter.Media -> MediaFeedGrid(
-            feedSpec = exploreMediaFeedSpec,
-            contentPadding = paddingValues,
-            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
-            onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
-        )
+            ExploreSection.Media -> MediaFeedGrid(
+                feedSpec = exploreMediaFeedSpec,
+                contentPadding = paddingValues,
+                onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+                onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+            )
+        }
     }
 }
 
@@ -116,8 +122,8 @@ private fun ExplorePlaceholder(paddingValues: PaddingValues) {
 @ExperimentalMaterial3Api
 @Composable
 internal fun ExploreTopAppBar(
-    activeFilter: ExploreFilter,
-    onExploreFilterPickerRequest: () -> Unit,
+    activeSection: ExploreSection,
+    onExploreSectionPickerRequest: () -> Unit,
     onSearchClick: () -> Unit,
     onAdvancedSearchClick: () -> Unit,
     avatarCdnImage: CdnImage?,
@@ -137,13 +143,13 @@ internal fun ExploreTopAppBar(
             .wrapContentHeight(),
     ) {
         PrimalTopLevelAppBar(
-            title = stringResource(id = activeFilter.titleRes),
-            subtitle = stringResource(id = activeFilter.subtitleRes),
+            title = activeSection.toTitle(),
+            subtitle = activeSection.toSubtitle(),
             titleOverride = titleOverride,
             subtitleOverride = subtitleOverride,
             showTitleChevron = true,
             chevronExpanded = chevronExpanded,
-            onTitleClick = { onExploreFilterPickerRequest() },
+            onTitleClick = { onExploreSectionPickerRequest() },
             avatarCdnImage = avatarCdnImage,
             avatarBlossoms = avatarBlossoms,
             avatarLegendaryCustomization = avatarLegendaryCustomization,
@@ -206,8 +212,8 @@ fun PreviewExploreTopAppBar() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ExploreTopAppBar(
-                activeFilter = ExploreFilter.Explore,
-                onExploreFilterPickerRequest = {},
+                activeSection = ExploreSection.Explore,
+                onExploreSectionPickerRequest = {},
                 onSearchClick = {},
                 onAdvancedSearchClick = {},
                 avatarCdnImage = null,
