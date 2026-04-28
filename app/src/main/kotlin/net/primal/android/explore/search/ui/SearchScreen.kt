@@ -92,6 +92,7 @@ fun SearchScreen(
                         },
                         onSearch = {
                             keyboardController?.hide()
+                            eventPublisher(SearchContract.UiEvent.SearchSubmitted(query = state.searchQuery))
                             scope.launch {
                                 callbacks.onSearchContent(searchScope, state.searchQuery)
                             }
@@ -133,7 +134,10 @@ fun SearchScreen(
                                     }
                                     profileId != null -> callbacks.onProfileClick(profileId)
                                     naddr != null -> callbacks.onNaddrClick(naddr)
-                                    else -> callbacks.onSearchContent(searchScope, query)
+                                    else -> {
+                                        eventPublisher(SearchContract.UiEvent.SearchSubmitted(query = query))
+                                        callbacks.onSearchContent(searchScope, query)
+                                    }
                                 }
                             }
                         },

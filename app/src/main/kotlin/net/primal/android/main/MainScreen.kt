@@ -208,6 +208,7 @@ private fun MainScreenTopAppBar(
     readsActiveFeed: FeedUi?,
     homePagerState: PagerState,
     readsPagerState: PagerState,
+    explorePagerState: PagerState,
     exploreActiveSection: ExploreSection,
     onExploreSectionPickerRequest: () -> Unit,
     onExploreSearchClick: () -> Unit,
@@ -257,6 +258,7 @@ private fun MainScreenTopAppBar(
         PrimalTopLevelDestination.Explore -> {
             ExploreTopAppBar(
                 activeSection = exploreActiveSection,
+                pagerState = explorePagerState,
                 onExploreSectionPickerRequest = onExploreSectionPickerRequest,
                 onSearchClick = onExploreSearchClick,
                 onAdvancedSearchClick = onExploreAdvancedSearchClick,
@@ -349,6 +351,7 @@ private fun ScaffoldTopAppBar(
         readsActiveFeed = sharedState.readsActiveFeed.value,
         homePagerState = sharedState.homePagerState,
         readsPagerState = sharedState.readsPagerState,
+        explorePagerState = sharedState.explorePagerState,
         exploreActiveSection = exploreActiveSection,
         onExploreSectionPickerRequest = { toggleOverlay(ActiveOverlay.ExploreSectionPicker) },
         onExploreSearchClick = onExploreSearchClick,
@@ -420,6 +423,12 @@ private fun MainScreenContent(
                         snackbarHostState = sharedState.snackbarHostState,
                         onFollowPackClick = { profileId, identifier ->
                             navController.navigateToFollowPack(profileId, identifier)
+                        },
+                        onRecentSearchClick = { query ->
+                            navController.navigateToSearch(
+                                searchScope = SearchScope.Notes,
+                                initialQuery = query,
+                            )
                         },
                         onGoToWallet = onGoToWallet,
                     )

@@ -196,8 +196,8 @@ private fun NavController.navigateToOnboarding() = navigate(route = "onboarding"
 
 private fun NavController.navigateToLogout(profileId: String) = navigate(route = "logout?$PROFILE_ID=$profileId")
 
-internal fun NavController.navigateToSearch(searchScope: SearchScope) =
-    navigate(route = "search?$SEARCH_SCOPE=$searchScope")
+internal fun NavController.navigateToSearch(searchScope: SearchScope, initialQuery: String? = null) =
+    navigate(route = "search?$SEARCH_SCOPE=$searchScope&$INITIAL_QUERY=$initialQuery")
 
 internal fun NavController.navigateToAdvancedSearch(
     initialQuery: String? = null,
@@ -666,10 +666,14 @@ private fun PrimalAppNavigation(
         )
 
         search(
-            route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}",
+            route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}&$INITIAL_QUERY={$INITIAL_QUERY}",
             arguments = listOf(
                 navArgument(SEARCH_SCOPE) {
                     type = NavType.StringType
+                },
+                navArgument(INITIAL_QUERY) {
+                    type = NavType.StringType
+                    nullable = true
                 },
             ),
             navController = navController,

@@ -2,12 +2,10 @@ package net.primal.android.main.explore
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarPage
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelAppBar
@@ -43,6 +42,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.main.explore.feeds.ExploreFeeds
+import net.primal.android.main.explore.landing.ExploreLanding
 import net.primal.android.main.explore.people.ExplorePeople
 import net.primal.android.main.explore.section.ExploreSection
 import net.primal.android.main.explore.section.toSubtitle
@@ -63,6 +63,7 @@ internal fun ExploreHomeContent(
     noteCallbacks: NoteCallbacks,
     snackbarHostState: SnackbarHostState,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
+    onRecentSearchClick: (query: String) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -70,7 +71,12 @@ internal fun ExploreHomeContent(
 
     HorizontalPager(state = pagerState) { pageIndex ->
         when (ExploreSection.entries[pageIndex]) {
-            ExploreSection.Explore -> ExplorePlaceholder(paddingValues = paddingValues)
+            ExploreSection.Explore -> ExploreLanding(
+                modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                paddingValues = paddingValues,
+                onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                onRecentSearchClick = onRecentSearchClick,
+            )
 
             ExploreSection.FeedGallery -> ExploreFeeds(
                 modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
@@ -109,16 +115,6 @@ internal fun ExploreHomeContent(
     }
 }
 
-@Composable
-private fun ExplorePlaceholder(paddingValues: PaddingValues) {
-    // Implement Explore landing content (people / feeds / media discovery).
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
-    )
-}
-
 @ExperimentalMaterial3Api
 @Composable
 internal fun ExploreTopAppBar(
@@ -129,6 +125,7 @@ internal fun ExploreTopAppBar(
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
     modifier: Modifier = Modifier,
+    pagerState: PagerState? = null,
     onAvatarSwipeDown: (() -> Unit)? = null,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
     avatarBlossoms: List<String> = emptyList(),
@@ -137,6 +134,7 @@ internal fun ExploreTopAppBar(
     titleOverride: String? = null,
     subtitleOverride: String? = null,
 ) {
+    val sectionPages = ExploreSection.entries.map { AppBarPage(title = it.toTitle(), subtitle = it.toSubtitle()) }
     Column(
         modifier = modifier
             .background(AppTheme.colorScheme.background)
@@ -157,6 +155,8 @@ internal fun ExploreTopAppBar(
             onAvatarSwipeDown = onAvatarSwipeDown,
             showDivider = false,
             scrollBehavior = scrollBehavior,
+            pagerState = pagerState,
+            pages = sectionPages,
         )
         ExploreSearchNavBar(
             onSearchClick = onSearchClick,

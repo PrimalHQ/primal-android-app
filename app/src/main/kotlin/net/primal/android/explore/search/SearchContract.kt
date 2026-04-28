@@ -18,6 +18,7 @@ interface SearchContract {
     sealed class UiEvent {
         data class SearchQueryUpdated(val query: String) : UiEvent()
         data class ProfileSelected(val profileId: String) : UiEvent()
+        data class SearchSubmitted(val query: String) : UiEvent()
         data object ResetSearchQuery : UiEvent()
     }
 

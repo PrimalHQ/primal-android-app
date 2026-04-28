@@ -1,5 +1,6 @@
 package net.primal.android.explore.search
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
+import net.primal.android.navigation.initialQuery
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.common.exception.NetworkException
@@ -25,12 +27,15 @@ import net.primal.domain.explore.ExploreRepository
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val initialQuery: String = savedStateHandle.initialQuery.orEmpty()
+
+    private val _state = MutableStateFlow(UiState(searchQuery = initialQuery))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -43,6 +48,9 @@ class SearchViewModel @Inject constructor(
         observeRecentUsers()
         observePopularUsers()
         fetchPopularUsers()
+        if (initialQuery.isNotEmpty()) {
+            setEvent(UiEvent.SearchQueryUpdated(query = initialQuery))
+        }
     }
 
     private fun observeEvents() =
@@ -51,10 +59,25 @@ class SearchViewModel @Inject constructor(
                 when (it) {
                     is UiEvent.SearchQueryUpdated -> setState { copy(searching = true, searchQuery = it.query) }
                     is UiEvent.ProfileSelected -> markProfileInteraction(profileId = it.profileId)
+                    is UiEvent.SearchSubmitted -> saveRecentSearch(query = it.query)
                     UiEvent.ResetSearchQuery -> setState { copy(searchQuery = "", searchResults = emptyList()) }
                 }
             }
         }
+
+    private fun saveRecentSearch(query: String) {
+        if (query.isBlank()) return
+        viewModelScope.launch {
+            runCatching {
+                exploreRepository.saveRecentSearch(
+                    ownerId = activeAccountStore.activeUserId(),
+                    query = query.trim(),
+                )
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to save recent search." }
+            }
+        }
+    }
 
     @OptIn(FlowPreview::class)
     private fun observeDebouncedQueryChanges() =
