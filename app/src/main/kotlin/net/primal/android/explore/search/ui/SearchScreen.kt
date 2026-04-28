@@ -29,8 +29,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -184,10 +186,22 @@ fun SearchTextField(
         }
     }
 
+    var fieldValue by remember { mutableStateOf(TextFieldValue(text = query, selection = TextRange(query.length))) }
+    LaunchedEffect(query) {
+        if (fieldValue.text != query) {
+            fieldValue = TextFieldValue(text = query, selection = TextRange(query.length))
+        }
+    }
+
     OutlinedTextField(
         modifier = Modifier.focusRequester(focusRequester),
-        value = query,
-        onValueChange = onQueryChange,
+        value = fieldValue,
+        onValueChange = { newValue ->
+            fieldValue = newValue
+            if (newValue.text != query) {
+                onQueryChange(newValue.text)
+            }
+        },
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,

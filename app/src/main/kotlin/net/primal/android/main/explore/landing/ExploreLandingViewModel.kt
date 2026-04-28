@@ -40,7 +40,7 @@ class ExploreLandingViewModel @Inject constructor(
             userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect { users ->
-                    setState { copy(recentUsers = users.map { it.mapAsUserProfileUi() }) }
+                    setState { copy(recentUsers = users) }
                 }
         }
 
@@ -71,7 +71,7 @@ class ExploreLandingViewModel @Inject constructor(
             )
                 .distinctUntilChanged()
                 .collect { queries ->
-                    setState { copy(recentSearches = queries) }
+                    setState { copy(recentSearches = queries, recentSearchesLoading = false) }
                 }
         }
 

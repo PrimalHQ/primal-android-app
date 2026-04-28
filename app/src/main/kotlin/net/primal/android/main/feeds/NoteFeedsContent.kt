@@ -26,12 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AppBarPage
 import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.feeds.list.ui.model.toAppBarPages
 import net.primal.android.main.feeds.NoteFeedsContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -164,7 +164,7 @@ internal fun NoteFeedTopAppBar(
             }
         },
         pagerState = pagerState,
-        pages = feeds.map { AppBarPage(title = it.title, subtitle = it.description.ifBlank { null }) },
+        pages = feeds.toAppBarPages(),
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,

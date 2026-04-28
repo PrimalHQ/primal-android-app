@@ -70,6 +70,7 @@ import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToAdvancedSearch
+import net.primal.android.navigation.navigateToExploreFeed
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
@@ -81,6 +82,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.wallet.picker.WalletPickerOverlayContent
 import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.CurrencyMode
 
@@ -424,10 +426,15 @@ private fun MainScreenContent(
                         onFollowPackClick = { profileId, identifier ->
                             navController.navigateToFollowPack(profileId, identifier)
                         },
-                        onRecentSearchClick = { query ->
+                        onRecentSearchEditClick = { query ->
                             navController.navigateToSearch(
                                 searchScope = SearchScope.Notes,
                                 initialQuery = query,
+                            )
+                        },
+                        onRecentSearchExecuteClick = { query ->
+                            navController.navigateToExploreFeed(
+                                feedSpec = buildAdvancedSearchNotesFeedSpec(query = query),
                             )
                         },
                         onGoToWallet = onGoToWallet,

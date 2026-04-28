@@ -10,6 +10,7 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
@@ -361,6 +362,7 @@ class ExploreRepositoryImpl(
     override fun observeRecentSearches(ownerId: String, limit: Int): Flow<List<String>> =
         database.recentSearches().observeRecentSearches(ownerId = ownerId, limit = limit)
             .map { rows -> rows.map { it.query } }
+            .distinctUntilChanged()
 
     @OptIn(ExperimentalPagingApi::class)
     private fun createFollowPacksPager(pagingSourceFactory: () -> PagingSource<Int, FollowPack>) =

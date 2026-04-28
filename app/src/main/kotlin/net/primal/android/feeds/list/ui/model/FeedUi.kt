@@ -1,5 +1,6 @@
 package net.primal.android.feeds.list.ui.model
 
+import net.primal.android.core.compose.AppBarPage
 import net.primal.domain.feeds.FEED_KIND_PRIMAL
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.PrimalFeed
@@ -37,3 +38,6 @@ fun FeedUi.asPrimalFeed() =
         enabled = this.enabled,
         feedKind = this.feedKind,
     )
+
+fun List<FeedUi>.toAppBarPages(): List<AppBarPage> =
+    map { AppBarPage(title = it.title, subtitle = it.description.ifBlank { null }) }

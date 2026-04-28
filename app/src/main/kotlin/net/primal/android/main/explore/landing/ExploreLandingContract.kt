@@ -9,6 +9,7 @@ interface ExploreLandingContract {
         val recentUsers: List<UserProfileItemUi> = emptyList(),
         val popularUsers: List<UserProfileItemUi> = emptyList(),
         val recentSearches: List<String> = emptyList(),
+        val recentSearchesLoading: Boolean = true,
     ) {
         val recommendedUsers: List<UserProfileItemUi> get() =
             (recentUsers + popularUsers).distinctBy { it.profileId }.take(MAX_RECOMMENDED_USERS)

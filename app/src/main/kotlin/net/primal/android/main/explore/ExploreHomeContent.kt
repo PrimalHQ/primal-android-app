@@ -63,7 +63,8 @@ internal fun ExploreHomeContent(
     noteCallbacks: NoteCallbacks,
     snackbarHostState: SnackbarHostState,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
-    onRecentSearchClick: (query: String) -> Unit,
+    onRecentSearchEditClick: (query: String) -> Unit,
+    onRecentSearchExecuteClick: (query: String) -> Unit,
     onGoToWallet: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -75,7 +76,8 @@ internal fun ExploreHomeContent(
                 modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                 paddingValues = paddingValues,
                 onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-                onRecentSearchClick = onRecentSearchClick,
+                onRecentSearchEditClick = onRecentSearchEditClick,
+                onRecentSearchExecuteClick = onRecentSearchExecuteClick,
             )
 
             ExploreSection.FeedGallery -> ExploreFeeds(

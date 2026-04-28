@@ -107,7 +107,7 @@ class SearchViewModel @Inject constructor(
             userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
                 .collect { users ->
-                    setState { copy(recentUsers = users.map { it.mapAsUserProfileUi() }) }
+                    setState { copy(recentUsers = users) }
                 }
         }
 
