@@ -194,8 +194,6 @@ private fun AppBarTitle(
     }
 }
 
-data class AppBarPage(val title: String, val subtitle: String? = null)
-
 @Composable
 private fun SwipingAppBarTitle(
     pagerState: PagerState,
