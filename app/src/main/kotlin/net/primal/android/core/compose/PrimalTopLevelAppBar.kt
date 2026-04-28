@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import kotlinx.coroutines.launch
-import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
@@ -72,7 +71,7 @@ fun PrimalTopLevelAppBar(
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     pagerState: PagerState? = null,
-    feeds: List<FeedUi> = emptyList(),
+    pages: List<AppBarPage> = emptyList(),
 ) {
     val effectiveTitle = titleOverride ?: title
     val effectiveSubtitle = subtitleOverride ?: subtitle
@@ -94,10 +93,10 @@ fun PrimalTopLevelAppBar(
                         chevronRotation = chevronRotation,
                         onTitleClick = effectiveOnTitleClick,
                     )
-                } else if (pagerState != null && feeds.size > 1) {
+                } else if (pagerState != null && pages.size > 1) {
                     SwipingAppBarTitle(
                         pagerState = pagerState,
-                        feeds = feeds,
+                        pages = pages,
                         showChevron = effectiveShowChevron,
                         chevronRotation = chevronRotation,
                         onTitleClick = effectiveOnTitleClick,
@@ -195,53 +194,55 @@ private fun AppBarTitle(
     }
 }
 
+data class AppBarPage(val title: String, val subtitle: String? = null)
+
 @Composable
 private fun SwipingAppBarTitle(
     pagerState: PagerState,
-    feeds: List<FeedUi>,
+    pages: List<AppBarPage>,
     showChevron: Boolean,
     chevronRotation: Float,
     onTitleClick: (() -> Unit)?,
 ) {
-    val maxIndex = (feeds.size - 1).coerceAtLeast(0)
+    val maxIndex = (pages.size - 1).coerceAtLeast(0)
     val settledPage = pagerState.settledPage.coerceIn(0, maxIndex)
 
-    val currentFeed = feeds.getOrNull(settledPage)
-    val prevFeed = if (settledPage > 0) feeds.getOrNull(settledPage - 1) else null
-    val nextFeed = if (settledPage < maxIndex) feeds.getOrNull(settledPage + 1) else null
+    val current = pages.getOrNull(settledPage)
+    val prev = if (settledPage > 0) pages.getOrNull(settledPage - 1) else null
+    val next = if (settledPage < maxIndex) pages.getOrNull(settledPage + 1) else null
 
     Box(modifier = Modifier.clipToBounds()) {
         AppBarTitle(
             modifier = Modifier
                 .fillMaxWidth()
                 .wipeClip(pagerState = pagerState, settledPage = settledPage, role = WipeRole.CURRENT),
-            title = currentFeed?.title ?: "",
-            subtitle = currentFeed?.description?.ifBlank { null },
+            title = current?.title.orEmpty(),
+            subtitle = current?.subtitle?.ifBlank { null },
             showChevron = showChevron,
             chevronRotation = chevronRotation,
             onTitleClick = onTitleClick,
         )
 
-        if (prevFeed != null) {
+        if (prev != null) {
             AppBarTitle(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wipeClip(pagerState = pagerState, settledPage = settledPage, role = WipeRole.PREV),
-                title = prevFeed.title ?: "",
-                subtitle = prevFeed.description?.ifBlank { null },
+                title = prev.title,
+                subtitle = prev.subtitle?.ifBlank { null },
                 showChevron = showChevron,
                 chevronRotation = chevronRotation,
                 onTitleClick = onTitleClick,
             )
         }
 
-        if (nextFeed != null) {
+        if (next != null) {
             AppBarTitle(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wipeClip(pagerState = pagerState, settledPage = settledPage, role = WipeRole.NEXT),
-                title = nextFeed.title ?: "",
-                subtitle = nextFeed.description?.ifBlank { null },
+                title = next.title,
+                subtitle = next.subtitle?.ifBlank { null },
                 showChevron = showChevron,
                 chevronRotation = chevronRotation,
                 onTitleClick = onTitleClick,

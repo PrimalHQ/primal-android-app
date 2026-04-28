@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
+import net.primal.android.core.compose.AppBarPage
 import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalTopLevelAppBar
@@ -176,7 +177,7 @@ internal fun ArticleFeedTopAppBar(
             }
         },
         pagerState = pagerState,
-        feeds = feeds,
+        pages = feeds.map { AppBarPage(title = it.title, subtitle = it.description.ifBlank { null }) },
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,
