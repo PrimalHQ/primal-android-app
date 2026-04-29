@@ -257,7 +257,7 @@ private fun rememberBottomBarState(
         }
     }
 
-    val isVisible by remember {
+    val isVisible by remember(topAppBarState) {
         derivedStateOf {
             initialHeight.isZeroOrNavigationBarFullHeight() || realHeight > 0.dp
         }
