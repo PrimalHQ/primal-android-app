@@ -5,6 +5,7 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -357,6 +358,7 @@ class UserRepository @Inject constructor(
     fun observeRecentUsers(ownerId: String): Flow<List<UserProfileItemUi>> =
         usersDatabase.userProfileInteractions()
             .observeRecentProfilesByOwnerId(ownerId)
+            .distinctUntilChanged()
             .map { recentProfiles ->
                 val profileIds = recentProfiles.map { it.profileId }
 

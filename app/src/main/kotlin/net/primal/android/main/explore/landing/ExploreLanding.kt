@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,7 +42,7 @@ private val SECTION_HORIZONTAL_PADDING = 16.dp
 private val SECTION_INNER_SPACING = 16.dp
 private const val POPULAR_USERS_COLUMNS = 4
 private const val POPULAR_USERS_LOADING_ROWS = 3
-private val POPULAR_USERS_LOADING_CELL_HEIGHT = 66.dp
+private val POPULAR_USERS_LOADING_CELL_HEIGHT = 44.dp
 
 @Composable
 fun ExploreLanding(
@@ -112,6 +113,7 @@ private fun RecentUsersSection(users: List<UserProfileItemUi>, onUserClick: (pro
                 rows = POPULAR_USERS_LOADING_ROWS,
                 columns = POPULAR_USERS_COLUMNS,
                 cellHeight = POPULAR_USERS_LOADING_CELL_HEIGHT,
+                cellShape = CircleShape,
             )
         } else {
             PopularUsersGrid(users = users, onUserClick = onUserClick)

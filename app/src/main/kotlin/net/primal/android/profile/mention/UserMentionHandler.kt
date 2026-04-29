@@ -68,7 +68,6 @@ class UserMentionHandler @AssistedInject constructor(
         }
         scope.launch {
             userRepository.observeRecentUsers(ownerId = userId)
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(recentUsers = users) }
                 }

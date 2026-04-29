@@ -7,7 +7,6 @@ import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
@@ -38,7 +37,6 @@ class ExploreLandingViewModel @Inject constructor(
     private fun observeRecentUsers() =
         viewModelScope.launch {
             userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(recentUsers = users) }
                 }
@@ -47,7 +45,6 @@ class ExploreLandingViewModel @Inject constructor(
     private fun observePopularUsers() =
         viewModelScope.launch {
             exploreRepository.observePopularUsers()
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(popularUsers = users.map { it.mapAsUserProfileUi() }) }
                 }
@@ -69,7 +66,6 @@ class ExploreLandingViewModel @Inject constructor(
                 ownerId = activeAccountStore.activeUserId(),
                 limit = MAX_RECENT_SEARCHES,
             )
-                .distinctUntilChanged()
                 .collect { queries ->
                     setState { copy(recentSearches = queries, recentSearchesLoading = false) }
                 }

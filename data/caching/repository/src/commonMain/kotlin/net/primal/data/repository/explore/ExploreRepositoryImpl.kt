@@ -347,6 +347,7 @@ class ExploreRepositoryImpl(
                     }
                 }
             }
+            .distinctUntilChanged()
 
     override suspend fun saveRecentSearch(ownerId: String, query: String) =
         withContext(dispatcherProvider.io()) {

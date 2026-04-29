@@ -8,7 +8,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
@@ -58,7 +57,6 @@ class NewExploreViewModel @Inject constructor(
     private fun observeRecentUsers() =
         viewModelScope.launch {
             userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(recentUsers = users) }
                 }
@@ -67,7 +65,6 @@ class NewExploreViewModel @Inject constructor(
     private fun observePopularUsers() =
         viewModelScope.launch {
             exploreRepository.observePopularUsers()
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(popularUsers = users.map { it.mapAsUserProfileUi() }) }
                 }
@@ -86,7 +83,6 @@ class NewExploreViewModel @Inject constructor(
     private fun observeFollowPacks() =
         viewModelScope.launch {
             exploreRepository.observeExploreFollowPacks()
-                .distinctUntilChanged()
                 .collect { packs ->
                     setState { copy(followPacks = packs.map { it.asFollowPackUi() }) }
                 }

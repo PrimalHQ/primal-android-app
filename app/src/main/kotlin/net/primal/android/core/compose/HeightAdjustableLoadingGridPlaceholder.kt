@@ -1,12 +1,18 @@
 package net.primal.android.core.compose
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -18,6 +24,7 @@ fun HeightAdjustableLoadingGridPlaceholder(
     columns: Int,
     cellHeight: Dp,
     modifier: Modifier = Modifier,
+    cellShape: Shape = RectangleShape,
     horizontalSpacing: Dp = 8.dp,
     verticalSpacing: Dp = 16.dp,
 ) {
@@ -37,10 +44,17 @@ fun HeightAdjustableLoadingGridPlaceholder(
                 horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
             ) {
                 repeat(columns) {
-                    InfiniteLottieAnimation(
+                    Box(
                         modifier = Modifier.weight(1f),
-                        resId = animationRawResId,
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        InfiniteLottieAnimation(
+                            modifier = Modifier
+                                .size(cellHeight)
+                                .clip(cellShape),
+                            resId = animationRawResId,
+                        )
+                    }
                 }
             }
         }

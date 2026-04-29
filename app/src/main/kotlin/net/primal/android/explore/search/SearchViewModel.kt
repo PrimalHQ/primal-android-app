@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
@@ -105,7 +104,6 @@ class SearchViewModel @Inject constructor(
     private fun observeRecentUsers() =
         viewModelScope.launch {
             userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(recentUsers = users) }
                 }
@@ -114,7 +112,6 @@ class SearchViewModel @Inject constructor(
     private fun observePopularUsers() =
         viewModelScope.launch {
             exploreRepository.observePopularUsers()
-                .distinctUntilChanged()
                 .collect { users ->
                     setState { copy(popularUsers = users.map { it.mapAsUserProfileUi() }) }
                 }

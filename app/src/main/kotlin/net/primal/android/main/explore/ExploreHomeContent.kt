@@ -31,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AppBarPage
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelAppBar
@@ -45,6 +44,7 @@ import net.primal.android.main.explore.feeds.ExploreFeeds
 import net.primal.android.main.explore.landing.ExploreLanding
 import net.primal.android.main.explore.people.ExplorePeople
 import net.primal.android.main.explore.section.ExploreSection
+import net.primal.android.main.explore.section.toAppBarPages
 import net.primal.android.main.explore.section.toSubtitle
 import net.primal.android.main.explore.section.toTitle
 import net.primal.android.main.explore.zaps.ExploreZaps
@@ -136,7 +136,7 @@ internal fun ExploreTopAppBar(
     titleOverride: String? = null,
     subtitleOverride: String? = null,
 ) {
-    val sectionPages = ExploreSection.entries.map { AppBarPage(title = it.toTitle(), subtitle = it.toSubtitle()) }
+    val sectionPages = ExploreSection.entries.toAppBarPages()
     Column(
         modifier = modifier
             .background(AppTheme.colorScheme.background)
