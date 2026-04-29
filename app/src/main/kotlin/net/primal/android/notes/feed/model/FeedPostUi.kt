@@ -3,7 +3,6 @@ package net.primal.android.notes.feed.model
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.events.polls.votes.asPollUi
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
@@ -58,7 +57,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorId = this.author.authorId,
         authorName = this.author.displayName,
         authorHandle = this.author.handle,
-        authorInternetIdentifier = this.author.internetIdentifier?.formatNip05Identifier(),
+        authorInternetIdentifier = this.author.internetIdentifier,
         authorAvatarCdnImage = this.author.avatarCdnImage,
         authorBlossoms = this.author.blossomServers,
         timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
