@@ -48,7 +48,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             handle = this.author?.usernameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
             displayName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
             rawNostrEvent = this.author?.raw,
-            internetIdentifier = this.author?.internetIdentifier?.formatNip05Identifier(),
+            internetIdentifier = this.author?.internetIdentifier,
             avatarCdnImage = this.author?.avatarCdnImage,
             legendProfile = this.author?.primalPremiumInfo?.legendProfile,
             blossomServers = this.author?.blossoms ?: emptyList(),

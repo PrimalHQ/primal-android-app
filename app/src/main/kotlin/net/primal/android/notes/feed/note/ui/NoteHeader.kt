@@ -52,7 +52,7 @@ fun FeedNoteHeader(
     authorBlossoms: List<String> = emptyList(),
     authorId: String? = null,
     replyToAuthor: String? = null,
-    label: String? = authorInternetIdentifier,
+    label: String? = authorInternetIdentifier?.formatNip05Identifier(),
     labelStyle: TextStyle? = null,
     isLive: Boolean = false,
     onAuthorAvatarClick: (() -> Unit)? = null,
