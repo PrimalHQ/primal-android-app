@@ -84,6 +84,7 @@ private fun FeedListOverlayContent(
             FeedMarketplaceStage.FeedList -> FeedListStage(
                 state = state,
                 onFeedClick = onFeedClick,
+                onCloseClick = onDismiss,
                 eventPublisher = eventPublisher,
                 onEditAdvancedSearchFeedClick = onEditAdvancedSearchFeedClick,
             )
@@ -109,6 +110,7 @@ private fun FeedListOverlayContent(
 private fun FeedListStage(
     state: FeedListContract.UiState,
     onFeedClick: (FeedUi) -> Unit,
+    onCloseClick: () -> Unit,
     eventPublisher: (FeedListContract.UiEvent) -> Unit,
     onEditAdvancedSearchFeedClick: ((feedSpec: String) -> Unit)? = null,
 ) {
@@ -129,6 +131,7 @@ private fun FeedListStage(
             }
         },
         onEditFeedClick = { eventPublisher(FeedListContract.UiEvent.OpenEditMode) },
+        onCloseClick = onCloseClick,
         enableEditMode = true,
         isEditMode = state.isEditMode,
         onAddFeedClick = { eventPublisher(FeedListContract.UiEvent.ShowFeedMarketplace) },

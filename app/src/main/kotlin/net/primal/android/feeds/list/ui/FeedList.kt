@@ -7,7 +7,6 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,7 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.ConfirmActionAlertDialog
-import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalOverlayBottomBar
+import net.primal.android.core.compose.PrimalOverlayCloseButton
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.PencilUnderline
@@ -60,6 +60,7 @@ fun FeedList(
     enableEditMode: Boolean = false,
     isEditMode: Boolean = false,
     onEditFeedClick: (() -> Unit)? = null,
+    onCloseClick: (() -> Unit)? = null,
     onAddFeedClick: (() -> Unit)? = null,
     onEditDoneClick: (() -> Unit)? = null,
     onFeedReordered: ((feeds: List<FeedUi>) -> Unit)? = null,
@@ -146,6 +147,7 @@ fun FeedList(
             enableEditMode = enableEditMode,
             isEditMode = isEditMode,
             onEditFeedClick = onEditFeedClick,
+            onCloseClick = onCloseClick,
             onAddFeedClick = onAddFeedClick,
             onEditDoneClick = onEditDoneClick,
         )
@@ -157,13 +159,16 @@ private fun FeedListBottomBar(
     enableEditMode: Boolean,
     isEditMode: Boolean,
     onEditFeedClick: (() -> Unit)?,
+    onCloseClick: (() -> Unit)?,
     onAddFeedClick: (() -> Unit)?,
     onEditDoneClick: (() -> Unit)?,
 ) {
     if (enableEditMode) {
-        PrimalDivider()
         if (!isEditMode) {
-            RegularBottomBar(onEditFeedClick = { onEditFeedClick?.invoke() })
+            RegularBottomBar(
+                onEditFeedClick = { onEditFeedClick?.invoke() },
+                onCloseClick = { onCloseClick?.invoke() },
+            )
         } else {
             EditModeBottomBar(
                 onAddFeedClick = { onAddFeedClick?.invoke() },
@@ -275,35 +280,31 @@ private fun RestoreDefaultFeedsItem(onRestoreClick: () -> Unit) {
 }
 
 @Composable
-private fun RegularBottomBar(onEditFeedClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        TextButton(onClick = onEditFeedClick) {
-            Text(text = stringResource(id = R.string.feed_list_edit))
-        }
-    }
+private fun RegularBottomBar(onEditFeedClick: () -> Unit, onCloseClick: () -> Unit) {
+    PrimalOverlayBottomBar(
+        leading = {
+            TextButton(onClick = onEditFeedClick) {
+                Text(text = stringResource(id = R.string.feed_list_edit))
+            }
+        },
+        trailing = { PrimalOverlayCloseButton(onClick = onCloseClick) },
+    )
 }
 
 @Composable
 private fun EditModeBottomBar(onAddFeedClick: () -> Unit, onDoneClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        TextButton(onClick = onAddFeedClick) {
-            Text(text = stringResource(id = R.string.feed_list_add_feed))
-        }
-
-        TextButton(onClick = onDoneClick) {
-            Text(text = stringResource(id = R.string.feed_list_done))
-        }
-    }
+    PrimalOverlayBottomBar(
+        leading = {
+            TextButton(onClick = onAddFeedClick) {
+                Text(text = stringResource(id = R.string.feed_list_add_feed))
+            }
+        },
+        trailing = {
+            TextButton(onClick = onDoneClick) {
+                Text(text = stringResource(id = R.string.feed_list_done))
+            }
+        },
+    )
 }
 
 private fun FeedUi.uniqueKey() = "$spec;$title"

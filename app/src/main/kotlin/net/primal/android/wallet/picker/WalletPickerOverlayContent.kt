@@ -33,7 +33,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
-import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalOverlayBottomBar
+import net.primal.android.core.compose.PrimalOverlayCloseButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
@@ -90,6 +91,7 @@ fun WalletPickerOverlayContent(onDismiss: () -> Unit) {
             onConfigureClick = { viewModel.setEvent(UiEvent.EnterEditMode) },
             onCancelClick = { viewModel.setEvent(UiEvent.CancelEditMode) },
             onDoneClick = { viewModel.setEvent(UiEvent.ConfirmReassignment) },
+            onCloseClick = onDismiss,
         )
     }
 }
@@ -153,26 +155,30 @@ private fun WalletPickerBottomBar(
     onConfigureClick: () -> Unit,
     onCancelClick: () -> Unit,
     onDoneClick: () -> Unit,
+    onCloseClick: () -> Unit,
 ) {
-    PrimalDivider()
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = if (isEditMode) Arrangement.SpaceBetween else Arrangement.End,
-    ) {
-        if (isEditMode) {
-            TextButton(onClick = onCancelClick) {
-                Text(text = stringResource(id = R.string.wallet_picker_cancel))
-            }
-            TextButton(onClick = onDoneClick) {
-                Text(text = stringResource(id = R.string.wallet_picker_done))
-            }
-        } else {
-            TextButton(onClick = onConfigureClick) {
-                Text(text = stringResource(id = R.string.wallet_picker_configure_wallets))
-            }
-        }
+    if (isEditMode) {
+        PrimalOverlayBottomBar(
+            leading = {
+                TextButton(onClick = onCancelClick) {
+                    Text(text = stringResource(id = R.string.wallet_picker_cancel))
+                }
+            },
+            trailing = {
+                TextButton(onClick = onDoneClick) {
+                    Text(text = stringResource(id = R.string.wallet_picker_done))
+                }
+            },
+        )
+    } else {
+        PrimalOverlayBottomBar(
+            leading = {
+                TextButton(onClick = onConfigureClick) {
+                    Text(text = stringResource(id = R.string.wallet_picker_configure_wallets))
+                }
+            },
+            trailing = { PrimalOverlayCloseButton(onClick = onCloseClick) },
+        )
     }
 }
 

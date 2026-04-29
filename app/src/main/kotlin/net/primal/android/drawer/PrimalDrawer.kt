@@ -24,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,7 +44,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalOverlayBottomBar
+import net.primal.android.core.compose.PrimalOverlayCloseButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DrawerBookmarks
 import net.primal.android.core.compose.icons.primaliconpack.DrawerMessages
@@ -143,8 +143,9 @@ private fun PrimalDrawer(
             )
         }
 
-        PrimalDivider()
-        DrawerFooter(onCloseClick = onDismiss)
+        PrimalOverlayBottomBar(
+            trailing = { PrimalOverlayCloseButton(onClick = onDismiss) },
+        )
     }
 }
 
@@ -320,20 +321,6 @@ private fun DrawerMenu(
                     }
                 },
             )
-        }
-    }
-}
-
-@Composable
-private fun DrawerFooter(onCloseClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.End,
-    ) {
-        TextButton(onClick = onCloseClick) {
-            Text(text = stringResource(id = R.string.drawer_action_close))
         }
     }
 }

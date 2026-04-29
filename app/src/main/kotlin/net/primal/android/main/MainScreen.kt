@@ -717,6 +717,7 @@ private fun ExploreSectionPickerOverlay(
                 scope.launch { explorePagerState.scrollToPage(section.ordinal) }
                 onDismissOverlay()
             },
+            onDismiss = onDismissOverlay,
         )
     }
 }
