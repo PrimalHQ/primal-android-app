@@ -56,6 +56,8 @@ import net.primal.data.local.dao.notes.RepostDao
 import net.primal.data.local.dao.notes.RepostData
 import net.primal.data.local.dao.notifications.NotificationDao
 import net.primal.data.local.dao.notifications.NotificationData
+import net.primal.data.local.dao.notifications.NotificationGroupCrossRef
+import net.primal.data.local.dao.notifications.NotificationGroupCrossRefDao
 import net.primal.data.local.dao.polls.PollDao
 import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollVoteDao
@@ -111,6 +113,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         NoteConversationCrossRef::class,
         TrendingTopic::class,
         NotificationData::class,
+        NotificationGroupCrossRef::class,
         MutedItemData::class,
         DirectMessageData::class,
         MessageConversationData::class,
@@ -137,7 +140,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         DvmFeedFeaturedUserCrossRef::class,
         RecentSearch::class,
     ],
-    version = 32,
+    version = 33,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -191,6 +194,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun followPackRemoteKeys(): FollowPackRemoteKeyDao
 
     abstract fun notifications(): NotificationDao
+
+    abstract fun notificationGroupCrossRef(): NotificationGroupCrossRefDao
 
     abstract fun mutedItems(): MutedItemDao
 

@@ -2,11 +2,13 @@ package net.primal.android.main.notifications
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.core.testing.CoroutinesTestRule
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.notifications.NotificationGroup
 import net.primal.domain.notifications.NotificationRepository
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +41,15 @@ class NotificationsViewModelTest {
                     coEvery { markAllNotificationsAsSeen(any()) } throws NetworkException()
                 },
             )
-            viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+            viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen(NotificationGroup.ALL))
+        }
+
+    @Test
+    fun handleNotificationsSeen_doesNotMarkAsSeenForNonAllFilter() =
+        runTest {
+            val repository = mockk<NotificationRepository>(relaxed = true)
+            val viewModel = createViewModel(notificationsRepository = repository)
+            viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen(NotificationGroup.ZAPS))
+            coVerify(exactly = 0) { repository.markAllNotificationsAsSeen(any()) }
         }
 }

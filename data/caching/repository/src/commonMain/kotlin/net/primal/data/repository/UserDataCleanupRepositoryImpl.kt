@@ -14,6 +14,7 @@ class UserDataCleanupRepositoryImpl(
             database.feeds().deleteAllByOwnerId(ownerId = userId)
             database.mutedItems().deleteAllByOwnerId(ownerId = userId)
             database.notifications().deleteAllByOwnerId(ownerId = userId)
+            database.notificationGroupCrossRef().deleteAllByOwnerId(ownerId = userId)
             database.articleFeedsConnections().deleteConnections(ownerId = userId)
             database.feedsConnections().deleteConnections(ownerId = userId)
             database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)

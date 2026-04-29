@@ -12,21 +12,25 @@ import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification
 import net.primal.data.local.dao.notifications.NotificationData
+import net.primal.data.local.dao.notifications.NotificationGroupCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
+import net.primal.data.remote.api.notifications.model.wireToken
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsNotificationPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsProfileStatsPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.notifications.NotificationGroup
 import net.primal.shared.data.local.db.withTransaction
 
 @ExperimentalPagingApi
 class NotificationsRemoteMediator(
     private val userId: String,
+    private val group: NotificationGroup,
     private val dispatcherProvider: DispatcherProvider,
     private val notificationsApi: NotificationsApi,
     private val database: PrimalDatabase,
@@ -50,9 +54,13 @@ class NotificationsRemoteMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
-        val notificationsCount =
-            withContext(dispatcherProvider.io()) { database.notifications().allCount(ownerId = userId) }
-        return if (notificationsCount == 0) {
+        val taggedCount = withContext(dispatcherProvider.io()) {
+            database.notificationGroupCrossRef().countByGroup(
+                ownerId = userId,
+                groupKey = group.name,
+            )
+        }
+        return if (taggedCount == 0) {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         } else {
             InitializeAction.SKIP_INITIAL_REFRESH
@@ -65,7 +73,7 @@ class NotificationsRemoteMediator(
             LoadType.PREPEND -> {
                 state.firstItemOrNull()?.data?.createdAt
                     ?: withContext(dispatcherProvider.io()) {
-                        database.notifications().first(ownerId = userId)?.createdAt
+                        database.notifications().firstByGroup(ownerId = userId, groupKey = group.name)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -73,7 +81,7 @@ class NotificationsRemoteMediator(
             LoadType.APPEND -> {
                 state.lastItemOrNull()?.data?.createdAt
                     ?: withContext(dispatcherProvider.io()) {
-                        database.notifications().last(ownerId = userId)?.createdAt
+                        database.notifications().lastByGroup(ownerId = userId, groupKey = group.name)?.createdAt
                     }
                     ?: return MediatorResult.Success(endOfPaginationReached = true)
             }
@@ -87,6 +95,7 @@ class NotificationsRemoteMediator(
             pubkey = userId,
             userPubkey = userId,
             limit = state.config.pageSize,
+            typeGroup = group.wireToken,
         )
 
         val requestBody = when (loadType) {
@@ -146,9 +155,20 @@ class NotificationsRemoteMediator(
                 database = database,
             )
 
+            val tagged = notifications.mapWithSeenAtTimestamps()
+
             database.withTransaction {
                 database.profileStats().upsertAll(data = userProfileStats)
-                database.notifications().upsertAll(data = notifications.mapWithSeenAtTimestamps())
+                database.notifications().upsertAll(data = tagged)
+                database.notificationGroupCrossRef().insertAll(
+                    refs = tagged.map {
+                        NotificationGroupCrossRef(
+                            notificationId = it.notificationId,
+                            ownerId = userId,
+                            groupKey = group.name,
+                        )
+                    },
+                )
                 database.streams().upsertStreamData(data = streamData)
             }
         }

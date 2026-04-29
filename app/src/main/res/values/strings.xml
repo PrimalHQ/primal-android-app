@@ -873,7 +873,17 @@
     <string name="wallet_top_app_bar_subtitle">All transactions</string>
 
     <string name="notifications_title">Alerts</string>
-    <string name="alerts_top_app_bar_subtitle">All notifications</string>
+    <string name="notifications_filter_all_title">All Notifications</string>
+    <string name="notifications_filter_zaps_title">Zaps</string>
+    <string name="notifications_filter_replies_title">Replies</string>
+    <string name="notifications_filter_mentions_title">Mentions</string>
+    <string name="notifications_filter_reposts_title">Reposts</string>
+
+    <string name="notifications_filter_all_description">Based on your notification settings</string>
+    <string name="notifications_filter_zaps_description">Show incoming zaps</string>
+    <string name="notifications_filter_replies_description">Show replies in your threads</string>
+    <string name="notifications_filter_mentions_description">Show mentions of you or your content</string>
+    <string name="notifications_filter_reposts_description">Show reposts of your content</string>
     <string name="notifications_no_content">Your notifications will appear here.</string>
     <string name="notifications_initial_loading_error">Unable to load notifications. Please try again.</string>
     <plurals name="notification_list_item_and_others">

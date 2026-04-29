@@ -10,4 +10,5 @@ data class NotificationsRequestBody(
     @SerialName("limit") val limit: Int? = null,
     @SerialName("until") val until: Long? = null,
     @SerialName("since") val since: Long? = null,
+    @SerialName("type_group") val typeGroup: String? = null,
 )

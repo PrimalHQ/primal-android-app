@@ -20,6 +20,7 @@ import net.primal.data.repository.mappers.local.asNotificationDO
 import net.primal.data.repository.notifications.paging.NotificationsRemoteMediator
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.notifications.Notification as NotificationDO
+import net.primal.domain.notifications.NotificationGroup
 import net.primal.domain.notifications.NotificationRepository
 
 @OptIn(ExperimentalPagingApi::class)
@@ -30,8 +31,8 @@ class NotificationRepositoryImpl(
     private val mediaCacher: MediaCacher? = null,
 ) : NotificationRepository {
 
-    override fun observeUnseenNotifications(ownerId: String) =
-        database.notifications().allUnseenNotifications(ownerId = ownerId)
+    override fun observeUnseenNotifications(ownerId: String, group: NotificationGroup): Flow<List<NotificationDO>> =
+        database.notifications().unseenByGroup(ownerId = ownerId, groupKey = group.name)
             .map { it.map { it.asNotificationDO() } }
 
     override suspend fun markAllNotificationsAsSeen(authorization: NostrEvent) {
@@ -39,7 +40,8 @@ class NotificationRepositoryImpl(
             val seenAt = Clock.System.now()
             val userId = authorization.pubKey
             notificationsApi.setLastSeenTimestamp(authorization = authorization)
-            constructRemoteMediator(userId = userId).updateLastSeenTimestamp(lastSeen = seenAt)
+            constructRemoteMediator(userId = userId, group = NotificationGroup.ALL)
+                .updateLastSeenTimestamp(lastSeen = seenAt)
             database.notifications().markAllUnseenNotificationsAsSeen(
                 ownerId = userId,
                 seenAt = seenAt.epochSeconds,
@@ -47,31 +49,35 @@ class NotificationRepositoryImpl(
         }
     }
 
-    override fun observeSeenNotifications(userId: String): Flow<PagingData<NotificationDO>> {
-        return createPager(userId = userId) {
-            database.notifications().allSeenNotificationsPaged(ownerId = userId)
+    override fun observeSeenNotifications(userId: String, group: NotificationGroup): Flow<PagingData<NotificationDO>> {
+        return createPager(userId = userId, group = group) {
+            database.notifications().seenByGroupPaged(ownerId = userId, groupKey = group.name)
         }.flow.map { it.map { it.asNotificationDO() } }
             .flowOn(dispatcherProvider.io())
     }
 
-    private fun constructRemoteMediator(userId: String) =
+    private fun constructRemoteMediator(userId: String, group: NotificationGroup) =
         NotificationsRemoteMediator(
             userId = userId,
+            group = group,
             dispatcherProvider = dispatcherProvider,
             notificationsApi = notificationsApi,
             database = database,
             mediaCacher = mediaCacher,
         )
 
-    private fun createPager(userId: String, pagingSourceFactory: () -> PagingSource<Int, NotificationPO>) =
-        Pager(
-            config = PagingConfig(
-                pageSize = 50,
-                prefetchDistance = 100,
-                initialLoadSize = 200,
-                enablePlaceholders = true,
-            ),
-            remoteMediator = constructRemoteMediator(userId = userId),
-            pagingSourceFactory = pagingSourceFactory,
-        )
+    private fun createPager(
+        userId: String,
+        group: NotificationGroup,
+        pagingSourceFactory: () -> PagingSource<Int, NotificationPO>,
+    ) = Pager(
+        config = PagingConfig(
+            pageSize = 50,
+            prefetchDistance = 100,
+            initialLoadSize = 200,
+            enablePlaceholders = true,
+        ),
+        remoteMediator = constructRemoteMediator(userId = userId, group = group),
+        pagingSourceFactory = pagingSourceFactory,
+    )
 }

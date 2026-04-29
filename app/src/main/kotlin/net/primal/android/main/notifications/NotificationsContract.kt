@@ -1,19 +1,15 @@
 package net.primal.android.main.notifications
 
-import androidx.paging.PagingData
-import kotlinx.coroutines.flow.Flow
-import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.user.domain.Badges
+import net.primal.domain.notifications.NotificationGroup
 
 interface NotificationsContract {
 
     data class UiState(
-        val seenNotifications: Flow<PagingData<NotificationUi>>,
-        val unseenNotifications: List<List<NotificationUi>> = emptyList(),
         val badges: Badges = Badges(),
     )
 
     sealed class UiEvent {
-        data object NotificationsSeen : UiEvent()
+        data class NotificationsSeen(val group: NotificationGroup) : UiEvent()
     }
 }
