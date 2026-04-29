@@ -87,6 +87,7 @@ fun PrimalAsyncImage(
 fun PrimalImage(
     model: Any?,
     modifier: Modifier = Modifier,
+    imageModifier: Modifier = Modifier,
     imageLoader: ImageLoader = LocalContext.current.imageLoader,
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Fit,
@@ -101,6 +102,7 @@ fun PrimalImage(
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Image(
+            modifier = imageModifier,
             painter = painter,
             contentDescription = contentDescription,
             alignment = alignment,

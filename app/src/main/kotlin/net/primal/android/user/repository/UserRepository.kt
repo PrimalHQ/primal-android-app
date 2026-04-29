@@ -5,9 +5,12 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
+import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -352,9 +355,10 @@ class UserRepository @Inject constructor(
             )
         }
 
-    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileSearchItem>> =
+    fun observeRecentUsers(ownerId: String): Flow<List<UserProfileItemUi>> =
         usersDatabase.userProfileInteractions()
             .observeRecentProfilesByOwnerId(ownerId)
+            .distinctUntilChanged()
             .map { recentProfiles ->
                 val profileIds = recentProfiles.map { it.profileId }
 
@@ -369,7 +373,7 @@ class UserRepository @Inject constructor(
                             metadata = profile,
                             followersCount = stats?.followers,
                             isLive = liveProfiles.contains(profileId),
-                        )
+                        ).mapAsUserProfileUi()
                     }
                 }
             }

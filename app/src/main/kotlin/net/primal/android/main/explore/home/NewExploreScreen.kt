@@ -1,17 +1,13 @@
 package net.primal.android.main.explore.home
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,7 +16,6 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -28,25 +23,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopLevelAppBar
-import net.primal.android.core.compose.UniversalAvatarThumbnail
-import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
-import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.feeds.dvm.ui.DvmFeedDetailsBottomSheet
 import net.primal.android.feeds.dvm.ui.DvmFeedListItem
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
@@ -66,8 +51,6 @@ fun NewExploreTabContent(
     paddingValues: PaddingValues,
     noteCallbacks: NoteCallbacks,
     onProfileClick: (profileId: String) -> Unit,
-    onSearchUsersClick: () -> Unit,
-    onAdvancedSearchClick: () -> Unit,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
 ) {
     val viewModel = hiltViewModel<NewExploreViewModel>()
@@ -79,8 +62,6 @@ fun NewExploreTabContent(
         eventPublisher = viewModel::setEvent,
         noteCallbacks = noteCallbacks,
         onProfileClick = onProfileClick,
-        onSearchUsersClick = onSearchUsersClick,
-        onAdvancedSearchClick = onAdvancedSearchClick,
         onFollowPackClick = onFollowPackClick,
     )
 }
@@ -92,8 +73,6 @@ fun NewExploreTabContent(
     eventPublisher: (NewExploreContract.UiEvent) -> Unit,
     noteCallbacks: NoteCallbacks,
     onProfileClick: (profileId: String) -> Unit,
-    onSearchUsersClick: () -> Unit,
-    onAdvancedSearchClick: () -> Unit,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
 ) {
     var dvmFeedToShow by remember { mutableStateOf<DvmFeedUi?>(null) }
@@ -122,15 +101,6 @@ fun NewExploreTabContent(
         modifier = Modifier.fillMaxSize(),
         contentPadding = paddingValues,
     ) {
-        item { Spacer(Modifier.height(SECTION_SPACING)) }
-        item {
-            UsersSection(
-                users = state.recommendedUsers,
-                onUserClick = onProfileClick,
-                onSearchUsersClick = onSearchUsersClick,
-                onAdvancedSearchClick = onAdvancedSearchClick,
-            )
-        }
         item { Spacer(Modifier.height(SECTION_SPACING)) }
         item {
             FollowPacksSection(
@@ -175,138 +145,6 @@ fun NewExploreTabTopAppBar(
         onAvatarSwipeDown = onAvatarSwipeDown,
         showDivider = false,
         scrollBehavior = scrollBehavior,
-    )
-}
-
-@Composable
-private fun UsersSection(
-    users: List<UserProfileItemUi>,
-    onUserClick: (profileId: String) -> Unit,
-    onSearchUsersClick: () -> Unit,
-    onAdvancedSearchClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(
-            text = stringResource(id = R.string.new_explore_users_section_title),
-            style = AppTheme.typography.titleLarge.copy(lineHeight = 20.sp),
-        )
-
-        PopularUsersGrid(users = users, onUserClick = onUserClick)
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedActionButton(
-                modifier = Modifier.weight(1f),
-                onClick = onSearchUsersClick,
-            ) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    imageVector = PrimalIcons.Search,
-                    contentDescription = null,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = stringResource(id = R.string.new_explore_search_users_button),
-                    style = AppTheme.typography.labelMedium,
-                )
-            }
-            OutlinedActionButton(
-                modifier = Modifier.weight(1f),
-                onClick = onAdvancedSearchClick,
-            ) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    imageVector = PrimalIcons.AdvancedSearch,
-                    contentDescription = null,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = stringResource(id = R.string.new_explore_advanced_search_button),
-                    style = AppTheme.typography.labelMedium,
-                )
-            }
-        }
-    }
-}
-
-private const val POPULAR_USERS_COLUMNS = 4
-private const val POPULAR_USER_LABEL_ALPHA = 0.7f
-
-@Composable
-private fun PopularUsersGrid(users: List<UserProfileItemUi>, onUserClick: (profileId: String) -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        users.chunked(POPULAR_USERS_COLUMNS).forEach { rowUsers ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                rowUsers.forEach { user ->
-                    UserCell(
-                        modifier = Modifier.weight(1f),
-                        user = user,
-                        onClick = { onUserClick(user.profileId) },
-                    )
-                }
-                repeat(POPULAR_USERS_COLUMNS - rowUsers.size) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun UserCell(
-    modifier: Modifier = Modifier,
-    user: UserProfileItemUi,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        UniversalAvatarThumbnail(
-            avatarCdnImage = user.avatarCdnImage,
-            avatarSize = 64.dp,
-            avatarBlossoms = user.avatarBlossoms,
-            legendaryCustomization = user.legendaryCustomization,
-            isLive = user.isLive,
-            onClick = onClick,
-        )
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 2.dp),
-            text = user.displayName,
-            style = AppTheme.typography.labelMedium,
-            color = AppTheme.colorScheme.onSurface.copy(alpha = POPULAR_USER_LABEL_ALPHA),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
-private fun OutlinedActionButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit,
-) {
-    PrimalFilledButton(
-        modifier = modifier,
-        height = 48.dp,
-        containerColor = Color.Transparent,
-        contentColor = AppTheme.colorScheme.onSurface,
-        border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
-        onClick = onClick,
-        content = content,
     )
 }
 

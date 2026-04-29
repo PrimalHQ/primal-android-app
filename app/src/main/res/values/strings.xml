@@ -732,6 +732,9 @@
     <string name="explore_section_media_title">Media</string>
     <string name="explore_section_media_subtitle">Top images and videos on Nostr today</string>
     <string name="explore_search_bar_hint">Search…</string>
+    <string name="explore_landing_recent_users_title">Recent Users</string>
+    <string name="explore_landing_recent_searches_title">Recent Searches</string>
+    <string name="explore_landing_recent_searches_empty">Your recent searches will appear here.</string>
 
     <string name="account_drawer_title">Account</string>
     <string name="account_drawer_subtitle">Options and settings</string>

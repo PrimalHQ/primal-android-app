@@ -70,6 +70,7 @@ import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToAdvancedSearch
+import net.primal.android.navigation.navigateToExploreFeed
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
@@ -81,6 +82,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.wallet.picker.WalletPickerOverlayContent
 import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.CurrencyMode
 
@@ -208,6 +210,7 @@ private fun MainScreenTopAppBar(
     readsActiveFeed: FeedUi?,
     homePagerState: PagerState,
     readsPagerState: PagerState,
+    explorePagerState: PagerState,
     exploreActiveSection: ExploreSection,
     onExploreSectionPickerRequest: () -> Unit,
     onExploreSearchClick: () -> Unit,
@@ -257,6 +260,7 @@ private fun MainScreenTopAppBar(
         PrimalTopLevelDestination.Explore -> {
             ExploreTopAppBar(
                 activeSection = exploreActiveSection,
+                pagerState = explorePagerState,
                 onExploreSectionPickerRequest = onExploreSectionPickerRequest,
                 onSearchClick = onExploreSearchClick,
                 onAdvancedSearchClick = onExploreAdvancedSearchClick,
@@ -349,6 +353,7 @@ private fun ScaffoldTopAppBar(
         readsActiveFeed = sharedState.readsActiveFeed.value,
         homePagerState = sharedState.homePagerState,
         readsPagerState = sharedState.readsPagerState,
+        explorePagerState = sharedState.explorePagerState,
         exploreActiveSection = exploreActiveSection,
         onExploreSectionPickerRequest = { toggleOverlay(ActiveOverlay.ExploreSectionPicker) },
         onExploreSearchClick = onExploreSearchClick,
@@ -420,6 +425,17 @@ private fun MainScreenContent(
                         snackbarHostState = sharedState.snackbarHostState,
                         onFollowPackClick = { profileId, identifier ->
                             navController.navigateToFollowPack(profileId, identifier)
+                        },
+                        onRecentSearchEditClick = { query ->
+                            navController.navigateToSearch(
+                                searchScope = SearchScope.Notes,
+                                initialQuery = query,
+                            )
+                        },
+                        onRecentSearchExecuteClick = { query ->
+                            navController.navigateToExploreFeed(
+                                feedSpec = buildAdvancedSearchNotesFeedSpec(query = query),
+                            )
                         },
                         onGoToWallet = onGoToWallet,
                     )

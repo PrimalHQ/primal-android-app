@@ -3,6 +3,7 @@ package net.primal.android.main.explore.section
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarPage
 
 enum class ExploreSection {
     Explore,
@@ -31,3 +32,7 @@ fun ExploreSection.toSubtitle(): String =
         ExploreSection.Zaps -> stringResource(id = R.string.explore_section_zaps_subtitle)
         ExploreSection.Media -> stringResource(id = R.string.explore_section_media_subtitle)
     }
+
+@Composable
+fun List<ExploreSection>.toAppBarPages(): List<AppBarPage> =
+    map { AppBarPage(title = it.toTitle(), subtitle = it.toSubtitle()) }

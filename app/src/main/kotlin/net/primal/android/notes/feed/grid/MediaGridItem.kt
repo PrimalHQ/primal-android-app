@@ -47,6 +47,7 @@ fun MediaGridItem(
     ) {
         PrimalImage(
             modifier = Modifier.fillMaxSize(),
+            imageModifier = Modifier.fillMaxSize(),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(cdnResource?.mediaUrl ?: firstAttachment?.thumbnailUrl ?: firstAttachment?.url)
                 .crossfade(true)

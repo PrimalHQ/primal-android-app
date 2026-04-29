@@ -7,8 +7,10 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
@@ -19,6 +21,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.explore.ExploreFollowPackCrossRef
 import net.primal.data.local.dao.explore.ExplorePopularUserCrossRef
 import net.primal.data.local.dao.explore.FollowPack
+import net.primal.data.local.dao.explore.RecentSearch
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
@@ -344,6 +347,23 @@ class ExploreRepositoryImpl(
                     }
                 }
             }
+            .distinctUntilChanged()
+
+    override suspend fun saveRecentSearch(ownerId: String, query: String) =
+        withContext(dispatcherProvider.io()) {
+            database.recentSearches().upsert(
+                RecentSearch(
+                    ownerId = ownerId,
+                    query = query,
+                    lastSearchedAt = Clock.System.now().epochSeconds,
+                ),
+            )
+        }
+
+    override fun observeRecentSearches(ownerId: String, limit: Int): Flow<List<String>> =
+        database.recentSearches().observeRecentSearches(ownerId = ownerId, limit = limit)
+            .map { rows -> rows.map { it.query } }
+            .distinctUntilChanged()
 
     @OptIn(ExperimentalPagingApi::class)
     private fun createFollowPacksPager(pagingSourceFactory: () -> PagingSource<Int, FollowPack>) =

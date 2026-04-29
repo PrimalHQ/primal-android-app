@@ -31,6 +31,7 @@ import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholde
 import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.feeds.list.ui.model.toAppBarPages
 import net.primal.android.main.feeds.NoteFeedsContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -163,7 +164,7 @@ internal fun NoteFeedTopAppBar(
             }
         },
         pagerState = pagerState,
-        feeds = feeds,
+        pages = feeds.toAppBarPages(),
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,

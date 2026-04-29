@@ -33,6 +33,7 @@ import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.feeds.list.ui.model.toAppBarPages
 import net.primal.android.navigation.navigateToArticleDetails
 import net.primal.android.navigation.navigateToPremiumBuying
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -176,7 +177,7 @@ internal fun ArticleFeedTopAppBar(
             }
         },
         pagerState = pagerState,
-        feeds = feeds,
+        pages = feeds.toAppBarPages(),
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,

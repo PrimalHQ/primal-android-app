@@ -7,6 +7,7 @@ import net.primal.android.core.compose.icons.primaliconpack.AddAccount
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearchFilled
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.ArrowUpLeftBlue
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.AvatarNostrich
 import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
@@ -361,6 +362,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             RemoteLogin,
             Gif,
             Expand,
+            ArrowUpLeftBlue,
         )
         return __PrimalIcons!!
     }

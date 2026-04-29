@@ -55,6 +55,7 @@ fun ReferencedNoteZap(
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.medium)
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .border(
                 width = NoteEmbedBorderWidth,
                 color = AppTheme.colorScheme.outline,
