@@ -1,15 +1,20 @@
 package net.primal.android.main.notifications
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,18 +27,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.compose.AppBarPage
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelAppBar
-import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
@@ -49,123 +56,143 @@ import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.user.domain.Badges
 import net.primal.domain.links.CdnImage
+import net.primal.domain.notifications.NotificationGroup
 import net.primal.domain.utils.canZap
 
+@Suppress("LongParameterList")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun NotificationsContent(
+    pagerState: PagerState,
+    badges: Badges,
+    seenNotificationsProvider: (NotificationGroup) -> Flow<PagingData<NotificationUi>>,
+    unseenNotificationsProvider: (NotificationGroup) -> Flow<List<List<NotificationUi>>>,
+    onNotificationsSeen: (NotificationGroup) -> Unit,
     paddingValues: PaddingValues,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     shouldAnimateScrollToTop: MutableState<Boolean>,
 ) {
-    val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
-    val notificationsState by notificationsViewModel.state.collectAsState()
     val noteViewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create() }
     val noteState by noteViewModel.state.collectAsState()
 
-    LaunchedEffect(Unit) {
-        notificationsViewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+    val currentGroup by remember {
+        derivedStateOf {
+            NotificationGroup.entries.getOrElse(pagerState.currentPage) { NotificationGroup.ALL }
+        }
     }
 
-    DisposableLifecycleObserverEffect(notificationsViewModel) {
-        when (it) {
-            Lifecycle.Event.ON_STOP -> notificationsViewModel.setEvent(
-                NotificationsContract.UiEvent.NotificationsSeen,
-            )
+    LaunchedEffect(currentGroup) {
+        onNotificationsSeen(currentGroup)
+    }
 
+    DisposableLifecycleObserverEffect(pagerState) {
+        when (it) {
+            Lifecycle.Event.ON_STOP -> onNotificationsSeen(currentGroup)
             else -> Unit
         }
     }
 
-    val seenPagingItems = notificationsState.seenNotifications.collectAsLazyPagingItems()
-    val notificationsListState = seenPagingItems.rememberLazyListStatePagingWorkaround()
-    val uiScope = rememberCoroutineScope()
-
-    LaunchedEffect(shouldAnimateScrollToTop.value) {
-        if (shouldAnimateScrollToTop.value) {
-            uiScope.launch { notificationsListState.animateScrollToItem(0) }
+    HorizontalPager(state = pagerState) { pageIndex ->
+        val group = NotificationGroup.entries[pageIndex]
+        val isActive by remember(pageIndex) {
+            derivedStateOf { pageIndex == pagerState.currentPage }
         }
+        NotificationFilterPage(
+            group = group,
+            isActive = isActive,
+            seenNotificationsProvider = seenNotificationsProvider,
+            unseenNotificationsProvider = unseenNotificationsProvider,
+            badges = badges,
+            noteState = noteState,
+            noteEventPublisher = noteViewModel::setEvent,
+            paddingValues = paddingValues,
+            noteCallbacks = noteCallbacks,
+            onGoToWallet = onGoToWallet,
+            shouldAnimateScrollToTop = shouldAnimateScrollToTop,
+        )
     }
-
-    LaunchedEffect(seenPagingItems, notificationsState.badges) {
-        if (notificationsState.badges.unreadNotificationsCount > 0) {
-            seenPagingItems.refresh()
-        }
-    }
-
-    NotificationsContent(
-        state = notificationsState,
-        noteState = noteState,
-        seenPagingItems = seenPagingItems,
-        notificationsListState = notificationsListState,
-        paddingValues = paddingValues,
-        noteCallbacks = noteCallbacks,
-        noteEventPublisher = noteViewModel::setEvent,
-        onGoToWallet = onGoToWallet,
-    )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "LongParameterList")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NotificationsContent(
-    state: NotificationsContract.UiState,
+private fun NotificationFilterPage(
+    group: NotificationGroup,
+    isActive: Boolean,
+    seenNotificationsProvider: (NotificationGroup) -> Flow<PagingData<NotificationUi>>,
+    unseenNotificationsProvider: (NotificationGroup) -> Flow<List<List<NotificationUi>>>,
+    badges: Badges,
     noteState: NoteContract.UiState,
-    seenPagingItems: LazyPagingItems<NotificationUi>,
-    notificationsListState: LazyListState,
+    noteEventPublisher: (NoteContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
     noteCallbacks: NoteCallbacks,
-    noteEventPublisher: (NoteContract.UiEvent) -> Unit,
     onGoToWallet: () -> Unit,
+    shouldAnimateScrollToTop: MutableState<Boolean>,
 ) {
+    val seenPagingItems = remember(group) {
+        seenNotificationsProvider(group)
+    }.collectAsLazyPagingItems()
+
+    val unseenNotifications by remember(group) {
+        unseenNotificationsProvider(group)
+    }.collectAsState(initial = emptyList())
+
+    val listState = rememberLazyListState()
     val uiScope = rememberCoroutineScope()
 
     var hasUserEverScrolled by remember { mutableStateOf(false) }
     var isAutoScrolling by remember { mutableStateOf(false) }
+    var previousUnseenIds by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    var previousUnseenNotificationIds by remember {
-        mutableStateOf<List<String>>(emptyList())
-    }
-
-    LaunchedEffect(notificationsListState) {
+    LaunchedEffect(listState) {
         snapshotFlow {
-            notificationsListState.isScrollInProgress to notificationsListState.interactionSource.interactions
+            listState.isScrollInProgress to listState.interactionSource.interactions
         }.first { (isScrolling, _) ->
             isScrolling && !isAutoScrolling
         }
         hasUserEverScrolled = true
     }
 
-    LaunchedEffect(state.unseenNotifications) {
-        val currentIds = state.unseenNotifications.flatten().map { it.notificationId }
-
-        if (currentIds != previousUnseenNotificationIds) {
+    LaunchedEffect(unseenNotifications) {
+        val currentIds = unseenNotifications.flatten().map { it.notificationId }
+        if (currentIds != previousUnseenIds) {
             if (!hasUserEverScrolled) {
                 isAutoScrolling = true
                 uiScope.launch {
-                    notificationsListState.animateScrollToItem(0)
+                    listState.animateScrollToItem(0)
                     isAutoScrolling = false
                 }
             }
-            previousUnseenNotificationIds = currentIds
+            previousUnseenIds = currentIds
+        }
+    }
+
+    LaunchedEffect(shouldAnimateScrollToTop.value) {
+        if (shouldAnimateScrollToTop.value) {
+            uiScope.launch { listState.animateScrollToItem(0) }
+        }
+    }
+
+    LaunchedEffect(isActive, seenPagingItems, badges) {
+        if (isActive && badges.unreadNotificationsCount > 0) {
+            seenPagingItems.refresh()
         }
     }
 
     NotificationsList(
-        state = state,
+        unseenNotifications = unseenNotifications,
         noteState = noteState,
         seenPagingItems = seenPagingItems,
+        listState = listState,
         paddingValues = paddingValues,
-        listState = notificationsListState,
+        noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         onPostLikeClick = {
             noteEventPublisher(
-                NoteContract.UiEvent.PostLikeAction(
-                    postId = it.postId,
-                    postAuthorId = it.authorId,
-                ),
+                NoteContract.UiEvent.PostLikeAction(postId = it.postId, postAuthorId = it.authorId),
             )
         },
         onRepostClick = {
@@ -197,21 +224,19 @@ private fun NotificationsContent(
             )
         },
         onPostQuoteClick = {
-            noteCallbacks.onNoteQuoteClick?.invoke(
-                it.asNeventString(),
-            )
+            noteCallbacks.onNoteQuoteClick?.invoke(it.asNeventString())
         },
         onBookmarkClick = {
             noteEventPublisher(NoteContract.UiEvent.BookmarkAction(noteId = it.postId))
         },
-        noteCallbacks = noteCallbacks,
     )
 }
 
+@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 @ExperimentalMaterial3Api
 @Composable
 private fun NotificationsList(
-    state: NotificationsContract.UiState,
+    unseenNotifications: List<List<NotificationUi>>,
     noteState: NoteContract.UiState,
     listState: LazyListState,
     seenPagingItems: LazyPagingItems<NotificationUi>,
@@ -266,11 +291,12 @@ private fun NotificationsList(
     }
 
     LazyColumn(
+        modifier = Modifier.fillMaxSize(),
         contentPadding = paddingValues,
         state = listState,
     ) {
         items(
-            items = state.unseenNotifications,
+            items = unseenNotifications,
             key = { it.map { it.notificationId } },
             contentType = { it.first().notificationType },
         ) {
@@ -299,7 +325,7 @@ private fun NotificationsList(
                 noteCallbacks = noteCallbacks,
             )
 
-            if (state.unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
+            if (unseenNotifications.last() != it || seenPagingItems.isNotEmpty()) {
                 PrimalDivider()
             }
         }
@@ -347,7 +373,7 @@ private fun NotificationsList(
             }
         }
 
-        if (seenPagingItems.isEmpty() && state.unseenNotifications.isEmpty()) {
+        if (seenPagingItems.isEmpty() && unseenNotifications.isEmpty()) {
             when (seenPagingItems.loadState.refresh) {
                 LoadState.Loading -> {
                     heightAdjustableLoadingLazyListPlaceholder(height = 98.dp)
@@ -357,9 +383,7 @@ private fun NotificationsList(
                     item(contentType = "NoContent") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(
-                                id = R.string.notifications_no_content,
-                            ),
+                            noContentText = stringResource(id = R.string.notifications_no_content),
                             refreshButtonVisible = false,
                         )
                     }
@@ -369,9 +393,7 @@ private fun NotificationsList(
                     item(contentType = "RefreshError") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
-                            noContentText = stringResource(
-                                id = R.string.notifications_initial_loading_error,
-                            ),
+                            noContentText = stringResource(id = R.string.notifications_initial_loading_error),
                             onRefresh = { seenPagingItems.refresh() },
                         )
                     }
@@ -388,9 +410,7 @@ private fun NotificationsList(
                 )
 
             is LoadState.Error -> item(contentType = "AppendError") {
-                ListLoadingError(
-                    text = stringResource(R.string.app_error_loading_next_page),
-                )
+                ListLoadingError(text = stringResource(R.string.app_error_loading_next_page))
             }
 
             else -> Unit
@@ -409,10 +429,14 @@ internal fun NotificationsTopAppBar(
     onAvatarSwipeDown: (() -> Unit)? = null,
     titleOverride: String? = null,
     subtitleOverride: String? = null,
+    pagerState: PagerState? = null,
+    pages: List<AppBarPage> = emptyList(),
+    showTitleChevron: Boolean = false,
+    chevronExpanded: Boolean = false,
+    onTitleClick: (() -> Unit)? = null,
 ) {
     PrimalTopLevelAppBar(
         title = stringResource(id = R.string.notifications_title),
-        subtitle = stringResource(id = R.string.alerts_top_app_bar_subtitle),
         titleOverride = titleOverride,
         subtitleOverride = subtitleOverride,
         avatarCdnImage = avatarCdnImage,
@@ -422,5 +446,10 @@ internal fun NotificationsTopAppBar(
         onAvatarSwipeDown = onAvatarSwipeDown,
         showDivider = false,
         scrollBehavior = scrollBehavior,
+        showTitleChevron = showTitleChevron,
+        chevronExpanded = chevronExpanded,
+        onTitleClick = onTitleClick,
+        pagerState = pagerState,
+        pages = pages,
     )
 }

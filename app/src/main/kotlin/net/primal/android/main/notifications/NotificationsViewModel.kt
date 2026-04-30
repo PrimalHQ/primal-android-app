@@ -2,6 +2,7 @@ package net.primal.android.main.notifications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,11 +11,14 @@ import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.toJavaInstant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -22,7 +26,6 @@ import net.primal.android.core.utils.isOnlyEmoji
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.events.polls.votes.asPollUi
 import net.primal.android.main.notifications.NotificationsContract.UiEvent
-import net.primal.android.main.notifications.NotificationsContract.UiEvent.NotificationsSeen
 import net.primal.android.main.notifications.NotificationsContract.UiState
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notes.feed.model.EventStatsUi
@@ -38,6 +41,7 @@ import net.primal.domain.links.ReferencedStream
 import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.notifications.Notification
+import net.primal.domain.notifications.NotificationGroup
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.notifications.NotificationType
 import net.primal.domain.streams.mappers.asReferencedStream
@@ -51,14 +55,33 @@ class NotificationsViewModel @Inject constructor(
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        UiState(
-            seenNotifications = notificationRepository
-                .observeSeenNotifications(userId = activeAccountStore.activeUserId())
+    private val seenPagerCache: Map<NotificationGroup, Flow<PagingData<NotificationUi>>> =
+        NotificationGroup.entries.associateWith { group ->
+            notificationRepository
+                .observeSeenNotifications(userId = activeAccountStore.activeUserId(), group = group)
                 .map { it.map { notification -> notification.asNotificationUi() } }
-                .cachedIn(viewModelScope),
-        ),
-    )
+                .cachedIn(viewModelScope)
+        }
+
+    private val unseenCache: Map<NotificationGroup, Flow<List<List<NotificationUi>>>> =
+        NotificationGroup.entries.associateWith { group ->
+            notificationRepository
+                .observeUnseenNotifications(ownerId = activeAccountStore.activeUserId(), group = group)
+                .map { notifications -> groupUnseenNotifications(notifications) }
+                .shareIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+                    replay = 1,
+                )
+        }
+
+    internal fun seenNotificationsForGroup(group: NotificationGroup): Flow<PagingData<NotificationUi>> =
+        seenPagerCache.getValue(group)
+
+    internal fun unseenNotificationsForGroup(group: NotificationGroup): Flow<List<List<NotificationUi>>> =
+        unseenCache.getValue(group)
+
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -68,14 +91,13 @@ class NotificationsViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToBadgesUpdates()
-        observeUnseenNotifications()
     }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    NotificationsSeen -> handleNotificationsSeen()
+                    is UiEvent.NotificationsSeen -> handleNotificationsSeen(it.group)
                 }
             }
         }
@@ -83,63 +105,12 @@ class NotificationsViewModel @Inject constructor(
     private fun subscribeToBadgesUpdates() =
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
-                setState {
-                    copy(badges = it)
-                }
+                setState { copy(badges = it) }
             }
         }
 
-    private fun observeUnseenNotifications() =
-        viewModelScope.launch {
-            notificationRepository.observeUnseenNotifications(ownerId = activeAccountStore.activeUserId())
-                .collect { newUnseenNotifications ->
-                    setState {
-                        val unseenNotifications = mutableListOf<List<Notification>>()
-                        val groupByType = newUnseenNotifications.groupBy { it.type }
-                        groupByType.keys.forEach { notificationType ->
-                            groupByType[notificationType]?.let { notificationsByType ->
-                                when (notificationType.collapsable) {
-                                    true -> {
-                                        val groupByPostId = notificationsByType.groupBy { it.actionPostId }
-                                        groupByPostId.keys.forEach { postId ->
-                                            groupByPostId[postId]?.let {
-                                                if (notificationType.isLike()) {
-                                                    it.map {
-                                                        it.copy(
-                                                            reaction = if (it.reaction?.isOnlyEmoji() == true) {
-                                                                it.reaction
-                                                            } else {
-                                                                "+"
-                                                            },
-                                                        )
-                                                    }.groupBy { it.reaction }
-                                                        .onEach { (_, notifications) ->
-                                                            unseenNotifications.add(notifications)
-                                                        }
-                                                } else {
-                                                    unseenNotifications.add(it)
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    false -> notificationsByType.forEach {
-                                        unseenNotifications.add(listOf(it))
-                                    }
-                                }
-                            }
-                        }
-
-                        copy(
-                            unseenNotifications = unseenNotifications.map { byType ->
-                                byType.map { it.asNotificationUi() }
-                            },
-                        )
-                    }
-                }
-        }
-
-    private fun handleNotificationsSeen() {
+    private fun handleNotificationsSeen(group: NotificationGroup) {
+        if (group != NotificationGroup.ALL) return
         // Launching in a new scope to survive view model destruction
         CoroutineScope(dispatcherProvider.io()).launch {
             try {
@@ -158,6 +129,47 @@ class NotificationsViewModel @Inject constructor(
                 Napier.w(throwable = error) { "Failed to mark notifications as seen due to network error." }
             }
         }
+    }
+
+    @Suppress("NestedBlockDepth")
+    private fun groupUnseenNotifications(notifications: List<Notification>): List<List<NotificationUi>> {
+        val unseenNotifications = mutableListOf<List<Notification>>()
+        val groupByType = notifications.groupBy { it.type }
+        groupByType.keys.forEach { notificationType ->
+            groupByType[notificationType]?.let { notificationsByType ->
+                when (notificationType.collapsable) {
+                    true -> {
+                        val groupByPostId = notificationsByType.groupBy { it.actionPostId }
+                        groupByPostId.keys.forEach { postId ->
+                            groupByPostId[postId]?.let {
+                                if (notificationType.isLike()) {
+                                    it.map {
+                                        it.copy(
+                                            reaction = if (it.reaction?.isOnlyEmoji() == true) {
+                                                it.reaction
+                                            } else {
+                                                "+"
+                                            },
+                                        )
+                                    }.groupBy { it.reaction }
+                                        .onEach { (_, notifications) ->
+                                            unseenNotifications.add(notifications)
+                                        }
+                                } else {
+                                    unseenNotifications.add(it)
+                                }
+                            }
+                        }
+                    }
+
+                    false -> notificationsByType.forEach {
+                        unseenNotifications.add(listOf(it))
+                    }
+                }
+            }
+        }
+
+        return unseenNotifications.map { byType -> byType.map { it.asNotificationUi() } }
     }
 
     private fun NotificationType.isLike() =

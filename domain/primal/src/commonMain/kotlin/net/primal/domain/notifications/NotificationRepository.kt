@@ -8,9 +8,9 @@ import net.primal.domain.nostr.NostrEvent
 
 interface NotificationRepository {
 
-    fun observeUnseenNotifications(ownerId: String): Flow<List<Notification>>
+    fun observeUnseenNotifications(ownerId: String, group: NotificationGroup): Flow<List<Notification>>
 
-    fun observeSeenNotifications(userId: String): Flow<PagingData<Notification>>
+    fun observeSeenNotifications(userId: String, group: NotificationGroup): Flow<PagingData<Notification>>
 
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun markAllNotificationsAsSeen(authorization: NostrEvent)
