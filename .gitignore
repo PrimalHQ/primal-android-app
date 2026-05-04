@@ -39,6 +39,7 @@
 /domain/build
 /domain/common/build
 /shared/build
+/detekt-rules/build
 /captures
 .externalNativeBuild
 .cxx
