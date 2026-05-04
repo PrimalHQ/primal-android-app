@@ -9,6 +9,8 @@ import kotlinx.serialization.Serializable
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
 import net.primal.android.core.utils.saveCsvToUri
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.transactions.Transaction
 
 @Serializable

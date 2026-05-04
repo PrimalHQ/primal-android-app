@@ -19,6 +19,7 @@ import net.primal.core.config.observeApiUrlByType
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.domain.global.PrimalServerType
 
 internal class ProxyPrimalApiClient(

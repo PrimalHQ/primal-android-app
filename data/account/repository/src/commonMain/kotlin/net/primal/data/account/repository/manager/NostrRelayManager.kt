@@ -16,12 +16,14 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import net.primal.core.nips.encryption.service.NostrEncryptionService
+import net.primal.core.utils.Result
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getAndClear
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.put
 import net.primal.core.utils.remove
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.signer.remote.RemoteSignerClient

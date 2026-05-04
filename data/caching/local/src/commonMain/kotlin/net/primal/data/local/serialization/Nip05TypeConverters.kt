@@ -1,6 +1,7 @@
 package net.primal.data.local.serialization
 
 import androidx.room.TypeConverter
+import net.primal.core.utils.runCatching
 import net.primal.domain.profile.Nip05VerificationStatus
 
 class Nip05TypeConverters {

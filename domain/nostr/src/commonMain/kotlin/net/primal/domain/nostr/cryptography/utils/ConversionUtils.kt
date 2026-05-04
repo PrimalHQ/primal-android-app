@@ -3,6 +3,7 @@ package net.primal.domain.nostr.cryptography.utils
 import fr.acinq.secp256k1.Hex
 import io.github.aakira.napier.Napier
 import io.ktor.utils.io.core.toByteArray
+import net.primal.core.utils.runCatching
 
 fun String.assureValidNsec() = if (startsWith("nsec")) this else this.hexToNsecHrp()
 fun String.assureValidNpub() = if (startsWith("npub")) this else this.hexToNpubHrp()

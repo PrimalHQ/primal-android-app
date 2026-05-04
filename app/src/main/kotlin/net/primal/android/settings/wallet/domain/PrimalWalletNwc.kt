@@ -3,6 +3,7 @@ package net.primal.android.settings.wallet.domain
 import android.net.Uri
 import androidx.core.net.toUri
 import kotlinx.serialization.Serializable
+import net.primal.core.utils.runCatching
 
 @Serializable
 data class PrimalWalletNwc(

@@ -21,6 +21,9 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata

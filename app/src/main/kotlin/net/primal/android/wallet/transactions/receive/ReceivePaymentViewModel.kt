@@ -19,9 +19,11 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiE
 import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiState
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import net.primal.core.utils.fold
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.WalletRepository

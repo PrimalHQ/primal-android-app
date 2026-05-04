@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
+import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventStatsDao
 import net.primal.data.local.dao.events.EventUserStats

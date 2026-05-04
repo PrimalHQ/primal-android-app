@@ -4,7 +4,9 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.wallet.SubWallet
 import net.primal.wallet.data.local.db.WalletDatabase

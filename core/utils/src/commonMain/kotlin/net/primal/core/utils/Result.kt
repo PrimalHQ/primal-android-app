@@ -73,25 +73,27 @@ sealed class Result<T> {
             is Failure<T> -> throw exception
             is Success<T> -> value
         }
-
-    /**
-     * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
-     * result of [onFailure] function for the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
-     *
-     * Note, that this function rethrows any [Throwable] exception thrown by [onFailure] function.
-     *
-     * This function is a shorthand for `fold(onSuccess = { it }, onFailure = onFailure)` (see [fold]).
-     */
-    fun <R, T : R> getOrElse(onFailure: (Throwable) -> R): R = fold(onSuccess = { it as T }, onFailure = onFailure)
-
-    /**
-     * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
-     * [defaultValue] if it is [failure][Result.isFailure].
-     *
-     * This function is a shorthand for `getOrElse { defaultValue }` (see [getOrElse]).
-     */
-    fun <R, T : R> getOrDefault(defaultValue: R): R = fold(onSuccess = { it as T }, onFailure = { defaultValue })
 }
+
+/**
+ * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
+ * result of [onFailure] function for the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
+ *
+ * Note, that this function rethrows any [Throwable] exception thrown by [onFailure] function.
+ *
+ * This function is a shorthand for `fold(onSuccess = { it }, onFailure = onFailure)` (see [fold]).
+ */
+inline fun <R, T : R> Result<T>.getOrElse(onFailure: (Throwable) -> R): R =
+    fold(onSuccess = { it }, onFailure = onFailure)
+
+/**
+ * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
+ * [defaultValue] if it is [failure][Result.isFailure].
+ *
+ * This function is a shorthand for `getOrElse { defaultValue }` (see [getOrElse]).
+ */
+inline fun <R, T : R> Result<T>.getOrDefault(defaultValue: R): R =
+    fold(onSuccess = { it }, onFailure = { defaultValue })
 
 /**
  * Calls the specified function [block] and returns its encapsulated result if invocation was successful,

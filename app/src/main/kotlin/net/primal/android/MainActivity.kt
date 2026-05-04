@@ -33,6 +33,8 @@ import net.primal.android.nostrconnect.utils.isNostrConnectUrl
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
 import net.primal.android.signer.client.launchSignEvent
 import net.primal.android.signer.client.rememberAmberSignerLauncher
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.profile.Nip05VerificationStatus
 

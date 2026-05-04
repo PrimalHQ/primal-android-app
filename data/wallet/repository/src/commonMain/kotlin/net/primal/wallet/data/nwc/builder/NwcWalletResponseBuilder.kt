@@ -11,6 +11,7 @@ import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJson
 
 class NwcWalletResponseBuilder {

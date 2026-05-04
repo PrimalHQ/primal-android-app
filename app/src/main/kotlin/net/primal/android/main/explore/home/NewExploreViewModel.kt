@@ -18,6 +18,9 @@ import net.primal.android.main.explore.home.NewExploreContract.UiState
 import net.primal.android.main.explore.people.model.asFollowPackUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.map
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.feeds.DvmFeed

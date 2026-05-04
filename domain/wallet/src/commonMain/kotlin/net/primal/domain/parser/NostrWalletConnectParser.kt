@@ -4,6 +4,7 @@ import fr.acinq.secp256k1.Hex
 import io.ktor.http.Url
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.toHex
 import net.primal.domain.wallet.NostrWalletConnect

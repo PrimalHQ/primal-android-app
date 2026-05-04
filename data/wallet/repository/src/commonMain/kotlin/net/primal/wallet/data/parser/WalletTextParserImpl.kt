@@ -3,6 +3,7 @@ package net.primal.wallet.data.parser
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.asUrlDecoded
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.parser.WalletTextParser

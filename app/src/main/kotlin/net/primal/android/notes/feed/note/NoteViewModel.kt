@@ -28,6 +28,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.onFailure
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository

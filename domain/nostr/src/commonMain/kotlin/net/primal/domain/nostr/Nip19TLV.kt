@@ -7,6 +7,7 @@ import io.ktor.utils.io.core.toByteArray
 import io.ktor.utils.io.core.writeFully
 import kotlinx.io.readByteArray
 import kotlinx.io.readString
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 import net.primal.domain.nostr.cryptography.utils.toHex
 

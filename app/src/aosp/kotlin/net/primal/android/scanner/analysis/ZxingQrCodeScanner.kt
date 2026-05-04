@@ -10,6 +10,7 @@ import java.nio.ByteBuffer
 import javax.inject.Inject
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
+import net.primal.core.utils.runCatching
 
 class ZxingQrCodeScanner @Inject constructor() : QrCodeResultDecoder {
 

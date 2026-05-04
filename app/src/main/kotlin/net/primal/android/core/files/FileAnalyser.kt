@@ -11,6 +11,8 @@ import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
 import android.net.Uri
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.runCatching
 
 class FileAnalyser @Inject constructor(
     private val contentResolver: ContentResolver,

@@ -10,6 +10,10 @@ import kotlinx.coroutines.launch
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.fold
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 
 class ProfileFollowsHandler @Inject constructor(
     private val userRepository: UserRepository,
