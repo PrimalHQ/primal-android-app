@@ -286,6 +286,9 @@ whyoleg-cryptography-provider-jdk = { module = "dev.whyoleg.cryptography:cryptog
 whyoleg-cryptography-provider-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "whyoleg-cryptography-kotlin" }
 whyoleg-cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal", version.ref = "whyoleg-cryptography-kotlin" }
 
+# Detekt custom rule API
+detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
+
 #Interop
 skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }
 skie-configuration-annotations-iosarm64 = { module = "co.touchlab.skie:configuration-annotations-iosarm64", version.ref = "skie" }
@@ -316,6 +319,7 @@ hilt-compiler = ["hilt-compiler", "hilt-compiler-dagger", "hilt-compiler-android
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 org-jetbrains-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -56,12 +56,17 @@ subprojects {
         }
     }
 
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-    plugins.withId("io.gitlab.arturbosch.detekt") {
-        detekt {
-            buildUponDefaultConfig = true
-            allRules = false
-            config.setFrom("$rootDir/detekt.yml")
+    if (name != "detekt-rules") {
+        apply(plugin = "io.gitlab.arturbosch.detekt")
+        plugins.withId("io.gitlab.arturbosch.detekt") {
+            detekt {
+                buildUponDefaultConfig = true
+                allRules = false
+                config.setFrom("$rootDir/detekt.yml")
+            }
+            dependencies {
+                "detektPlugins"(project(":detekt-rules"))
+            }
         }
     }
 
