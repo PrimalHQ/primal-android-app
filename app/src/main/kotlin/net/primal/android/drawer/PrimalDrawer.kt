@@ -2,44 +2,43 @@ package net.primal.android.drawer
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
@@ -113,35 +112,22 @@ private fun PrimalDrawer(
             .navigationBarsPadding()
             .padding(top = 16.dp),
     ) {
-        Row(
-            modifier = Modifier.weight(1f),
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-            ) {
-                DrawerHeader(
-                    userAccount = state.activeUserAccount,
-                    onQrCodeClick = onQrCodeClick,
-                    legendaryCustomization = state.legendaryCustomization,
-                )
+        DrawerHeader(
+            userAccount = state.activeUserAccount,
+            onQrCodeClick = onQrCodeClick,
+            legendaryCustomization = state.legendaryCustomization,
+            accountSwitcherCallbacks = accountSwitcherCallbacks,
+            onSignOutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
+        )
 
-                DrawerMenu(
-                    modifier = Modifier
-                        .weight(1.0f)
-                        .padding(top = 32.dp),
-                    state = state,
-                    showPremiumBadge = state.showPremiumBadge,
-                    onDrawerDestinationClick = onDrawerDestinationClick,
-                )
-            }
-
-            AccountSwitcher(
-                callbacks = accountSwitcherCallbacks,
-                onLogoutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
-            )
-        }
+        DrawerMenu(
+            modifier = Modifier
+                .weight(1.0f)
+                .padding(top = 32.dp),
+            state = state,
+            showPremiumBadge = state.showPremiumBadge,
+            onDrawerDestinationClick = onDrawerDestinationClick,
+        )
 
         PrimalOverlayBottomBar(
             trailing = { PrimalOverlayCloseButton(onClick = onDismiss) },
@@ -149,53 +135,65 @@ private fun PrimalDrawer(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DrawerHeader(
     userAccount: UserAccount?,
     legendaryCustomization: LegendaryCustomization?,
     onQrCodeClick: () -> Unit,
+    accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    onSignOutClick: (String) -> Unit,
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp),
+            .padding(start = 24.dp, end = 12.dp),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.weight(1f),
         ) {
-            NostrUserText(
-                profileId = userAccount?.pubkey,
-                displayName = userAccount?.authorDisplayName ?: "",
-                internetIdentifier = userAccount?.internetIdentifier,
-                internetIdentifierBadgeSize = 24.dp,
-                legendaryCustomization = legendaryCustomization,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                NostrUserText(
+                    profileId = userAccount?.pubkey,
+                    displayName = userAccount?.authorDisplayName ?: "",
+                    internetIdentifier = userAccount?.internetIdentifier,
+                    internetIdentifierBadgeSize = 24.dp,
+                    legendaryCustomization = legendaryCustomization,
+                )
 
-            IconButton(onClick = onQrCodeClick) {
-                Icon(
-                    imageVector = PrimalIcons.QrCode,
-                    contentDescription = stringResource(id = R.string.accessibility_qr_code),
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                IconButton(onClick = onQrCodeClick) {
+                    Icon(
+                        imageVector = PrimalIcons.QrCode,
+                        contentDescription = stringResource(id = R.string.accessibility_qr_code),
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+            }
+
+            val formattedIdentifier = userAccount?.internetIdentifier?.formatNip05Identifier()
+            if (!formattedIdentifier.isNullOrBlank()) {
+                Text(
+                    text = formattedIdentifier,
+                    style = AppTheme.typography.labelLarge,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
-        }
 
-        val formattedIdentifier = userAccount?.internetIdentifier?.formatNip05Identifier()
-        if (!formattedIdentifier.isNullOrBlank()) {
             Text(
-                text = formattedIdentifier,
+                text = buildStatsAnnotatedString(
+                    followersCount = userAccount?.followersCount,
+                    followingCount = userAccount?.followingCount,
+                ),
                 style = AppTheme.typography.labelLarge,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                modifier = Modifier.padding(top = 16.dp),
             )
         }
 
-        Text(
-            text = buildStatsAnnotatedString(
-                followersCount = userAccount?.followersCount,
-                followingCount = userAccount?.followingCount,
-            ),
-            style = AppTheme.typography.labelLarge,
-            modifier = Modifier.padding(top = 16.dp),
+        AccountSwitcher(
+            callbacks = accountSwitcherCallbacks,
+            onLogoutClick = onSignOutClick,
         )
     }
 }
@@ -244,6 +242,8 @@ private fun buildStatsAnnotatedString(followingCount: Int?, followersCount: Int?
     }
 }
 
+private const val DRAWER_GRID_COLUMNS = 3
+
 @Composable
 private fun DrawerMenu(
     modifier: Modifier,
@@ -251,75 +251,83 @@ private fun DrawerMenu(
     showPremiumBadge: Boolean,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
-    LazyColumn(
+    LazyVerticalGrid(
         modifier = modifier,
-        verticalArrangement = Arrangement.Top,
+        columns = GridCells.Fixed(DRAWER_GRID_COLUMNS),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         items(
             items = state.menuItems,
             key = { it.toString() },
         ) { item ->
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            ListItem(
-                colors = ListItemDefaults.colors(
-                    containerColor = Color.Transparent,
-                    leadingIconColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    headlineColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                ),
-                modifier = Modifier.clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = {
-                        onDrawerDestinationClick(item)
-                    },
-                ),
-                leadingContent = {
-                    Icon(
-                        modifier = Modifier.padding(start = 8.dp),
-                        imageVector = item.icon(),
-                        contentDescription = item.label(),
-                        tint = if (isPressed) {
-                            AppTheme.colorScheme.onSurface
-                        } else {
-                            AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                        },
-                    )
-                },
-                headlineContent = {
-                    val isPremiumWithRequiredBadge = (item is DrawerScreenDestination.Premium && showPremiumBadge)
-                    val isMessagesWithUnreadCount = item is DrawerScreenDestination.Messages &&
-                        state.badges.unreadMessagesCount > 0
+            val showBadge = when (item) {
+                is DrawerScreenDestination.Premium -> showPremiumBadge
+                is DrawerScreenDestination.Messages -> state.badges.unreadMessagesCount > 0
+                else -> false
+            }
+            DrawerGridTile(
+                item = item,
+                showBadge = showBadge,
+                onClick = { onDrawerDestinationClick(item) },
+            )
+        }
+    }
+}
 
-                    BadgedBox(
-                        badge = {
-                            if (isMessagesWithUnreadCount || isPremiumWithRequiredBadge) {
-                                Badge(
-                                    modifier = Modifier
-                                        .size(size = 8.dp)
-                                        .offset(x = 16.dp, y = (-8).dp),
-                                    containerColor = AppTheme.colorScheme.primary,
-                                )
-                            }
-                        },
-                    ) {
-                        Text(
-                            text = item.label(),
+@Composable
+private fun DrawerGridTile(
+    item: DrawerScreenDestination,
+    showBadge: Boolean,
+    onClick: () -> Unit,
+) {
+    val isSignOut = item is DrawerScreenDestination.SignOut
+    val contentColor = if (isSignOut) {
+        AppTheme.colorScheme.error
+    } else {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+    }
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 14.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
+        ) {
+            BadgedBox(
+                badge = {
+                    if (showBadge) {
+                        Badge(
                             modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(top = (3.5).dp),
-                            style = AppTheme.typography.titleLarge,
-                            color = if (isPressed) {
-                                AppTheme.colorScheme.onSurface
-                            } else {
-                                AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                            },
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Normal,
-                            lineHeight = 20.sp,
+                                .size(size = 8.dp)
+                                .offset(x = 6.dp, y = (-6).dp),
+                            containerColor = AppTheme.colorScheme.primary,
                         )
                     }
                 },
+            ) {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    imageVector = item.icon(),
+                    contentDescription = item.label(),
+                    tint = contentColor,
+                )
+            }
+            Text(
+                text = item.label(),
+                style = AppTheme.typography.labelLarge,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -372,9 +380,11 @@ fun PrimalDrawerPreview() {
             state = PrimalDrawerContract.UiState(
                 menuItems = listOf(
                     DrawerScreenDestination.Profile(userId = "none"),
+                    DrawerScreenDestination.Premium(hasPremium = false),
                     DrawerScreenDestination.Messages,
                     DrawerScreenDestination.Bookmarks(userId = "none"),
                     DrawerScreenDestination.ScanCode,
+                    DrawerScreenDestination.RemoteLogin,
                     DrawerScreenDestination.Settings,
                     DrawerScreenDestination.SignOut(userId = "none"),
                 ),

@@ -18,6 +18,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -90,27 +91,28 @@ private fun AccountSwitcher(
     }
 
     Column(
-        modifier = modifier
-            .padding(end = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         state.userAccounts.take(2).forEach { account ->
-            UniversalAvatarThumbnail(
-                modifier = Modifier.clip(CircleShape),
-                avatarSize = 28.dp,
-                avatarCdnImage = account.avatarCdnImage,
-                avatarBlossoms = account.avatarBlossoms,
-                legendaryCustomization = account.legendaryCustomization,
-                onClick = { eventPublisher(AccountSwitcherContract.UiEvent.SwitchAccount(account.pubkey)) },
-                defaultAvatar = {
-                    CompositionLocalProvider(
-                        LocalContentColor provides AppTheme.colorScheme.onSurface,
-                    ) {
-                        DefaultAvatarThumbnailPlaceholderListItemImage()
-                    }
-                },
-            )
+            key(account.pubkey) {
+                UniversalAvatarThumbnail(
+                    modifier = Modifier.clip(CircleShape),
+                    avatarSize = 28.dp,
+                    avatarCdnImage = account.avatarCdnImage,
+                    avatarBlossoms = account.avatarBlossoms,
+                    legendaryCustomization = account.legendaryCustomization,
+                    onClick = { eventPublisher(AccountSwitcherContract.UiEvent.SwitchAccount(account.pubkey)) },
+                    defaultAvatar = {
+                        CompositionLocalProvider(
+                            LocalContentColor provides AppTheme.colorScheme.onSurface,
+                        ) {
+                            DefaultAvatarThumbnailPlaceholderListItemImage()
+                        }
+                    },
+                )
+            }
         }
 
         CompositionLocalProvider(LocalRippleConfiguration provides null) {
