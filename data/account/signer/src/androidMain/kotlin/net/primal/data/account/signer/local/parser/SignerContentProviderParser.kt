@@ -3,6 +3,8 @@ package net.primal.data.account.signer.local.parser
 import android.net.Uri
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
+import net.primal.core.utils.Result
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.signer.local.model.LocalSignerMethod
 import net.primal.data.account.signer.local.model.SignerMethod

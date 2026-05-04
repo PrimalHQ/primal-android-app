@@ -1,6 +1,8 @@
 package net.primal.wallet.data.validator
 
 import fr.acinq.bitcoin.MnemonicCode
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 
 class RecoveryPhraseValidator {
 

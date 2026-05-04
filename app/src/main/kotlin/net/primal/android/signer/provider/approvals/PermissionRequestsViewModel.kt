@@ -20,8 +20,10 @@ import net.primal.android.signer.provider.approvals.PermissionRequestsContract.U
 import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiState
 import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.data.account.repository.service.LocalSignerError
 import net.primal.data.account.repository.service.LocalSignerService
 import net.primal.data.account.signer.local.model.LocalSignerMethod

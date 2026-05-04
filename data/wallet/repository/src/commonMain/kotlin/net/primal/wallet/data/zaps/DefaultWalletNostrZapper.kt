@@ -4,6 +4,8 @@ import io.github.aakira.napier.Napier
 import kotlin.uuid.Uuid
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.utils.MSATS_IN_SATS
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.runCatching
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.ZapKind
 import net.primal.domain.nostr.zaps.NostrZapper

@@ -3,6 +3,8 @@ package net.primal.android.signer.client.utils
 import android.content.Context
 import android.os.Build
 import net.primal.android.signer.client.AMBER_PACKAGE_NAME
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 
 /* Amber 3.0.4 */
 private const val COMPATIBLE_AMBER_VERSION_CODE = 115

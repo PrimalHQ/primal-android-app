@@ -9,6 +9,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.data.remote.api.klipy.KlipyApi
 
 @Singleton

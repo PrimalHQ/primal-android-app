@@ -2,6 +2,7 @@ package net.primal.domain.polls
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import net.primal.core.utils.Result
 
 interface PollsRepository {
     suspend fun fetchPollVotes(eventId: String)

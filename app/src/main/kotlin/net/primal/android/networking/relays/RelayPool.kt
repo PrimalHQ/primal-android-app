@@ -25,6 +25,8 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent

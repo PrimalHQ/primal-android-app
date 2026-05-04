@@ -17,7 +17,9 @@ import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice

@@ -13,7 +13,12 @@ import net.primal.android.networking.UserAgentProvider
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
+import net.primal.core.utils.mapCatching
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.pushnotifications.PushNotificationRepository
 import net.primal.domain.account.repository.ConnectionRepository

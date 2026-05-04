@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import net.primal.core.utils.runCatching
 
 data class AppDisplayInfo(
     val name: String,

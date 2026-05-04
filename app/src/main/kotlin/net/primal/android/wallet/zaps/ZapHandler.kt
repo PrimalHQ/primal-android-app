@@ -14,6 +14,9 @@ import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.mapToRelayDO
 import net.primal.android.user.repository.RelayRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.cryptography.utils.getOrNull
 import net.primal.domain.nostr.zaps.ZapError

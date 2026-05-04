@@ -30,6 +30,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.account.WalletAccountRepository

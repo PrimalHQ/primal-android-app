@@ -24,6 +24,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import okio.Buffer
 import okio.GzipSink

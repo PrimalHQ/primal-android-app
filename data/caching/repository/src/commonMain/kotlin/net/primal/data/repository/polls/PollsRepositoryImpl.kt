@@ -12,7 +12,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.polls.PollData

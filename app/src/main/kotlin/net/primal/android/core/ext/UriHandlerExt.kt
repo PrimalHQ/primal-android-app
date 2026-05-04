@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.platform.UriHandler
 import androidx.core.net.toUri
+import net.primal.core.utils.runCatching
 
 fun UriHandler.openUriSafely(uri: String) {
     try {

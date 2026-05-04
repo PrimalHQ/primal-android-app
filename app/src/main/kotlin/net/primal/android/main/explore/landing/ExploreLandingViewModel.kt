@@ -13,6 +13,9 @@ import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.main.explore.landing.ExploreLandingContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.map
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 

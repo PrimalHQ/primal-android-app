@@ -12,6 +12,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.retryOnFailureWithAbort
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.toULong

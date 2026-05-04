@@ -6,6 +6,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.core.utils.fold
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 

@@ -6,6 +6,8 @@ import net.primal.core.networking.nwc.nip47.NwcEncryptionScheme
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequestException
 import net.primal.core.nips.encryption.service.NostrEncryptionService
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.runCatching
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent

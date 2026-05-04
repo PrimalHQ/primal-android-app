@@ -9,6 +9,7 @@ import net.primal.core.config.api.WellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.updater.Updater
 import net.primal.domain.common.exception.NetworkException
 
