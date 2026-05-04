@@ -26,6 +26,9 @@ import net.primal.android.events.polls.votes.PollVotesContract.UiState
 import net.primal.android.events.polls.votes.model.PollVoterUi
 import net.primal.android.navigation.eventIdOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.map
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.polls.PollVoter
 import net.primal.domain.polls.PollsRepository
 

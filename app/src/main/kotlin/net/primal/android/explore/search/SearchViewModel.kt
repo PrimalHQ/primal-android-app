@@ -21,6 +21,9 @@ import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.navigation.initialQuery
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.map
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 

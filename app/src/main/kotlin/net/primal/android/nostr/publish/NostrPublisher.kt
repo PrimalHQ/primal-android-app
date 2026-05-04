@@ -10,6 +10,9 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.domain.Relay
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent

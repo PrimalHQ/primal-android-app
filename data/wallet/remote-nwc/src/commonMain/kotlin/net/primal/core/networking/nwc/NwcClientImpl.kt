@@ -34,6 +34,8 @@ import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.core.utils.Result
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent

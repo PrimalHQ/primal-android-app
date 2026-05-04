@@ -1,5 +1,7 @@
 package net.primal.domain.account.model
 
+import net.primal.core.utils.runCatching
+
 data class LocalApp(
     val identifier: String,
     val packageName: String,

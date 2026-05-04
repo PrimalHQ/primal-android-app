@@ -9,6 +9,7 @@ import net.primal.core.utils.NPROFILE
 import net.primal.core.utils.NPUB
 import net.primal.core.utils.NRELAY
 import net.primal.core.utils.NSEC
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV

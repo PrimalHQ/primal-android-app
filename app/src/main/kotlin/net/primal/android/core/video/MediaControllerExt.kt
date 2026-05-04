@@ -15,6 +15,8 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import net.primal.android.core.service.PrimalMediaSessionService
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.Naddr
 
 @Composable

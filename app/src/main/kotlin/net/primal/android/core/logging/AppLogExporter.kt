@@ -17,6 +17,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import net.primal.android.BuildConfig
+import net.primal.core.utils.fold
+import net.primal.core.utils.runCatching
 
 @Singleton
 class AppLogExporter @Inject constructor(

@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import kotlinx.serialization.Serializable
 import net.primal.android.core.utils.saveCsvToUri
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.nwc.model.NwcRequestLog
 
 @Serializable

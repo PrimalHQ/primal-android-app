@@ -1,5 +1,6 @@
 package net.primal.domain.feeds
 
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 fun String.isUserNotesFeedSpec(): Boolean {

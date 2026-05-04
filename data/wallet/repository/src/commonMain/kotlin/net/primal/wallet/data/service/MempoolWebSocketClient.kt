@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import net.primal.core.networking.factory.HttpClientFactory
+import net.primal.core.utils.runCatching
 
 internal class MempoolWebSocketClient(
     private val httpClient: HttpClient = HttpClientFactory.createHttpClientWithDefaultConfig {

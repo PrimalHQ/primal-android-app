@@ -1,6 +1,7 @@
 package net.primal.android.nostrconnect.utils
 
 import androidx.core.net.toUri
+import net.primal.core.utils.runCatching
 
 const val NOSTR_CONNECT_SCHEME = "nostrconnect"
 const val PRIMAL_CONNECT_SCHEME = "primalconnect"

@@ -2,6 +2,8 @@ package net.primal.android.thread.articles.details.ui.rendering
 
 import java.net.URL
 import net.primal.android.thread.articles.details.ui.model.ArticleContentSegment
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.withNostrPrefix

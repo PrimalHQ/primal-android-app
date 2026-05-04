@@ -5,6 +5,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapError

@@ -9,6 +9,8 @@ import androidx.room.TypeConverters
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import io.github.aakira.napier.Napier
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.AppPermissionData
 import net.primal.data.account.local.dao.apps.AppPermissionDataDao
 import net.primal.data.account.local.dao.apps.AppSessionData

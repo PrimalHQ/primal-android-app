@@ -22,6 +22,8 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
+import net.primal.core.utils.getOrElse
+import net.primal.core.utils.runCatching
 import net.primal.domain.billing.BillingRepository
 
 @HiltViewModel

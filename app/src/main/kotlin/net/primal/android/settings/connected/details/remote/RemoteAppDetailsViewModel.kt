@@ -22,7 +22,10 @@ import net.primal.android.settings.connected.details.remote.RemoteAppDetailsCont
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.UiState
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.model.AppSessionState
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository

@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.core.utils.ellipsizeMiddle
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 import net.primal.domain.feeds.extractAdvancedSearchQuery
 import net.primal.domain.feeds.extractPubkeyFromFeedSpec
 import net.primal.domain.feeds.extractSimpleSearchQuery

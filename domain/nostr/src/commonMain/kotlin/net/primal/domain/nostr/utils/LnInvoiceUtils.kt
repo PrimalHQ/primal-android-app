@@ -3,6 +3,7 @@ package net.primal.domain.nostr.utils
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.aakira.napier.Napier
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
+import net.primal.core.utils.runCatching
 
 /** based on litecoinj */
 @Suppress("MagicNumber", "UnusedPrivateProperty")

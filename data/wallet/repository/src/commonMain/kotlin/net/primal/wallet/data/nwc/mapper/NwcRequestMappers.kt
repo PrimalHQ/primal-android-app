@@ -3,6 +3,8 @@ package net.primal.wallet.data.nwc.mapper
 import net.primal.core.networking.nwc.nip47.NwcError
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.wallet.exception.WalletConnectionException
 import net.primal.domain.wallet.exception.WalletException

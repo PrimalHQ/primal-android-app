@@ -70,6 +70,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.ext.onFocusSelectAll
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.theme.AppTheme
+import net.primal.core.utils.runCatching
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

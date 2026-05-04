@@ -15,6 +15,8 @@ import net.primal.android.auth.repository.AuthRepository
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 
 @HiltViewModel
 class LogoutViewModel @Inject constructor(

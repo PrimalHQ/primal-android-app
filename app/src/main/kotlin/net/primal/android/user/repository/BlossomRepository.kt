@@ -5,6 +5,8 @@ import kotlinx.coroutines.withContext
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.ensureHttpOrHttps
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asServerTag

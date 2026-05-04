@@ -14,6 +14,8 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import net.primal.core.utils.fold
+import net.primal.core.utils.mapCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.repository.service.LocalSignerError
 import net.primal.data.account.repository.service.LocalSignerService

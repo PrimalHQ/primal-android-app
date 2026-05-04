@@ -11,6 +11,7 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.runCatching
 
 fun Context.copyText(text: String, label: String = "") {
     val clipboard = getSystemService(ClipboardManager::class.java)

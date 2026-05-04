@@ -28,6 +28,10 @@ import net.primal.android.navigation.editingFeedSpec
 import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
 import net.primal.android.navigation.searchKind
+import net.primal.core.utils.map
+import net.primal.core.utils.mapCatching
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.feeds.AdvancedSearchParsedQuery
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.extractAdvancedSearchQuery
