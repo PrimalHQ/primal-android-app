@@ -23,3 +23,10 @@ complexity:
   LongParameterList:
     ignoreAnnotated: ['Composable']
     ignoreDefaultParameters: true
+
+PrimalRuleSet:
+  active: true
+  RequireCustomRunCatching:
+    active: true
+  RequireCustomResult:
+    active: true

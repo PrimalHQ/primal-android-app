@@ -23,6 +23,7 @@ dependencyResolutionManagement {
 rootProject.name = "Primal"
 
 include(":app")
+include(":detekt-rules")
 
 include(":core:utils")
 include(":core:nips")
