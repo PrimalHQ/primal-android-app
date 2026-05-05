@@ -167,8 +167,4 @@ internal class TransactionsHandler(
             }
         }
     }
-
-    companion object {
-        private const val TAG = "TransactionsHandler"
-    }
 }

@@ -46,7 +46,7 @@ interface FeedPostDao {
         FROM PostData WHERE postId IN (:postIds)
         """,
     )
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findAllPostsByIds(postIds: List<String>): List<FeedPost>
 
     suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost> =

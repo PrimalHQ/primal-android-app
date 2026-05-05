@@ -1,8 +1,5 @@
 package net.primal.data.account.repository.service.factory
 
-import de.jensklingenberg.ktorfit.Ktorfit
-import io.ktor.client.plugins.cache.HttpCache
-import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
@@ -11,8 +8,6 @@ import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.repository.factory.provideAccountDatabase
 import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
-import net.primal.data.account.signer.remote.api.WellKnownApi
-import net.primal.data.account.signer.remote.api.createWellKnownApi
 import net.primal.data.account.signer.remote.parser.RemoteSignerMethodParser
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -26,18 +21,6 @@ object AccountServiceFactory {
     private val remoteAppConnectionManager = RemoteAppConnectionManager()
 
     fun getRemoteAppConnectionManager(): RemoteAppConnectionManager = remoteAppConnectionManager
-
-    private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig {
-        install(HttpCache)
-    }
-
-    private val wellKnownApi: WellKnownApi by lazy {
-        Ktorfit.Builder()
-            .baseUrl("https://primal.net/")
-            .httpClient(client = httpClient)
-            .build()
-            .createWellKnownApi()
-    }
 
     fun createRemoteSignerService(
         signerKeyPair: NostrKeyPair,

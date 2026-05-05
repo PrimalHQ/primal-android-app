@@ -19,8 +19,12 @@ object Nip19TLV {
         KIND(3),
     }
 
+    private const val INT32_SIZE_BYTES = 4
+
     fun toInt32(bytes: ByteArray): Int {
-        require(bytes.size == 4) { "length must be 4, got: ${bytes.size}" }
+        require(bytes.size == INT32_SIZE_BYTES) {
+            "length must be $INT32_SIZE_BYTES, got: ${bytes.size}"
+        }
         val packet = buildPacket {
             writeFully(bytes)
         }

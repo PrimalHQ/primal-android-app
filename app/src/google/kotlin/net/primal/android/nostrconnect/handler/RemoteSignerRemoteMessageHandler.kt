@@ -4,6 +4,7 @@ import com.google.firebase.messaging.RemoteMessage
 import javax.inject.Inject
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
+import net.primal.core.utils.onSuccess
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.NostrEventKind
 

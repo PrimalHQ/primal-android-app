@@ -93,10 +93,8 @@ class SignerConnectionInitializer internal constructor(
     ): Pair<RemoteAppConnection, String> {
         val isNostrConnect = connectionUrl.startsWith(prefix = NOSTR_CONNECT_PREFIX, ignoreCase = true)
         val isPrimalConnect = connectionUrl.startsWith(prefix = PRIMAL_CONNECT_PREFIX, ignoreCase = true)
-        if (!isNostrConnect && !isPrimalConnect) {
-            throw IllegalArgumentException(
-                "Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX` or `$PRIMAL_CONNECT_PREFIX`.",
-            )
+        require(isNostrConnect || isPrimalConnect) {
+            "Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX` or `$PRIMAL_CONNECT_PREFIX`."
         }
 
         val parsedUrl = Url(urlString = connectionUrl)

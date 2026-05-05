@@ -31,7 +31,7 @@ interface EventStatsDao {
     }
 
     @Query("SELECT * FROM EventStats WHERE eventId IN (:eventIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     fun _observeStats(eventIds: List<String>): Flow<List<EventStats>>
 
     fun observeStats(eventIds: List<String>): Flow<List<EventStats>> = eventIds.chunkedFlowQuery { _observeStats(it) }

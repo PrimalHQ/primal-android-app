@@ -10,12 +10,14 @@ import net.primal.domain.nostr.cryptography.utils.toHex
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.NostrWalletKeypair
 
+private const val HEX_PUBKEY_LENGTH = 64
+
 fun String.parseNWCUrl(): NostrWalletConnect {
     val uri = Url(this)
 
     val host = uri.host
     val pubkey = when {
-        host.toByteArray(Charsets.UTF_8).size == 64 -> host
+        host.toByteArray(Charsets.UTF_8).size == HEX_PUBKEY_LENGTH -> host
         else -> null
     }
 
@@ -24,7 +26,7 @@ fun String.parseNWCUrl(): NostrWalletConnect {
 
     val secretParam = uri.parameters["secret"]
     val keypairSecret = when {
-        secretParam != null && secretParam.toByteArray().size == 64 -> secretParam
+        secretParam != null && secretParam.toByteArray().size == HEX_PUBKEY_LENGTH -> secretParam
         else -> null
     }
 

@@ -153,7 +153,7 @@ class StreamRepositoryImpl(
                 )
 
                 val streamData = response.liveActivity?.asStreamData()
-                    ?: throw IllegalStateException("Live stream event not found or identifier tag is missing.")
+                    ?: error("Live stream event not found or identifier tag is missing.")
 
                 database.withTransaction {
                     database.streams().upsertStreamData(data = listOf(streamData))

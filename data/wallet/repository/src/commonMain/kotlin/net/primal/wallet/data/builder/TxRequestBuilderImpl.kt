@@ -1,6 +1,7 @@
 package net.primal.wallet.data.builder
 
 import kotlin.uuid.Uuid
+import net.primal.core.utils.Result
 import net.primal.domain.builder.TxRequestBuilder
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.wallet.DraftTx

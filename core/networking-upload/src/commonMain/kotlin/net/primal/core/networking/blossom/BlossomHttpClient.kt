@@ -19,12 +19,15 @@ import kotlinx.serialization.json.Json
 import net.primal.core.networking.UserAgentProvider
 import net.primal.core.networking.factory.HttpClientFactory
 
+private const val CONNECT_TIMEOUT_MILLIS = 15_000L
+private const val SOCKET_TIMEOUT_MILLIS = 15_000L
+
 internal fun createBlossomHttpClient() =
     HttpClientFactory.createHttpClient {
         install(HttpTimeout) {
             requestTimeoutMillis = Long.MAX_VALUE
-            connectTimeoutMillis = 15_000
-            socketTimeoutMillis = 15_000
+            connectTimeoutMillis = CONNECT_TIMEOUT_MILLIS
+            socketTimeoutMillis = SOCKET_TIMEOUT_MILLIS
         }
 
         install(ContentNegotiation) {

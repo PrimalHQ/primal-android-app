@@ -81,7 +81,7 @@ class SessionRepositoryImpl(
                         Napier.d(tag = "Signer") {
                             "Existing open session already exists for $appIdentifier. Start ignored."
                         }
-                        throw IllegalStateException("There is an existing open session for connection $appIdentifier.")
+                        error("There is an existing open session for connection $appIdentifier.")
                     }
 
                     val newSession = AppSessionData(

@@ -85,7 +85,9 @@ object CryptoUtils {
     @Throws(IllegalArgumentException::class)
     private fun decrypt(message: String, sharedSecret: ByteArray): String {
         val parts = message.split("?iv=")
-        if (parts.size != 2 || sharedSecret.isEmpty()) throw IllegalArgumentException()
+        require(parts.size == 2 && sharedSecret.isNotEmpty()) {
+            "Invalid encrypted message format or empty shared secret."
+        }
 
         val encryptedMsg = Base64.decode(parts[0])
         val iv = Base64.decode(parts[1])
