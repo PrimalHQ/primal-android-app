@@ -6,6 +6,8 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import net.primal.android.signer.client.decryptNip04WithAmber
 import net.primal.android.signer.client.encryptNip04WithAmber
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.MessageEncryptException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException

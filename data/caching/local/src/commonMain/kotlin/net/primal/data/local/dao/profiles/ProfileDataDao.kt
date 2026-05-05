@@ -29,7 +29,7 @@ interface ProfileDataDao {
     suspend fun insertOrReplaceAll(data: List<ProfileData>)
 
     @Query("SELECT ownerId, primalPremiumInfo FROM ProfileData WHERE ownerId IN (:profileIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findLegendProfileData(
         profileIds: List<String>,
     ): Map<
@@ -43,7 +43,7 @@ interface ProfileDataDao {
         profileIds.chunkedMapQuery { _findLegendProfileData(it) }
 
     @Query("SELECT ownerId FROM ProfileData WHERE ownerId in (:profileIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findExistingProfileIds(profileIds: List<String>): List<String>
 
     suspend fun findExistingProfileIds(profileIds: List<String>): List<String> =
@@ -57,7 +57,7 @@ interface ProfileDataDao {
     fun observeProfileData(profileId: String): Flow<ProfileData?>
 
     @Query("SELECT * FROM ProfileData WHERE ownerId IN (:profileIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     fun _observeProfilesData(profileIds: List<String>): Flow<List<ProfileData>>
 
     fun observeProfilesData(profileIds: List<String>): Flow<List<ProfileData>> =
@@ -67,7 +67,7 @@ interface ProfileDataDao {
     suspend fun findProfileData(profileId: String): ProfileData?
 
     @Query("SELECT * FROM ProfileData WHERE ownerId IN (:profileIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findProfileData(profileIds: List<String>): List<ProfileData>
 
     suspend fun findProfileData(profileIds: List<String>): List<ProfileData> =

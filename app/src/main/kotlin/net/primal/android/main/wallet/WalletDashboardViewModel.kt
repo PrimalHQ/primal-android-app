@@ -38,7 +38,9 @@ import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
+import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository

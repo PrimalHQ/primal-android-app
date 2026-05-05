@@ -26,8 +26,10 @@ import net.primal.android.navigation.streamNaddr
 import net.primal.android.notes.feed.model.asStreamPillUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository

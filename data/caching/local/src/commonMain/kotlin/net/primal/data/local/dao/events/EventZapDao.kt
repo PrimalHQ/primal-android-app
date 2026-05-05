@@ -37,7 +37,7 @@ interface EventZapDao {
     suspend fun upsertAll(data: List<EventZap>)
 
     @Query("SELECT * FROM EventZap WHERE invoice IN (:invoices)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findAllByInvoices(invoices: List<String>): List<EventZap>
 
     suspend fun findAllByInvoices(invoices: List<String>): List<EventZap> =

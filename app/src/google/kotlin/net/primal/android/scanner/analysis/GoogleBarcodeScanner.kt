@@ -11,6 +11,7 @@ import com.google.mlkit.vision.common.InputImage
 import javax.inject.Inject
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
+import net.primal.core.utils.runCatching
 
 class GoogleBarcodeScanner @Inject constructor() : QrCodeResultDecoder {
 

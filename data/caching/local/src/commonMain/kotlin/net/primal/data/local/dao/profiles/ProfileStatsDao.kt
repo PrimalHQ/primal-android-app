@@ -30,7 +30,7 @@ interface ProfileStatsDao {
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>
 
     @Query("SELECT * FROM ProfileStats WHERE profileId IN (:profileIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findProfileStats(profileIds: List<String>): List<ProfileStats>
 
     suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats> =

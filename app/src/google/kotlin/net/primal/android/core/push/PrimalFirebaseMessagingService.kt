@@ -12,6 +12,7 @@ import kotlinx.coroutines.withTimeout
 import net.primal.android.nostrconnect.handler.RemoteSignerRemoteMessageHandler
 import net.primal.android.wallet.nwc.handler.NwcRemoteMessageHandler
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 
 @AndroidEntryPoint
 class PrimalFirebaseMessagingService : FirebaseMessagingService() {

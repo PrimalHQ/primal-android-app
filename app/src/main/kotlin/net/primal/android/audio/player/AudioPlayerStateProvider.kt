@@ -21,6 +21,8 @@ import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.delay
 import net.primal.android.core.service.PrimalMediaSessionService
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 
 private const val PROGRESS_POLL_INTERVAL_MS = 200L
 const val EXTRA_NOTE_ID = "noteId"

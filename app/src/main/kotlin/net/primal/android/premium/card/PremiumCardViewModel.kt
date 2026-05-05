@@ -13,6 +13,7 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.navigation.profileIdOrThrow
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.runCatching
 import net.primal.domain.profile.ProfileRepository
 
 @HiltViewModel

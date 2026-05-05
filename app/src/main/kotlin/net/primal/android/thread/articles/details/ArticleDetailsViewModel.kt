@@ -35,6 +35,8 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository

@@ -26,6 +26,8 @@ import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.fold
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind

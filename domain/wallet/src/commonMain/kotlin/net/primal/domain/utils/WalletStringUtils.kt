@@ -9,6 +9,7 @@ import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.asUrlDecoded
 import net.primal.core.utils.isEmailAddress
+import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.BitcoinPaymentInstruction
 
 fun String.isLnInvoice() = startsWith(prefix = "lnbc", ignoreCase = true)

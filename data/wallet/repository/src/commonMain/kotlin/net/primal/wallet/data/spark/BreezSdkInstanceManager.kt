@@ -124,7 +124,7 @@ internal class BreezSdkInstanceManager(
      */
     suspend fun requireInstance(walletId: String): BreezSdk =
         mutex.withLock {
-            instances[walletId] ?: throw IllegalStateException("Wallet not found: $walletId")
+            instances[walletId] ?: error("Wallet not found: $walletId")
         }
 
     /**

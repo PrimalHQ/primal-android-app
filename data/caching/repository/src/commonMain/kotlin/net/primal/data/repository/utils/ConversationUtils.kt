@@ -1,5 +1,7 @@
 package net.primal.data.repository.utils
 
+import net.primal.core.utils.getOrDefault
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.getTagValueOrNull
 import net.primal.domain.nostr.hasMentionMarker
 import net.primal.domain.nostr.hasReplyMarker

@@ -3,7 +3,6 @@ package net.primal.data.remote.factory
 import de.jensklingenberg.ktorfit.Ktorfit
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
-import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.ArticlesApiImpl
 import net.primal.data.remote.api.broadcast.BroadcastApi
@@ -39,7 +38,6 @@ import net.primal.data.remote.api.users.createUserWellKnownApi
 
 object PrimalApiServiceFactory {
 
-    private val dispatcherProvider = createDispatcherProvider()
     private val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
     fun createArticlesApi(primalApiClient: PrimalApiClient): ArticlesApi = ArticlesApiImpl(primalApiClient)

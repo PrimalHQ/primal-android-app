@@ -19,6 +19,9 @@ import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
 import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.fold
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.toLong
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.domain.nostr.InvoiceType

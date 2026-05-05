@@ -31,11 +31,13 @@ import net.primal.core.networking.nwc.wallet.signNwcErrorResponseNostrEvent
 import net.primal.core.networking.nwc.wallet.signNwcInfoNostrEvent
 import net.primal.core.networking.nwc.wallet.signNwcResponseNostrEvent
 import net.primal.core.nips.encryption.service.NostrEncryptionService
+import net.primal.core.utils.Result
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService

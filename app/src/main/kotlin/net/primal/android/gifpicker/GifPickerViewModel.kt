@@ -25,6 +25,9 @@ import net.primal.android.gifpicker.GifPickerContract.UiEvent
 import net.primal.android.gifpicker.GifPickerContract.UiState
 import net.primal.android.gifpicker.domain.GifCategory
 import net.primal.android.gifpicker.domain.asGifItem
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.data.remote.api.klipy.KlipyApi
 
 @HiltViewModel

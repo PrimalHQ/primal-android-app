@@ -7,6 +7,7 @@ import io.ktor.utils.io.core.toByteArray
 import io.ktor.utils.io.core.writeFully
 import kotlinx.io.readByteArray
 import kotlinx.io.readString
+import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 import net.primal.domain.nostr.cryptography.utils.toHex
 
@@ -18,8 +19,12 @@ object Nip19TLV {
         KIND(3),
     }
 
+    private const val INT32_SIZE_BYTES = 4
+
     fun toInt32(bytes: ByteArray): Int {
-        require(bytes.size == 4) { "length must be 4, got: ${bytes.size}" }
+        require(bytes.size == INT32_SIZE_BYTES) {
+            "length must be $INT32_SIZE_BYTES, got: ${bytes.size}"
+        }
         val packet = buildPacket {
             writeFully(bytes)
         }

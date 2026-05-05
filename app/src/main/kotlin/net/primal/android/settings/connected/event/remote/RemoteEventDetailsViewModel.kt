@@ -14,6 +14,7 @@ import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.navigation.eventIdOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository

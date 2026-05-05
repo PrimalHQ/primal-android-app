@@ -1,5 +1,6 @@
 package net.primal.core.utils
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.core.utils.Result.Companion.failure
@@ -62,8 +63,8 @@ sealed class Result<T> {
     }
 
     /**
-     * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or throws the encapsulated [Throwable] exception
-     * if it is [failure][Result.isFailure].
+     * Returns the encapsulated value if this instance represents [success][Result.isSuccess]
+     * or throws the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
      *
      * This function is a shorthand for `getOrElse { throw it }` (see [getOrElse]).
      */
@@ -72,41 +73,47 @@ sealed class Result<T> {
             is Failure<T> -> throw exception
             is Success<T> -> value
         }
-
-    /**
-     * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
-     * result of [onFailure] function for the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
-     *
-     * Note, that this function rethrows any [Throwable] exception thrown by [onFailure] function.
-     *
-     * This function is a shorthand for `fold(onSuccess = { it }, onFailure = onFailure)` (see [fold]).
-     */
-    fun <R, T : R> getOrElse(onFailure: (Throwable) -> R): R = fold(onSuccess = { it as T }, onFailure = onFailure)
-
-    /**
-     * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
-     * [defaultValue] if it is [failure][Result.isFailure].
-     *
-     * This function is a shorthand for `getOrElse { defaultValue }` (see [getOrElse]).
-     */
-    fun <R, T : R> getOrDefault(defaultValue: R): R = fold(onSuccess = { it as T }, onFailure = { defaultValue })
 }
 
 /**
+ * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
+ * result of [onFailure] function for the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
+ *
+ * Note, that this function rethrows any [Throwable] exception thrown by [onFailure] function.
+ *
+ * This function is a shorthand for `fold(onSuccess = { it }, onFailure = onFailure)` (see [fold]).
+ */
+inline fun <R, T : R> Result<T>.getOrElse(onFailure: (Throwable) -> R): R =
+    fold(onSuccess = { it }, onFailure = onFailure)
+
+/**
+ * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or the
+ * [defaultValue] if it is [failure][Result.isFailure].
+ *
+ * This function is a shorthand for `getOrElse { defaultValue }` (see [getOrElse]).
+ */
+inline fun <R, T : R> Result<T>.getOrDefault(defaultValue: R): R =
+    fold(onSuccess = { it }, onFailure = { defaultValue })
+
+/**
  * Calls the specified function [block] and returns its encapsulated result if invocation was successful,
- * catching any [Throwable] exception that was thrown from the [block] function execution and encapsulating it as a failure.
+ * catching any [Throwable] exception that was thrown from the [block] function execution and
+ * encapsulating it as a failure.
  */
 inline fun <R> runCatching(block: () -> R): Result<R> {
     return try {
         success(block())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
         failure(e)
     }
 }
 
 /**
- * Returns the result of [onSuccess] for the encapsulated value if this instance represents [success][Result.isSuccess]
- * or the result of [onFailure] function for the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
+ * Returns the result of [onSuccess] for the encapsulated value if this instance represents
+ * [success][Result.isSuccess] or the result of [onFailure] function for the encapsulated
+ * [Throwable] exception if it is [failure][Result.isFailure].
  *
  * Note, that this function rethrows any [Throwable] exception thrown by [onSuccess] or by [onFailure] function.
  */
@@ -117,12 +124,15 @@ inline fun <R, T> Result<T>.fold(onSuccess: (value: T) -> R, onFailure: (error: 
     }
 
 /**
- * Calls the specified function [block] with `this` value as its receiver and returns its encapsulated result if invocation was successful,
- * catching any [Throwable] exception that was thrown from the [block] function execution and encapsulating it as a failure.
+ * Calls the specified function [block] with `this` value as its receiver and returns its encapsulated
+ * result if invocation was successful, catching any [Throwable] exception that was thrown from the
+ * [block] function execution and encapsulating it as a failure.
  */
 inline fun <T, R> T.runCatching(block: T.() -> R): Result<R> {
     return try {
         success(block())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
         failure(e)
     }
@@ -214,8 +224,8 @@ inline fun <R, T : R> Result<T>.recoverCatching(transform: (exception: Throwable
     }
 
 /**
- * Performs the given [action] on the encapsulated [Throwable] exception if this instance represents [failure][Result.isFailure].
- * Returns the original `Result` unchanged.
+ * Performs the given [action] on the encapsulated [Throwable] exception if this instance represents
+ * [failure][Result.isFailure]. Returns the original `Result` unchanged.
  */
 inline fun <T> Result<T>.onFailure(action: (exception: Throwable) -> Unit): Result<T> {
     exceptionOrNull()?.let { action(it) }

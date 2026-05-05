@@ -17,7 +17,7 @@ interface PostDao {
     suspend fun findByPostId(postId: String): PostData?
 
     @Query("SELECT * FROM PostData WHERE postId IN (:postIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findPosts(postIds: List<String>): List<PostData>
 
     suspend fun findPosts(postIds: List<String>): List<PostData> = postIds.chunkedQuery { _findPosts(it) }

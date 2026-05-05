@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:LocalSessionEventMappers.android.kt$actual fun LocalAppSessionEventData.asDomain(): SessionEvent?</ID>
+    <ID>LongParameterList:LocalSessionEventMappers.android.kt$( sessionId: String, requestedAt: Long, requestType: SignerMethodType, completedAt: Long?, method: LocalSignerMethod?, response: LocalSignerMethodResponse?, requestState: AppRequestState?, )</ID>
+    <ID>UseOrEmpty:LocalSessionEventMappers.android.kt$requestMethod .getIfTypeOrNull(LocalSignerMethod.SignEvent::unsignedEvent) ?.encodeToJsonString() ?: ""</ID>
+  </CurrentIssues>
+</SmellBaseline>

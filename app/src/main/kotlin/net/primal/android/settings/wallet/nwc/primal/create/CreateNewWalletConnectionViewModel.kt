@@ -21,6 +21,9 @@ import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConne
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository

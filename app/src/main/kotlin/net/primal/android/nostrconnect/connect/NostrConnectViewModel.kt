@@ -37,8 +37,10 @@ import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.account.model.TrustLevel

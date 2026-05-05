@@ -9,6 +9,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -196,12 +198,13 @@ internal class PrimalUploadService(
      * without consuming the source.
      */
     fun BufferedSource.mimeType(): String? {
-        val head = peek().readByteArray(512)
+        val head = peek().readByteArray(FILE_HEAD_PEEK_BYTES)
         return FileType.detect(head)?.toString()
     }
 
     private companion object {
         private const val DEFAULT_BUFFER_SIZE = 8 * 1024L
+        private const val FILE_HEAD_PEEK_BYTES = 512L
     }
 
     private fun String.trimTrailingSlashes(): String = this.trimEnd('/')
