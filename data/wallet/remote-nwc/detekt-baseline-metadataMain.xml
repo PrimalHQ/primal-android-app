@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:NwcWalletRequestParser.kt$NwcWalletRequestParser$private fun parseMethod( method: String, params: JsonElement?, event: NostrEvent, connection: NwcConnection, encryptionScheme: NwcEncryptionScheme, ): WalletNwcRequest?</ID>
+    <ID>LongMethod:NwcWalletRequestParser.kt$NwcWalletRequestParser$private fun parseMethod( method: String, params: JsonElement?, event: NostrEvent, connection: NwcConnection, encryptionScheme: NwcEncryptionScheme, ): WalletNwcRequest?</ID>
+    <ID>ReturnCount:NwcClientImpl.kt$NwcClientImpl$override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult</ID>
+    <ID>ReturnCount:NwcWalletRequestParser.kt$NwcWalletRequestParser$private fun parseMethod( method: String, params: JsonElement?, event: NostrEvent, connection: NwcConnection, encryptionScheme: NwcEncryptionScheme, ): WalletNwcRequest?</ID>
+    <ID>TooGenericExceptionCaught:NwcClientImpl.kt$NwcClientImpl$e: Exception</ID>
+    <ID>TooManyFunctions:NwcClientImpl.kt$NwcClientImpl : NostrZapperNwcApiNostrEventPublisher</ID>
+  </CurrentIssues>
+</SmellBaseline>

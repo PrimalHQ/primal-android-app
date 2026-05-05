@@ -75,6 +75,26 @@ subprojects {
                 // statically and flags an undeclared read from KSP output dirs.
                 // Establish ordering even though the file-filter above excludes them.
                 mustRunAfter(tasks.matching { it.name.startsWith("ksp") })
+                if (isKmpModule && name != "detekt") {
+                    // KMP per-source-set tasks otherwise all share the extension's
+                    // default baseline file and clobber each other. Give each its own,
+                    // but only when the file actually exists (detekt fails if a configured
+                    // baseline file is missing).
+                    val sourceSet = name.removePrefix("detekt").replaceFirstChar { it.lowercase() }
+                    val baselineFile = file("$projectDir/detekt-baseline-$sourceSet.xml")
+                    if (baselineFile.exists()) {
+                        baseline.set(baselineFile)
+                    }
+                }
+            }
+
+            tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>().configureEach {
+                exclude { it.file.invariantSeparatorsPath.contains("/build/generated/") }
+                mustRunAfter(tasks.matching { it.name.startsWith("ksp") })
+                if (isKmpModule && name != "detektBaseline") {
+                    val sourceSet = name.removePrefix("detektBaseline").replaceFirstChar { it.lowercase() }
+                    baseline.set(file("$projectDir/detekt-baseline-$sourceSet.xml"))
+                }
             }
 
             if (isKmpModule) {
@@ -87,6 +107,12 @@ subprojects {
                         dependsOn(
                             tasks.withType<io.gitlab.arturbosch.detekt.Detekt>()
                                 .matching { it.name != "detekt" },
+                        )
+                    }
+                    tasks.named("detektBaseline").configure {
+                        dependsOn(
+                            tasks.withType<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>()
+                                .matching { it.name != "detektBaseline" },
                         )
                     }
                 }

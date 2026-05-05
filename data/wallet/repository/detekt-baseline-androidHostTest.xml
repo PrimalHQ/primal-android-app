@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LargeClass:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest</ID>
+    <ID>ReturnCount:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$private suspend fun getAttemptHistory(transactionId: String): List&lt;EnrichmentAttemptEntry&gt;</ID>
+    <ID>SuspendFunWithFlowReturnType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest.FakeEventRepository$suspend</ID>
+    <ID>TooGenericExceptionThrown:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest.FakeProfileRepository$throw RuntimeException("Profile fetch failure")</ID>
+    <ID>TooManyFunctions:NwcBudgetManagerTest.kt$NwcBudgetManagerTest</ID>
+    <ID>TooManyFunctions:WalletDatabaseMigration5to6Test.kt$WalletDatabaseMigration5to6Test</ID>
+    <ID>TooManyFunctions:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest</ID>
+    <ID>TooManyFunctions:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$FakeEventRepository : EventRepository</ID>
+    <ID>TooManyFunctions:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$FakeProfileRepository : ProfileRepository</ID>
+    <ID>UnsafeCallOnNullableType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$database.walletTransactions().findTransactionById(txId)!!</ID>
+    <ID>UnsafeCallOnNullableType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$database.walletTransactions().findTransactionById(txId1)!!</ID>
+    <ID>UnsafeCallOnNullableType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$database.walletTransactions().findTransactionById(txId2)!!</ID>
+    <ID>UnsafeCallOnNullableType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$database.walletTransactions().findTransactionById(txIdHit)!!</ID>
+    <ID>UnsafeCallOnNullableType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$database.walletTransactions().findTransactionById(txIdMiss)!!</ID>
+    <ID>UnsafeCallOnNullableType:ZapEnrichmentProcessorTest.kt$ZapEnrichmentProcessorTest$database.zapEnrichmentTracker().findByTransactionId(txId)!!</ID>
+  </CurrentIssues>
+</SmellBaseline>
