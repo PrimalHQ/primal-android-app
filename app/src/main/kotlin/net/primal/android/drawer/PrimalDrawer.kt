@@ -282,12 +282,8 @@ private fun DrawerGridTile(
     showBadge: Boolean,
     onClick: () -> Unit,
 ) {
-    val isSignOut = item is DrawerScreenDestination.SignOut
-    val contentColor = if (isSignOut) {
-        AppTheme.colorScheme.error
-    } else {
-        AppTheme.extraColorScheme.onSurfaceVariantAlt2
-    }
+    val contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
