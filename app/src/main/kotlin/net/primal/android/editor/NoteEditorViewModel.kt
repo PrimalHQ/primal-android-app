@@ -72,7 +72,6 @@ import net.primal.domain.nostr.buildNeventFromReplyOrRootNoteTag
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.nostr.utils.takeAsNaddrOrNull
 import net.primal.domain.nostr.utils.takeAsNeventOrNull
 import net.primal.domain.nostr.utils.withNostrPrefix
@@ -457,17 +456,35 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun handlePasteContent(content: TextFieldValue) =
         viewModelScope.launch {
-            val uris = content.text.parseNostrUris() + content.text.split(" ").filter { it.isLnInvoice() }
+            val tokens = content.text.extractEmbeddableNostrTokens(
+                isEmbeddable = { mapUriToReferencedUri(it) != null },
+            )
+            val lnInvoices = content.text.split(" ").filter { it.isLnInvoice() }
+
             var contentText = content.text
-
-            uris.mapNotNull(::mapUriToReferencedUri)
-                .onEach { contentText = contentText.replace(it.uri, "") }
-                .also {
-                    fetchNostrUris(it)
-                    setState { copy(referencedNostrUris = it + referencedNostrUris) }
+            val referencedUris = buildList {
+                tokens.forEach { token ->
+                    val ref = mapUriToReferencedUri(token.canonicalUri) ?: return@forEach
+                    add(ref)
+                    contentText = contentText.replaceFirst(token.sourceMatch, "")
                 }
+                lnInvoices.forEach { invoice ->
+                    mapUriToReferencedUri(invoice)?.let {
+                        add(it)
+                        contentText = contentText.replace(invoice, "")
+                    }
+                }
+            }
 
-            setState { copy(content = content.copy(text = contentText)) }
+            if (referencedUris.isNotEmpty()) {
+                fetchNostrUris(referencedUris)
+            }
+            setState {
+                copy(
+                    referencedNostrUris = referencedUris + referencedNostrUris,
+                    content = content.copy(text = contentText),
+                )
+            }
         }
 
     private fun fetchNostrUris(uris: List<ReferencedUri<*>>) =
@@ -1028,32 +1045,7 @@ class NoteEditorViewModel @AssistedInject constructor(
 
                     else -> null
                 }
-            } ?: uri.takeAsNeventOrNull()
-            .takeIf {
-                it?.kind == NostrEventKind.ShortTextNote.value ||
-                    it?.kind == NostrEventKind.Highlight.value
-            }
-            ?.let { nevent ->
-                when (nevent.kind) {
-                    NostrEventKind.ShortTextNote.value ->
-                        ReferencedUri.Note(
-                            data = null,
-                            loading = true,
-                            uri = uri,
-                            nevent = nevent,
-                        )
-
-                    NostrEventKind.Highlight.value ->
-                        ReferencedUri.Highlight(
-                            data = null,
-                            loading = true,
-                            uri = uri,
-                            nevent = nevent,
-                        )
-
-                    else -> null
-                }
-            }
+            } ?: uri.takeAsNeventOrNull()?.toEmbeddableReferencedUriOrNull(uri)
     }
 
     private suspend fun FeedPostUi.asNevent(): Nevent {
