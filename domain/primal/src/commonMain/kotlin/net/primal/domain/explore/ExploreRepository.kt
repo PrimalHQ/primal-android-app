@@ -16,11 +16,6 @@ interface ExploreRepository {
 
     fun getFollowLists(): Flow<PagingData<FollowPack>>
 
-    fun observeExploreFollowPacks(): Flow<List<FollowPack>>
-
-    @Throws(NetworkException::class, CancellationException::class)
-    suspend fun fetchExploreFollowPacks(): List<FollowPack>
-
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchFollowLists(
         since: Long?,

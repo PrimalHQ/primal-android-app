@@ -18,8 +18,6 @@ import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventUserStatsDao
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.events.EventZapDao
-import net.primal.data.local.dao.explore.ExploreFollowPackCrossRef
-import net.primal.data.local.dao.explore.ExploreFollowPackDao
 import net.primal.data.local.dao.explore.ExplorePopularUserCrossRef
 import net.primal.data.local.dao.explore.ExplorePopularUserDao
 import net.primal.data.local.dao.explore.FollowPackDao
@@ -134,13 +132,12 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         PollVoterRemoteKey::class,
         Nip05VerificationData::class,
         ExplorePopularUserCrossRef::class,
-        ExploreFollowPackCrossRef::class,
         DvmFeedData::class,
         RecommendedDvmFeedCrossRef::class,
         DvmFeedFeaturedUserCrossRef::class,
         RecentSearch::class,
     ],
-    version = 33,
+    version = 34,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -226,8 +223,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun nip05Verifications(): Nip05VerificationDataDao
 
     abstract fun explorePopularUsers(): ExplorePopularUserDao
-
-    abstract fun exploreFollowPacks(): ExploreFollowPackDao
 
     abstract fun dvmFeeds(): DvmFeedDao
 

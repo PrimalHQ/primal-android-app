@@ -18,7 +18,6 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.data.local.dao.explore.ExploreFollowPackCrossRef
 import net.primal.data.local.dao.explore.ExplorePopularUserCrossRef
 import net.primal.data.local.dao.explore.FollowPack
 import net.primal.data.local.dao.explore.RecentSearch
@@ -57,7 +56,6 @@ import net.primal.domain.explore.ExplorePeopleData
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreZapNoteData
 import net.primal.domain.explore.FollowPack as FollowPackDO
-import net.primal.domain.nostr.NostrEventKind
 import net.primal.shared.data.local.db.withTransaction
 
 class ExploreRepositoryImpl(
@@ -187,29 +185,6 @@ class ExploreRepositoryImpl(
         createFollowPacksPager {
             database.followPacks().getFollowPacks()
         }.flow.map { it.map { it.asFollowPackDO() } }
-
-    override fun observeExploreFollowPacks(): Flow<List<FollowPackDO>> =
-        database.followPacks().observeExploreFollowPacks()
-            .map { packs -> packs.map { it.asFollowPackDO() } }
-
-    override suspend fun fetchExploreFollowPacks(): List<FollowPackDO> =
-        withContext(dispatcherProvider.io()) {
-            val persisted = fetchFollowLists(since = null, until = null, limit = EXPLORE_FOLLOW_PACKS_LIMIT)
-            if (persisted.isNotEmpty()) {
-                database.withTransaction {
-                    database.exploreFollowPacks().deleteAll()
-                    database.exploreFollowPacks().upsertAll(
-                        data = persisted.mapIndexed { index, pack ->
-                            ExploreFollowPackCrossRef(
-                                aTag = "${NostrEventKind.StarterPack.value}:${pack.authorId}:${pack.identifier}",
-                                position = index,
-                            )
-                        },
-                    )
-                }
-            }
-            persisted
-        }
 
     override suspend fun fetchFollowLists(
         since: Long?,
@@ -385,6 +360,5 @@ class ExploreRepositoryImpl(
 
     companion object {
         private const val PAGE_SIZE = 25
-        private const val EXPLORE_FOLLOW_PACKS_LIMIT = 50
     }
 }

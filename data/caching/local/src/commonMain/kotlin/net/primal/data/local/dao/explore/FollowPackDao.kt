@@ -39,15 +39,4 @@ interface FollowPackDao {
     @Transaction
     @Query("SELECT * FROM FollowPackData WHERE identifier = :identifier AND authorId = :authorId")
     fun observeFollowPack(authorId: String, identifier: String): Flow<FollowPack?>
-
-    @Transaction
-    @Query(
-        """
-        SELECT fp.* FROM FollowPackData fp
-        INNER JOIN ExploreFollowPackCrossRef e
-            ON e.aTag = fp.aTag
-        ORDER BY e.position ASC
-        """,
-    )
-    fun observeExploreFollowPacks(): Flow<List<FollowPack>>
 }
