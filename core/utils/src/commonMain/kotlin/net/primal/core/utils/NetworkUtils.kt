@@ -14,7 +14,8 @@ import io.github.aakira.napier.Napier
  * @param onFinally A callback that runs after the operation completes, regardless of success or failure.
  * @param onSuccess A callback that is invoked with the result if it is successfully obtained (non-null).
  *
- * @return The retrieved value of type [T], or `null` if an exception of type [E] occurred or the value is still `null` after fetch.
+ * @return The retrieved value of type [T], or `null` if an exception of type [E] occurred or the value
+ * is still `null` after fetch.
  *
  * @throws Exception If an exception occurs during the operation that is not of type [E], it is rethrown.
  */

@@ -63,7 +63,6 @@ internal class SparkWalletServiceImpl(
 ) : WalletService<Wallet.Spark> {
 
     private companion object Companion {
-        private const val DEFAULT_OFFSET = 0u
         private const val DEFAULT_LIMIT = 100u
         private const val DEFAULT_INVOICE_EXPIRY_SECS = 3600u
         private const val DEFAULT_COMPLETION_TIMEOUT_SECS = 30u

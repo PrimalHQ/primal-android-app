@@ -63,8 +63,8 @@ sealed class Result<T> {
     }
 
     /**
-     * Returns the encapsulated value if this instance represents [success][Result.isSuccess] or throws the encapsulated [Throwable] exception
-     * if it is [failure][Result.isFailure].
+     * Returns the encapsulated value if this instance represents [success][Result.isSuccess]
+     * or throws the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
      *
      * This function is a shorthand for `getOrElse { throw it }` (see [getOrElse]).
      */
@@ -97,7 +97,8 @@ inline fun <R, T : R> Result<T>.getOrDefault(defaultValue: R): R =
 
 /**
  * Calls the specified function [block] and returns its encapsulated result if invocation was successful,
- * catching any [Throwable] exception that was thrown from the [block] function execution and encapsulating it as a failure.
+ * catching any [Throwable] exception that was thrown from the [block] function execution and
+ * encapsulating it as a failure.
  */
 inline fun <R> runCatching(block: () -> R): Result<R> {
     return try {
@@ -110,8 +111,9 @@ inline fun <R> runCatching(block: () -> R): Result<R> {
 }
 
 /**
- * Returns the result of [onSuccess] for the encapsulated value if this instance represents [success][Result.isSuccess]
- * or the result of [onFailure] function for the encapsulated [Throwable] exception if it is [failure][Result.isFailure].
+ * Returns the result of [onSuccess] for the encapsulated value if this instance represents
+ * [success][Result.isSuccess] or the result of [onFailure] function for the encapsulated
+ * [Throwable] exception if it is [failure][Result.isFailure].
  *
  * Note, that this function rethrows any [Throwable] exception thrown by [onSuccess] or by [onFailure] function.
  */
@@ -122,8 +124,9 @@ inline fun <R, T> Result<T>.fold(onSuccess: (value: T) -> R, onFailure: (error: 
     }
 
 /**
- * Calls the specified function [block] with `this` value as its receiver and returns its encapsulated result if invocation was successful,
- * catching any [Throwable] exception that was thrown from the [block] function execution and encapsulating it as a failure.
+ * Calls the specified function [block] with `this` value as its receiver and returns its encapsulated
+ * result if invocation was successful, catching any [Throwable] exception that was thrown from the
+ * [block] function execution and encapsulating it as a failure.
  */
 inline fun <T, R> T.runCatching(block: T.() -> R): Result<R> {
     return try {
@@ -221,8 +224,8 @@ inline fun <R, T : R> Result<T>.recoverCatching(transform: (exception: Throwable
     }
 
 /**
- * Performs the given [action] on the encapsulated [Throwable] exception if this instance represents [failure][Result.isFailure].
- * Returns the original `Result` unchanged.
+ * Performs the given [action] on the encapsulated [Throwable] exception if this instance represents
+ * [failure][Result.isFailure]. Returns the original `Result` unchanged.
  */
 inline fun <T> Result<T>.onFailure(action: (exception: Throwable) -> Unit): Result<T> {
     exceptionOrNull()?.let { action(it) }

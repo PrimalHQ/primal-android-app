@@ -59,6 +59,7 @@ subprojects {
     if (name != "detekt-rules") {
         apply(plugin = "io.gitlab.arturbosch.detekt")
         plugins.withId("io.gitlab.arturbosch.detekt") {
+            val isKmpModule = file("src/commonMain").exists()
             detekt {
                 buildUponDefaultConfig = true
                 allRules = false
@@ -66,6 +67,29 @@ subprojects {
             }
             dependencies {
                 "detektPlugins"(project(":detekt-rules"))
+            }
+
+            tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+                exclude { it.file.invariantSeparatorsPath.contains("/build/generated/") }
+                // Gradle's task-input validator inspects detekt's source roots
+                // statically and flags an undeclared read from KSP output dirs.
+                // Establish ordering even though the file-filter above excludes them.
+                mustRunAfter(tasks.matching { it.name.startsWith("ksp") })
+            }
+
+            if (isKmpModule) {
+                // KMP modules have per-source-set Detekt tasks (detektDesktopMain,
+                // detektAndroidMain, etc.) but the plain `detekt` task is NO-SOURCE
+                // because it expects src/main/kotlin. Aggregate so `:module:detekt`
+                // actually runs PrimalRuleSet against KMP source sets.
+                afterEvaluate {
+                    tasks.named("detekt").configure {
+                        dependsOn(
+                            tasks.withType<io.gitlab.arturbosch.detekt.Detekt>()
+                                .matching { it.name != "detekt" },
+                        )
+                    }
+                }
             }
         }
     }

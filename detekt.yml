@@ -1,6 +1,7 @@
 naming:
   FunctionNaming:
     ignoreAnnotated: ['Composable']
+    excludes: ['**/src/test/**', '**/src/*Test/**']
 
   TopLevelPropertyNaming:
     active: false
@@ -9,6 +10,7 @@ style:
   MagicNumber:
     ignorePropertyDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
+    excludes: ['**/src/test/**', '**/src/*Test/**']
 
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
