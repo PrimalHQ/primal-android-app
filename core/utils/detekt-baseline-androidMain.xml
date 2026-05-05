@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>InjectDispatcher:AndroidDispatcherProvider.kt$AndroidDispatcherProvider$IO</ID>
+    <ID>MatchingDeclarationName:AppBuildHelper.android.kt$AndroidAppBuildHelper : AppBuildHelper</ID>
+  </CurrentIssues>
+</SmellBaseline>

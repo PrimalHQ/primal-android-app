@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:PlatformKeyStore.android.kt$AndroidPlatformKeyStore$128</ID>
+    <ID>MagicNumber:PlatformKeyStore.android.kt$AndroidPlatformKeyStore$256</ID>
+    <ID>MagicNumber:PlatformKeyStore.android.kt$AndroidPlatformKeyStore$32</ID>
+    <ID>MatchingDeclarationName:PlatformKeyStore.android.kt$AndroidPlatformKeyStore : PlatformKeyStore</ID>
+  </CurrentIssues>
+</SmellBaseline>

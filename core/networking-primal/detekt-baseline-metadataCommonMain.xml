@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:NostrIncomingMessageParser.kt$3</ID>
+    <ID>SwallowedException:BasePrimalApiClient.kt$BasePrimalApiClient$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:BasePrimalApiClient.kt$BasePrimalApiClient$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:NostrIncomingMessageParser.kt$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:NostrSocketClientImpl.kt$NostrSocketClientImpl$error: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:NostrUriUtils.kt$isNote() || isNoteUri() || isNEventUri() || isNEvent()</ID>
+    <ID>LoopWithTooManyJumpStatements:LnInvoiceUtils.kt$LnInvoiceUtils$while</ID>
+    <ID>MagicNumber:Nip19TLV.kt$Nip19TLV$10</ID>
+    <ID>MagicNumber:Nip19TLV.kt$Nip19TLV.Type.KIND$3</ID>
+    <ID>MagicNumber:NostrUriUtils.kt$3</ID>
+    <ID>MagicNumber:Tags.kt$3</ID>
+    <ID>MagicNumber:Tags.kt$4</ID>
+    <ID>ReturnCount:LnInvoiceUtils.kt$LnInvoiceUtils$fun getDescription(invoice: String): String?</ID>
+    <ID>ReturnCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun convertBits( data: ByteArray, fromBits: Int, toBits: Int, pad: Boolean, ): ByteArray?</ID>
+    <ID>ReturnCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun decodeData(invoice: String): Map&lt;Int, ByteArray&gt;?</ID>
+    <ID>ReturnCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun getAmount(invoice: String): BigDecimal</ID>
+    <ID>ReturnCount:NostrUriUtils.kt$fun String.nostrUriToBytes(): ByteArray?</ID>
+    <ID>ThrowsCount:LnInvoiceUtils.kt$LnInvoiceUtils$private fun decodeUnlimitedLength(invoice: String): Boolean</ID>
+    <ID>TooGenericExceptionCaught:LnInvoiceUtils.kt$LnInvoiceUtils$e: Exception</ID>
+    <ID>TooManyFunctions:ConversionUtils.kt$net.primal.domain.nostr.cryptography.utils.ConversionUtils.kt</ID>
+    <ID>TooManyFunctions:Nip19TLV.kt$Nip19TLV</ID>
+    <ID>TooManyFunctions:NostrUriUtils.kt$net.primal.domain.nostr.utils.NostrUriUtils.kt</ID>
+    <ID>TooManyFunctions:Tags.kt$net.primal.domain.nostr.Tags.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

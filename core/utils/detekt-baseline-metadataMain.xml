@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>InstanceOfCheckForException:NetworkUtils.kt$error is E</ID>
+    <ID>ReturnCount:Result.kt$suspend inline fun &lt;T&gt; (suspend () -&gt; Result&lt;T&gt;).retryOnFailureWithAbort( times: Int = 5, initialDelaySeconds: Int = 3, noinline shouldRetry: suspend () -&gt; Boolean = { true }, crossinline onRetry: ( attempt: Int, remainingAttempts: Int, delaySeconds: Int, error: Throwable, ) -&gt; Unit = { _, _, _, _ -&gt; }, ): Result&lt;T&gt;</ID>
+    <ID>SwallowedException:UriUtils.kt$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:NetworkUtils.kt$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:Result.kt$e: Throwable</ID>
+    <ID>TooGenericExceptionCaught:UriUtils.kt$error: Exception</ID>
+    <ID>TooManyFunctions:Result.kt$net.primal.core.utils.Result.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

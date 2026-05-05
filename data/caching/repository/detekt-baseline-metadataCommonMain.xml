@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:MessagesRemoteMediator.kt$MessagesRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, DirectMessage&gt;): MediatorResult</ID>
+    <ID>CyclomaticComplexMethod:NostrResources.kt$fun List&lt;String&gt;.mapAsReferencedNostrUriDO( eventId: String, eventIdToNostrEvent: Map&lt;String, NostrEvent&gt;, streamIdToStreamData: Map&lt;String, StreamData&gt;, postIdToPostDataMap: Map&lt;String, PostData&gt;, articleIdToArticle: Map&lt;String, ArticleData&gt;, profileIdToProfileDataMap: Map&lt;String, ProfileData&gt;, cdnResources: Map&lt;String, CdnResource&gt;, linkPreviews: Map&lt;String, EventLinkPreviewData&gt;, videoThumbnails: Map&lt;String, String&gt;, postIdToPollDataMap: Map&lt;String, PollData&gt; = emptyMap(), postIdToUserVotedOption: Map&lt;String, String?&gt; = emptyMap(), )</ID>
+    <ID>CyclomaticComplexMethod:NotificationEvents.kt$private fun ContentPrimalNotification.parseActionPostId(type: NotificationType): String?</ID>
+    <ID>CyclomaticComplexMethod:NotificationEvents.kt$private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String?</ID>
+    <ID>CyclomaticComplexMethod:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
+    <ID>LongMethod:FeedResponseProcessor.kt$internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: PrimalDatabase)</ID>
+    <ID>LongMethod:FeedsRepositoryImpl.kt$FeedsRepositoryImpl$override suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind?): List&lt;DvmFeed&gt;</ID>
+    <ID>LongMethod:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
+    <ID>LongParameterList:MessagesProcessor.kt$MessagesProcessor$( userId: String, messages: List&lt;NostrEvent&gt;, profileMetadata: List&lt;NostrEvent&gt;, mediaResources: List&lt;PrimalEvent&gt;, primalUserNames: PrimalEvent?, primalPremiumInfo: PrimalEvent?, primalLegendProfiles: PrimalEvent?, blossomServerEvents: List&lt;NostrEvent&gt;?, )</ID>
+    <ID>LongParameterList:NostrResources.kt$( event: NostrEvent?, profilesMap: Map&lt;String, ProfileData&gt;, postsMap: Map&lt;String, PostData&gt;, cdnResourcesMap: Map&lt;String, CdnResource&gt;, linkPreviewsMap: Map&lt;String, EventLinkPreviewData&gt;, nostrEventsMap: Map&lt;String, NostrEvent&gt;, videoThumbnailsMap: Map&lt;String, String&gt;, articlesMap: Map&lt;String, ArticleData&gt;, streamMap: Map&lt;String, StreamData&gt;, )</ID>
+    <ID>LongParameterList:NostrResources.kt$( eventId: String, eventIdToNostrEvent: Map&lt;String, NostrEvent&gt;, streamIdToStreamData: Map&lt;String, StreamData&gt;, postIdToPostDataMap: Map&lt;String, PostData&gt;, articleIdToArticle: Map&lt;String, ArticleData&gt;, profileIdToProfileDataMap: Map&lt;String, ProfileData&gt;, cdnResources: Map&lt;String, CdnResource&gt;, linkPreviews: Map&lt;String, EventLinkPreviewData&gt;, videoThumbnails: Map&lt;String, String&gt;, postIdToPollDataMap: Map&lt;String, PollData&gt; = emptyMap(), postIdToUserVotedOption: Map&lt;String, String?&gt; = emptyMap(), )</ID>
+    <ID>LongParameterList:NostrResources.kt$( eventIdToNostrEvent: Map&lt;String, NostrEvent&gt;, postIdToPostDataMap: Map&lt;String, PostData&gt;, articleIdToArticle: Map&lt;String, ArticleData&gt;, streamIdToStreamData: Map&lt;String, StreamData&gt;, profileIdToProfileDataMap: Map&lt;String, ProfileData&gt;, cdnResources: Map&lt;String, CdnResource&gt;, linkPreviews: Map&lt;String, EventLinkPreviewData&gt;, videoThumbnails: Map&lt;String, String&gt;, postIdToPollDataMap: Map&lt;String, PollData&gt; = emptyMap(), postIdToUserVotedOption: Map&lt;String, String?&gt; = emptyMap(), )</ID>
+    <ID>LongParameterList:NostrResources.kt$( eventIdToNostrEvent: Map&lt;String, NostrEvent&gt;, postIdToPostDataMap: Map&lt;String, PostData&gt;, streamIdToStreamData: Map&lt;String, StreamData&gt;, articleIdToArticle: Map&lt;String, ArticleData&gt;, profileIdToProfileDataMap: Map&lt;String, ProfileData&gt;, cdnResources: Map&lt;String, CdnResource&gt;, linkPreviews: Map&lt;String, EventLinkPreviewData&gt;, videoThumbnails: Map&lt;String, String&gt;, postIdToPollDataMap: Map&lt;String, PollData&gt; = emptyMap(), postIdToUserVotedOption: Map&lt;String, String&gt; = emptyMap(), )</ID>
+    <ID>LongParameterList:NostrResources.kt$( refNote: PostData?, refPostAuthor: ProfileData?, cdnResources: Map&lt;String, CdnResource&gt;, linkPreviews: Map&lt;String, EventLinkPreviewData&gt;, videoThumbnails: Map&lt;String, String&gt;, eventIdToNostrEvent: Map&lt;String, NostrEvent&gt;, postIdToPostDataMap: Map&lt;String, PostData&gt;, articleIdToArticle: Map&lt;String, ArticleData&gt;, streamIdToStreamData: Map&lt;String, StreamData&gt;, profileIdToProfileDataMap: Map&lt;String, ProfileData&gt;, postIdToPollDataMap: Map&lt;String, PollData&gt; = emptyMap(), postIdToUserVotedOption: Map&lt;String, String?&gt; = emptyMap(), )</ID>
+    <ID>MagicNumber:Nip05VerificationServiceImpl.kt$Nip05VerificationServiceImpl$8</ID>
+    <ID>MagicNumber:PollDataEvents.kt$3</ID>
+    <ID>ReturnCount:FollowPackMediator.kt$FollowPackMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, FollowPackPO&gt;): MediatorResult</ID>
+    <ID>ReturnCount:MessagesRemoteMediator.kt$MessagesRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, DirectMessage&gt;): MediatorResult</ID>
+    <ID>ReturnCount:Nip05VerificationServiceImpl.kt$Nip05VerificationServiceImpl$override suspend fun getStatuses(pubkeys: List&lt;String&gt;): Map&lt;String, Nip05VerificationStatus?&gt;</ID>
+    <ID>ReturnCount:Nip05VerificationServiceImpl.kt$Nip05VerificationServiceImpl$private suspend fun performVerification(pubkey: String, internetIdentifier: String): VerificationResult</ID>
+    <ID>ReturnCount:NotificationEvents.kt$fun ContentPrimalNotification.asNotificationPOOrNull(): NotificationData?</ID>
+    <ID>ReturnCount:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
+    <ID>ReturnCount:PollVotersRemoteMediator.kt$PollVotersRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, PollVoteWithProfile&gt;): MediatorResult</ID>
+    <ID>ReturnCount:StreamEvents.kt$fun NostrEvent.asChatMessageDataDO(): StreamChatMessageData?</ID>
+    <ID>ReturnCount:StreamEvents.kt$fun NostrEvent.asStreamData(): StreamData?</ID>
+    <ID>TooGenericExceptionCaught:Nip05VerificationServiceImpl.kt$Nip05VerificationServiceImpl$e: Exception</ID>
+    <ID>TooManyFunctions:CommonRepositoryFactory.kt$CommonRepositoryFactory</ID>
+    <ID>TooManyFunctions:EventRepositoryImpl.kt$EventRepositoryImpl : EventRepository</ID>
+    <ID>TooManyFunctions:ExploreRepositoryImpl.kt$ExploreRepositoryImpl : ExploreRepository</ID>
+    <ID>TooManyFunctions:FeedRepositoryImpl.kt$FeedRepositoryImpl : FeedRepository</ID>
+    <ID>TooManyFunctions:FeedsRepositoryImpl.kt$FeedsRepositoryImpl : FeedsRepository</ID>
+    <ID>TooManyFunctions:MutedItemRepositoryImpl.kt$MutedItemRepositoryImpl : MutedItemRepository</ID>
+    <ID>TooManyFunctions:PrimalProfileStatsAndScores.kt$net.primal.data.repository.mappers.remote.PrimalProfileStatsAndScores.kt</ID>
+    <ID>TooManyFunctions:ProfileRepositoryImpl.kt$ProfileRepositoryImpl : ProfileRepository</ID>
+    <ID>UnusedParameter:CommonRepositoryFactory.kt$CommonRepositoryFactory$cachingPrimalApiClient: PrimalApiClient</ID>
+  </CurrentIssues>
+</SmellBaseline>

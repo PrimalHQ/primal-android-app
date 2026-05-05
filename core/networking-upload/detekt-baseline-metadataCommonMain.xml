@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>InstanceOfCheckForException:PrimalUploadService.kt$PrimalUploadService$error is BlossomException</ID>
+    <ID>LongParameterList:BlossomApiImpl.kt$BlossomApiImpl$( endpoint: String, authorization: String, contentType: String, fileMetadata: FileMetadata, bufferedSource: BufferedSource, errorPrefix: String, onProgress: ((Int, Int) -&gt; Unit)? = null, checkFileSize: Boolean = false, )</ID>
+    <ID>MagicNumber:Image.kt$0x2A</ID>
+    <ID>MagicNumber:Image.kt$0x49</ID>
+    <ID>MagicNumber:Image.kt$0x4D</ID>
+    <ID>MagicNumber:Image.kt$10</ID>
+    <ID>MagicNumber:Image.kt$8</ID>
+    <ID>MagicNumber:Image.kt$9</ID>
+    <ID>MagicNumber:Int.kt$16</ID>
+    <ID>MagicNumber:Int.kt$24</ID>
+    <ID>MagicNumber:Int.kt$3</ID>
+    <ID>MagicNumber:Int.kt$8</ID>
+    <ID>MagicNumber:IsoBmff.kt$IsoBmff.Companion$12</ID>
+    <ID>MagicNumber:IsoBmff.kt$IsoBmff.Companion$16</ID>
+    <ID>MagicNumber:IsoBmff.kt$IsoBmff.Companion$4</ID>
+    <ID>MagicNumber:IsoBmff.kt$IsoBmff.Companion$8</ID>
+    <ID>MagicNumber:Video.kt$4</ID>
+    <ID>ReturnCount:IsoBmff.kt$IsoBmff.Companion$fun checkFormat(buffer: ByteArray, majorBrand: String): Boolean</ID>
+    <ID>ReturnCount:IsoBmff.kt$IsoBmff.Companion$private fun detect(buffer: ByteArray): Boolean</ID>
+    <ID>TooGenericExceptionCaught:PrimalUploadService.kt$PrimalUploadService$error: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

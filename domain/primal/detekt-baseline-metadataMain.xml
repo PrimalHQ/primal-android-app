@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:EventInteractionRepository.kt$EventInteractionRepository$( userId: String, walletId: String, amountInSats: ULong, comment: String, target: ZapTarget, zapRequestEvent: NostrEvent, )</ID>
+    <ID>LongParameterList:FeedsRepository.kt$FeedsRepository$( userId: String, feedSpec: String, title: String, description: String, feedSpecKind: FeedSpecKind, feedKind: String, )</ID>
+    <ID>LongParameterList:FeedsRepository.kt$FeedsRepository$( userId: String, oldFeedSpec: String, newFeedSpec: String, title: String, description: String, feedSpecKind: FeedSpecKind, feedKind: String, )</ID>
+    <ID>TooManyFunctions:EventRepository.kt$EventRepository</ID>
+    <ID>TooManyFunctions:ExploreRepository.kt$ExploreRepository</ID>
+    <ID>TooManyFunctions:FeedExtensions.kt$net.primal.domain.feeds.FeedExtensions.kt</ID>
+    <ID>TooManyFunctions:FeedRepository.kt$FeedRepository</ID>
+    <ID>TooManyFunctions:FeedsRepository.kt$FeedsRepository</ID>
+    <ID>TooManyFunctions:MutedItemRepository.kt$MutedItemRepository</ID>
+    <ID>TooManyFunctions:ProfileRepository.kt$ProfileRepository</ID>
+  </CurrentIssues>
+</SmellBaseline>

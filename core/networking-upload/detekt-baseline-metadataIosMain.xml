@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:NostrExtensions.kt$NostrExtensions$( id: String, pubKey: String, createdAt: Long, kind: Int, tags: List&lt;List&lt;String&gt;&gt; = emptyList(), content: String, sig: String, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

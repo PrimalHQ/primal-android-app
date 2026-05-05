@@ -1,0 +1,49 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:MigratePrimalTransactionsHandler.kt$MigratePrimalTransactionsHandler$suspend fun invoke( userId: String, targetSparkWalletId: String, maxPages: Int? = null, onPageFetched: ((Int) -&gt; Unit)? = null, ): Result&lt;Unit&gt;</ID>
+    <ID>CyclomaticComplexMethod:NostrWalletServiceImpl.kt$NostrWalletServiceImpl$private fun Throwable.toWalletException(): WalletException</ID>
+    <ID>CyclomaticComplexMethod:NwcRequestMappers.kt$internal fun Throwable.resolveNwcErrorCode(): String</ID>
+    <ID>CyclomaticComplexMethod:SparkPaymentMappers.kt$internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback: NostrEvent?): Transaction?</ID>
+    <ID>CyclomaticComplexMethod:SparkWalletServiceImpl.kt$SparkWalletServiceImpl$private fun Throwable.toWalletException(): WalletException</ID>
+    <ID>CyclomaticComplexMethod:TransactionsHandler.kt$TransactionsHandler$private suspend fun resolveOtherUserIds(transactions: List&lt;Transaction&gt;): List&lt;Transaction&gt;</ID>
+    <ID>LongMethod:MigratePrimalTransactionsHandler.kt$MigratePrimalTransactionsHandler$suspend fun invoke( userId: String, targetSparkWalletId: String, maxPages: Int? = null, onPageFetched: ((Int) -&gt; Unit)? = null, ): Result&lt;Unit&gt;</ID>
+    <ID>LongMethod:NostrWalletServiceImpl.kt$NostrWalletServiceImpl$private suspend fun fetchNwcTransactions( wallet: Wallet.NWC, until: Long?, from: Long?, offset: Int?, limit: Int, unpaid: Boolean?, type: InvoiceType?, ): List&lt;Transaction&gt;</ID>
+    <ID>LongMethod:NwcRequestProcessor.kt$NwcRequestProcessor$private suspend fun processMakeInvoice(request: WalletNwcRequest.MakeInvoice): String</ID>
+    <ID>LongMethod:PrimalWalletEvents.kt$private fun ContentWalletTransaction.asPrimalTransaction( walletId: String, walletType: WalletType = WalletType.PRIMAL, ): Transaction</ID>
+    <ID>LongMethod:SparkPaymentMappers.kt$internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback: NostrEvent?): Transaction?</ID>
+    <ID>LongMethod:SparkWalletServiceImpl.kt$SparkWalletServiceImpl$override suspend fun pay(wallet: Wallet.Spark, request: TxRequest): Result&lt;PayResult&gt;</ID>
+    <ID>LongParameterList:MigratePrimalToSparkWalletHandler.kt$MigratePrimalToSparkWalletHandler$( private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase, private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler, private val sparkWalletAccountRepository: SparkWalletAccountRepository, private val walletAccountRepository: WalletAccountRepository, private val walletRepository: WalletRepository, private val walletDatabase: WalletDatabase, private val primalWalletApi: PrimalWalletApi, private val dispatcherProvider: DispatcherProvider, )</ID>
+    <ID>LongParameterList:NostrWalletServiceImpl.kt$NostrWalletServiceImpl$( wallet: Wallet.NWC, until: Long?, from: Long?, offset: Int?, limit: Int, unpaid: Boolean?, type: InvoiceType?, )</ID>
+    <ID>LongParameterList:NwcServiceImpl.kt$NwcServiceImpl$( private val dispatchers: DispatcherProvider, private val nwcRepository: NwcRepository, private val internalNwcRepository: InternalNwcRepository, private val encryptionService: NostrEncryptionService, private val requestParser: NwcWalletRequestParser, private val requestProcessor: NwcRequestProcessor, private val responseBuilder: NwcWalletResponseBuilder, private val budgetManager: NwcBudgetManager, )</ID>
+    <ID>LongParameterList:WalletRepositoryImpl.kt$WalletRepositoryImpl$( private val dispatcherProvider: DispatcherProvider, private val walletServiceFactory: WalletServiceFactory, private val primalWalletApi: PrimalWalletApi, private val walletDatabase: WalletDatabase, private val profileRepository: ProfileRepository, private val lightningPayHelper: LightningPayHelper, private val eventRepository: EventRepository, )</ID>
+    <ID>LoopWithTooManyJumpStatements:MigratePrimalTransactionsHandler.kt$MigratePrimalTransactionsHandler$do</ID>
+    <ID>LoopWithTooManyJumpStatements:NwcServiceImpl.kt$NwcServiceImpl$while</ID>
+    <ID>LoopWithTooManyJumpStatements:WalletRepositoryImpl.kt$WalletRepositoryImpl$do</ID>
+    <ID>MagicNumber:NwcRequestProcessor.kt$NwcRequestProcessor$16</ID>
+    <ID>MagicNumber:NwcRequestProcessor.kt$NwcRequestProcessor$20</ID>
+    <ID>MagicNumber:NwcRequestProcessor.kt$NwcRequestProcessor$30</ID>
+    <ID>MagicNumber:NwcRequestProcessor.kt$NwcRequestProcessor$50</ID>
+    <ID>MagicNumber:NwcRequestProcessor.kt$NwcRequestProcessor$8</ID>
+    <ID>MagicNumber:NwcServiceImpl.kt$NwcServiceImpl$8</ID>
+    <ID>MagicNumber:PendingDepositsSyncerImpl.kt$PendingDepositsSyncerImpl$10</ID>
+    <ID>MagicNumber:SparkWalletServiceImpl.kt$SparkWalletServiceImpl$30</ID>
+    <ID>NestedBlockDepth:PendingDepositsSyncerImpl.kt$PendingDepositsSyncerImpl$private suspend fun initialFetch(walletId: String)</ID>
+    <ID>ReturnCount:DefaultWalletNostrZapper.kt$DefaultWalletNostrZapper$override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult</ID>
+    <ID>ReturnCount:MempoolApiService.kt$MempoolApiService$suspend fun lookupTransaction(txid: String): TransactionLookupResult</ID>
+    <ID>ReturnCount:MempoolWebSocketClient.kt$MempoolWebSocketClient$private fun parseMempoolEvent(text: String): MempoolAddressEvent?</ID>
+    <ID>ReturnCount:NwcRequestProcessor.kt$NwcRequestProcessor$private suspend fun processLookupInvoice(request: WalletNwcRequest.LookupInvoice): String</ID>
+    <ID>ReturnCount:SparkPaymentMappers.kt$internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback: NostrEvent?): Transaction?</ID>
+    <ID>ReturnCount:TimestampBasedWalletTransactionsMediator.kt$TimestampBasedWalletTransactionsMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, WalletTransactionData&gt;): MediatorResult</ID>
+    <ID>ReturnCount:TransactionsHandler.kt$TransactionsHandler$private suspend fun resolveOtherUserIds(transactions: List&lt;Transaction&gt;): List&lt;Transaction&gt;</ID>
+    <ID>ReturnCount:WalletSessionProvider.kt$WalletSessionProvider$private suspend fun connectSparkWallet(walletId: String): Boolean</ID>
+    <ID>ReturnCount:ZapEnrichmentProcessor.kt$ZapEnrichmentProcessor$private suspend fun processTracker(tracker: ZapEnrichmentTracker): Boolean</ID>
+    <ID>TooGenericExceptionCaught:PendingDepositsSyncerImpl.kt$PendingDepositsSyncerImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SparkWalletServiceImpl.kt$SparkWalletServiceImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TransactionsHandler.kt$TransactionsHandler$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ZapEnrichmentProcessor.kt$ZapEnrichmentProcessor$e: Exception</ID>
+    <ID>TooManyFunctions:SparkWalletAccountRepositoryImpl.kt$SparkWalletAccountRepositoryImpl : SparkWalletAccountRepository</ID>
+    <ID>TooManyFunctions:WalletRepositoryImpl.kt$WalletRepositoryImpl : WalletRepository</ID>
+  </CurrentIssues>
+</SmellBaseline>
