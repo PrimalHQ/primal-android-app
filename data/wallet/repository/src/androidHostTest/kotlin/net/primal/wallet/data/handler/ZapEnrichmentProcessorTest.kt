@@ -874,7 +874,7 @@ class ZapEnrichmentProcessorTest {
             ?: return emptyList()
         val raw = tracker.attemptHistory
         if (raw.isBlank()) return emptyList()
-        return "[$raw]".decodeFromJsonStringOrNull<List<EnrichmentAttemptEntry>>() ?: emptyList()
+        return "[$raw]".decodeFromJsonStringOrNull<List<EnrichmentAttemptEntry>>().orEmpty()
     }
 
     private suspend fun allPendingTrackers(): List<ZapEnrichmentTracker> {

@@ -17,7 +17,7 @@ interface EventRelayHintsDao {
     suspend fun update(data: List<EventRelayHints>)
 
     @Query("SELECT * FROM EventRelayHints WHERE eventId IN (:eventIds)")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     suspend fun _findById(eventIds: List<String>): List<EventRelayHints>
 
     suspend fun findById(eventIds: List<String>): List<EventRelayHints> = eventIds.chunkedQuery { _findById(it) }

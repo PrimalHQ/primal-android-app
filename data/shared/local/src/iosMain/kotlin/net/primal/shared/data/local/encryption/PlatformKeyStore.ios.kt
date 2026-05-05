@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package net.primal.shared.data.local.encryption
 
 import dev.whyoleg.cryptography.CryptographyProviderApi
@@ -37,6 +39,9 @@ object IosPlatformKeyStore : PlatformKeyStore {
     private const val SERVICE_NAME = "primal.keystore"
     private const val ACCOUNT_NAME = "encryption_key_v1"
     private const val KEY_SIZE_BYTES = 32
+    private const val READ_QUERY_CAPACITY: Long = 4
+    private const val WRITE_QUERY_CAPACITY: Long = 5
+    private const val DELETE_QUERY_CAPACITY: Long = 3
 
     override fun getOrCreateKey(): ByteArray {
         getKeyFromKeychain()?.let { return it }
@@ -77,14 +82,14 @@ object IosPlatformKeyStore : PlatformKeyStore {
         }
 
     private fun buildReadQuery() =
-        CFDictionaryCreateMutable(null, 4, null, null)?.apply {
+        CFDictionaryCreateMutable(null, READ_QUERY_CAPACITY, null, null)?.apply {
             setBaseAttributes()
             CFDictionarySetValue(this, kSecReturnData, kCFBooleanTrue)
             CFAutorelease(this)
         }
 
     private fun buildWriteQuery(keyData: NSData) =
-        CFDictionaryCreateMutable(null, 5, null, null)?.apply {
+        CFDictionaryCreateMutable(null, WRITE_QUERY_CAPACITY, null, null)?.apply {
             setBaseAttributes()
             CFDictionarySetValue(this, kSecValueData, CFBridgingRetain(keyData))
             CFDictionarySetValue(
@@ -96,7 +101,7 @@ object IosPlatformKeyStore : PlatformKeyStore {
         }
 
     private fun buildDeleteQuery() =
-        CFDictionaryCreateMutable(null, 3, null, null)?.apply {
+        CFDictionaryCreateMutable(null, DELETE_QUERY_CAPACITY, null, null)?.apply {
             setBaseAttributes()
             CFAutorelease(this)
         }

@@ -15,6 +15,8 @@ import net.primal.core.networking.factory.HttpClientFactory
 
 private const val TAG = "Nip05HttpClient"
 private const val MAX_RESPONSE_SIZE_BYTES = 2 * 1024 * 1024L // 2 MB
+private const val REQUEST_TIMEOUT_MILLIS = 10_000L
+private const val CONNECT_TIMEOUT_MILLIS = 10_000L
 
 class Nip05HttpClient(private val httpClient: HttpClient) {
 
@@ -61,8 +63,8 @@ class Nip05HttpClient(private val httpClient: HttpClient) {
             val httpClient = HttpClientFactory.createHttpClient {
                 followRedirects = false
                 install(HttpTimeout) {
-                    requestTimeoutMillis = 10_000
-                    connectTimeoutMillis = 10_000
+                    requestTimeoutMillis = REQUEST_TIMEOUT_MILLIS
+                    connectTimeoutMillis = CONNECT_TIMEOUT_MILLIS
                 }
             }
             return Nip05HttpClient(httpClient)

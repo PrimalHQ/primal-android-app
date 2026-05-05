@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package net.primal.core.utils
 
 import platform.Foundation.NSBundle

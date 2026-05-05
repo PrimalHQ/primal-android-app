@@ -7,6 +7,8 @@ import kotlinx.io.IOException
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 
+private const val HTTP_OK = 200
+
 class LightningAddressChecker(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient = LightningHttpClient.defaultHttpClient,
@@ -25,7 +27,7 @@ class LightningAddressChecker(
                 httpClient.get(lnUrl)
             }
 
-            if (response.status.value != 200) {
+            if (response.status.value != HTTP_OK) {
                 throw InvalidLud16Exception(lud16 = lud16)
             }
         } catch (error: IOException) {

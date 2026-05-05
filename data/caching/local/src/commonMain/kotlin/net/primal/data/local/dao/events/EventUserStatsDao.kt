@@ -35,7 +35,7 @@ interface EventUserStatsDao {
     }
 
     @Query("SELECT * FROM EventUserStats WHERE eventId IN (:eventIds) AND userId = :userId")
-    @Suppress("ktlint:standard:function-naming")
+    @Suppress("ktlint:standard:function-naming", "FunctionNaming")
     fun _observeStats(eventIds: List<String>, userId: String): Flow<List<EventUserStats>>
 
     fun observeStats(eventIds: List<String>, userId: String): Flow<List<EventUserStats>> =

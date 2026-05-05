@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package net.primal.wallet.data.spark
 
 import kotlinx.cinterop.ExperimentalForeignApi
