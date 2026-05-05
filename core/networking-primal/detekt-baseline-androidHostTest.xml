@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>NoNameShadowing:PrimalQueryResultTest.kt$PrimalQueryResultTest${ buildNostrEvent(kind = it ?: NostrEventKind.Unknown) }</ID>
+    <ID>NoNameShadowing:PrimalQueryResultTest.kt$PrimalQueryResultTest${ buildPrimalEvent(kind = it ?: NostrEventKind.Unknown) }</ID>
+    <ID>NoNameShadowing:PrimalQueryResultTest.kt$PrimalQueryResultTest${ it.isNotPrimalEventKind() &amp;&amp; !it.isNotUnknown() }</ID>
+    <ID>NoNameShadowing:PrimalQueryResultTest.kt$PrimalQueryResultTest${ it.isPrimalEventKind() }</ID>
+    <ID>TooManyFunctions:NostrSocketClientImplTest.kt$NostrSocketClientImplTest</ID>
+  </CurrentIssues>
+</SmellBaseline>

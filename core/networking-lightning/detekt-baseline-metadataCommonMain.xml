@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ThrowsCount:LightningAddressChecker.kt$LightningAddressChecker$suspend fun validateLightningAddress(lud16: String)</ID>
+    <ID>ThrowsCount:LightningPayHelper.kt$LightningPayHelper$suspend fun fetchPayRequest(lnUrl: String): LightningPayRequest</ID>
+    <ID>TooGenericExceptionCaught:LightningAddressChecker.kt$LightningAddressChecker$error: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

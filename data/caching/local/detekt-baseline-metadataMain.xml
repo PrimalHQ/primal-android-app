@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooManyFunctions:NostrReferenceTypeConverters.kt$NostrReferenceTypeConverters</ID>
+    <ID>TooManyFunctions:PrimalDatabase.kt$PrimalDatabase : RoomDatabase</ID>
+    <ID>TooManyFunctions:ProfileDataDao.kt$ProfileDataDao</ID>
+  </CurrentIssues>
+</SmellBaseline>

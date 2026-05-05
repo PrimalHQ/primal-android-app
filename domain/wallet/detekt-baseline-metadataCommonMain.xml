@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>InvalidPackageDeclaration:SubWalletSerializer.kt$package net.primal.wallet.domain.serializer</ID>
+    <ID>LongParameterList:Transaction.kt$Transaction$( open val transactionId: String, open val walletId: String, open val walletType: WalletType, open val type: TxType, open val state: TxState, open val createdAt: Long, open val updatedAt: Long, open val completedAt: Long?, open val note: String?, open val invoice: String?, open val amountInBtc: Double, open val amountInUsd: Double?, open val exchangeRate: String?, open val totalFeeInBtc: String?, )</ID>
+    <ID>TooManyFunctions:SparkWalletAccountRepository.kt$SparkWalletAccountRepository</ID>
+    <ID>TooManyFunctions:WalletRepository.kt$WalletRepository</ID>
+  </CurrentIssues>
+</SmellBaseline>

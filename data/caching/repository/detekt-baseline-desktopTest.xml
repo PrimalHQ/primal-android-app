@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooManyFunctions:EventInteractionRepositoryImplTest.kt$EventInteractionRepositoryImplTest</ID>
+    <ID>TooManyFunctions:Nip05VerificationServiceTest.kt$Nip05VerificationServiceTest</ID>
+  </CurrentIssues>
+</SmellBaseline>

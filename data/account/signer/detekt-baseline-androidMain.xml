@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:LocalSignerMethodResponseSerializer.kt$LocalSignerMethodResponseSerializer$override fun deserialize(decoder: Decoder): LocalSignerMethodResponse</ID>
+    <ID>CyclomaticComplexMethod:LocalSignerMethodSerializer.kt$LocalSignerMethodSerializer$override fun deserialize(decoder: Decoder): LocalSignerMethod</ID>
+    <ID>EmptyDefaultConstructor:ProviderSignerUtils.kt$SignerResult$()</ID>
+    <ID>LongMethod:LocalSignerMethodSerializer.kt$LocalSignerMethodSerializer$override fun deserialize(decoder: Decoder): LocalSignerMethod</ID>
+    <ID>UseOrEmpty:SignerIntentParser.kt$SignerIntentParser$intent.getStringExtra(PERMISSIONS_COLUMN) .decodeFromJsonStringOrNull&lt;List&lt;Permission&gt;&gt;() ?: emptyList()</ID>
+  </CurrentIssues>
+</SmellBaseline>

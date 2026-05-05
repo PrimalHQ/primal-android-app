@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:WalletDatabase.kt$WalletDatabase.Companion.&lt;no name provided&gt;$override fun migrate(connection: SQLiteConnection)</ID>
+    <ID>LongParameterList:NwcWalletRequestLogDao.kt$NwcWalletRequestLogDao$( eventId: String, responsePayload: Encryptable&lt;String&gt;?, requestState: Encryptable&lt;String&gt;, completedAt: Long, errorCode: Encryptable&lt;String&gt;?, errorMessage: Encryptable&lt;String&gt;?, )</ID>
+    <ID>LongParameterList:WalletTransactionDao.kt$WalletTransactionDao$( walletId: String, type: TxType?, limit: Int, offset: Int, from: Long?, until: Long?, )</ID>
+    <ID>NestedBlockDepth:WalletDatabase.kt$WalletDatabase.Companion.&lt;no name provided&gt;$override fun migrate(connection: SQLiteConnection)</ID>
+    <ID>TooManyFunctions:NwcPaymentHoldDao.kt$NwcPaymentHoldDao</ID>
+    <ID>TooManyFunctions:WalletDao.kt$WalletDao</ID>
+    <ID>TooManyFunctions:WalletDatabase.kt$WalletDatabase : RoomDatabase</ID>
+    <ID>TooManyFunctions:WalletTransactionDao.kt$WalletTransactionDao</ID>
+  </CurrentIssues>
+</SmellBaseline>

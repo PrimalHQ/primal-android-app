@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:RemoteSessionEventMappers.kt$fun RemoteAppSessionEventData.asDomain(): SessionEvent?</ID>
+    <ID>LongParameterList:AccountServiceFactory.kt$AccountServiceFactory$( signerKeyPair: NostrKeyPair, eventSignatureHandler: NostrEventSignatureHandler, nostrEncryptionService: NostrEncryptionService, nostrEncryptionHandler: NostrEncryptionHandler, connectionRepository: ConnectionRepository, sessionRepository: SessionRepository, sessionInactivityTimeoutInMinutes: Long = 0, )</ID>
+    <ID>LongParameterList:RemoteSessionEventMappers.kt$( sessionId: String, signerPubKey: String, requestedAt: Long, requestType: SignerMethodType, completedAt: Long?, method: RemoteSignerMethod?, response: RemoteSignerMethodResponse?, requestState: RemoteAppRequestStatePO?, )</ID>
+    <ID>LongParameterList:RemoteSignerServiceImpl.kt$RemoteSignerServiceImpl$( private val signerKeyPair: NostrKeyPair, private val sessionInactivityTimeoutInMinutes: Long, private val connectionRepository: ConnectionRepository, private val sessionRepository: SessionRepository, private val nostrRelayManager: NostrRelayManager, private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder, private val internalSessionEventRepository: InternalRemoteSessionEventRepository, private val remoteSignerMethodParser: RemoteSignerMethodParser, private val remoteAppConnectionManager: RemoteAppConnectionManager, )</ID>
+    <ID>LoopWithTooManyJumpStatements:NostrRelayManager.kt$NostrRelayManager$while</ID>
+    <ID>TooManyFunctions:ConnectionRepositoryImpl.kt$ConnectionRepositoryImpl : ConnectionRepository</ID>
+    <ID>TooManyFunctions:SessionRepositoryImpl.kt$SessionRepositoryImpl : SessionRepository</ID>
+  </CurrentIssues>
+</SmellBaseline>
