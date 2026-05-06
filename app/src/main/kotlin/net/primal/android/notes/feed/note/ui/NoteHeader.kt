@@ -55,6 +55,7 @@ fun FeedNoteHeader(
     label: String? = authorInternetIdentifier?.formatNip05Identifier(),
     labelStyle: TextStyle? = null,
     isLive: Boolean = false,
+    verticalAlignment: Alignment.Vertical = Alignment.Top,
     onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
     val displaySettings = LocalContentDisplaySettings.current
@@ -69,7 +70,7 @@ fun FeedNoteHeader(
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = verticalAlignment,
     ) {
         if (authorAvatarVisible) {
             UniversalAvatarThumbnail(
