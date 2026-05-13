@@ -217,14 +217,20 @@ class Nip05VerificationServiceImpl(
     )
 
     private suspend fun performVerification(pubkey: String, internetIdentifier: String): VerificationResult {
-        val parts = internetIdentifier.split("@")
-        if (parts.size != 2) {
-            Napier.d(tag = TAG) { "Invalid identifier format: $internetIdentifier" }
-            return VerificationResult(status = Nip05VerificationStatus.FAILED)
+        // Per NIP-05, when the local-part is omitted the client uses "_" as the local-part.
+        // Accept both "domain" and "@domain" as shorthand for "_@domain".
+        val (localPart, domain) = when {
+            !internetIdentifier.contains('@') -> "_" to internetIdentifier
+            else -> {
+                val parts = internetIdentifier.split("@")
+                if (parts.size != 2) {
+                    Napier.d(tag = TAG) { "Invalid identifier format: $internetIdentifier" }
+                    return VerificationResult(status = Nip05VerificationStatus.FAILED)
+                }
+                val rawLocal = parts[0]
+                (if (rawLocal.isEmpty()) "_" else rawLocal) to parts[1]
+            }
         }
-
-        val localPart = parts[0]
-        val domain = parts[1]
 
         if (!VALID_DOMAIN.matches(domain)) {
             Napier.d(tag = TAG) { "Invalid domain: $domain" }
