@@ -91,7 +91,46 @@ class Nip05VerificationServiceTest {
     fun `verifyIfNeeded sets FAILED for invalid identifier format`() =
         runTest {
             val (service, dao) = createService()
-            service.verifyIfNeeded(pubkey = testPubkey, internetIdentifier = "no-at-sign")
+            service.verifyIfNeeded(pubkey = testPubkey, internetIdentifier = "foo@bar@baz")
+
+            val slot = slot<Nip05VerificationData>()
+            coVerify { dao.upsert(capture(slot)) }
+            slot.captured.status shouldBe Nip05VerificationStatus.FAILED
+        }
+
+    @Test
+    fun `verifyIfNeeded verifies domain-only identifier against underscore entry`() =
+        runTest {
+            // NIP-05 shorthand: when local-part is omitted (e.g. "dergigi.com"),
+            // the client should look up the "_" entry in the well-known response.
+            val engine = createMockEngine(responseBody = """{"names":{"_":"$testPubkey"}}""")
+            val (service, dao) = createService(engine = engine)
+            service.verifyIfNeeded(pubkey = testPubkey, internetIdentifier = "dergigi.com")
+
+            val slot = slot<Nip05VerificationData>()
+            coVerify { dao.upsert(capture(slot)) }
+            slot.captured.status shouldBe Nip05VerificationStatus.VERIFIED
+            slot.captured.verifiedAddress shouldBe "dergigi.com"
+        }
+
+    @Test
+    fun `verifyIfNeeded verifies at-prefixed identifier against underscore entry`() =
+        runTest {
+            // "@dergigi.com" is treated equivalently to "_@dergigi.com".
+            val engine = createMockEngine(responseBody = """{"names":{"_":"$testPubkey"}}""")
+            val (service, dao) = createService(engine = engine)
+            service.verifyIfNeeded(pubkey = testPubkey, internetIdentifier = "@dergigi.com")
+
+            val slot = slot<Nip05VerificationData>()
+            coVerify { dao.upsert(capture(slot)) }
+            slot.captured.status shouldBe Nip05VerificationStatus.VERIFIED
+        }
+
+    @Test
+    fun `verifyIfNeeded sets FAILED for domain-only identifier with invalid domain`() =
+        runTest {
+            val (service, dao) = createService()
+            service.verifyIfNeeded(pubkey = testPubkey, internetIdentifier = "not a domain")
 
             val slot = slot<Nip05VerificationData>()
             coVerify { dao.upsert(capture(slot)) }
