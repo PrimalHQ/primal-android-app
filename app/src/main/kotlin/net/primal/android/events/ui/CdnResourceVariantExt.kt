@@ -30,17 +30,19 @@ fun calculateDimensions(
     height: Int,
     maxWidth: Int,
     maxHeight: Int,
+    allowUpscaling: Boolean = true,
 ): DpSize {
     if (width == 0 || height == 0) {
         val sideLength = min(maxWidth, maxHeight)
         return DpSize(width = sideLength.dp, height = sideLength.dp)
     }
 
-    val heightForMaxWidth = (maxWidth.toFloat() * height.toFloat()) / width.toFloat()
-    val finalHeight = min(heightForMaxWidth, maxHeight.toFloat())
+    val targetWidth = if (!allowUpscaling && width < maxWidth) width else maxWidth
+    val heightForTargetWidth = (targetWidth.toFloat() * height.toFloat()) / width.toFloat()
+    val finalHeight = min(heightForTargetWidth, maxHeight.toFloat())
 
     return DpSize(
-        width = maxWidth.dp,
+        width = targetWidth.dp,
         height = finalHeight.dp,
     )
 }
