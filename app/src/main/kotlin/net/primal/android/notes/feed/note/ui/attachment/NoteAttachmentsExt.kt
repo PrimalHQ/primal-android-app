@@ -24,7 +24,7 @@ fun BoxWithConstraintsScope.findFeedNoteMediaSize(eventUri: EventUriUi): DpSize 
     findImageSize(
         eventUri = eventUri,
         maxHeightDp = FEED_NOTE_MEDIA_MAX_HEIGHT_DP,
-        fit = Fit.FitBoth,
+        fit = Fit.FitWidth,
         allowUpscaling = false,
     )
 
@@ -107,6 +107,7 @@ private fun calculateMediaSize(
             height = height,
             maxWidth = maxWidth,
             maxHeight = maxHeight,
+            allowUpscaling = allowUpscaling,
         )
 
         Fit.FitBoth -> {
