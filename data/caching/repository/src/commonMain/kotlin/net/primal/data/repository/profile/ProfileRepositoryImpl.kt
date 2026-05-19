@@ -47,7 +47,7 @@ class ProfileRepositoryImpl(
     private val wellKnownApi: UserWellKnownApi,
     private val primalPublisher: PrimalPublisher,
     private val mediaCacher: MediaCacher? = null,
-    private val nip05VerificationService: Nip05VerificationService,
+    private val nip05VerificationService: Nip05VerificationService? = null,
 ) : ProfileRepository {
 
     override suspend fun fetchProfileId(primalName: String): String? =
@@ -166,7 +166,7 @@ class ProfileRepositoryImpl(
             }
 
             if (profileMetadata?.internetIdentifier != null) {
-                nip05VerificationService.verifyIfNeeded(
+                nip05VerificationService?.verifyIfNeeded(
                     pubkey = profileId,
                     internetIdentifier = profileMetadata.internetIdentifier!!,
                 )

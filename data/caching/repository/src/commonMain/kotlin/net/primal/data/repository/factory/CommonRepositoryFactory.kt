@@ -238,7 +238,7 @@ abstract class CommonRepositoryFactory {
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         mediaCacher: MediaCacher? = null,
-        nip05VerificationService: Nip05VerificationService,
+        nip05VerificationService: Nip05VerificationService? = null,
     ): ProfileRepository {
         return ProfileRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -272,7 +272,7 @@ abstract class CommonRepositoryFactory {
     fun createStreamRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
-        nip05VerificationService: Nip05VerificationService,
+        nip05VerificationService: Nip05VerificationService? = null,
         mediaCacher: MediaCacher? = null,
     ): StreamRepository =
         StreamRepositoryImpl(
