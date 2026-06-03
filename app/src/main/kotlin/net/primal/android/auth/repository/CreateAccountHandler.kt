@@ -67,10 +67,13 @@ class CreateAccountHandler @Inject constructor(
                     async { blossomRepository.ensureBlossomServerList(userId) },
                     async { userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata) },
                     async { userRepository.setFollowList(userId = userId, contacts = setOf(userId) + followedUserIds) },
+                    async {
+                        ensureSparkWalletExistsUseCase.invoke(userId = userId)
+                            .onSuccess { walletId -> setLightningAddress(userId = userId, walletId = walletId) }
+                    },
                 )
             }
 
-            scope.launchEnsureWalletAndSetLightningAddress(userId)
             scope.launchFetchSettings(userId)
         }.onFailure { exception ->
             Napier.w(throwable = exception) { "Failed to create Nostr account." }
@@ -78,22 +81,6 @@ class CreateAccountHandler @Inject constructor(
             throw AccountCreationException(cause = exception)
         }.onSuccess {
             authRepository.loginWithNsec(nostrKey = privateKey)
-        }
-    }
-
-    private fun CoroutineScope.launchEnsureWalletAndSetLightningAddress(userId: String) {
-        launch {
-            runCatching {
-                withTimeout(BACKGROUND_TASK_TIMEOUT) {
-                    ensureSparkWalletExistsUseCase.invoke(userId = userId)
-                        .onSuccess { walletId -> setLightningAddress(userId = userId, walletId = walletId) }
-                        .onFailure { error ->
-                            Napier.w(throwable = error) { "Wallet creation failed during onboarding." }
-                        }
-                }
-            }.onFailure { error ->
-                Napier.w(throwable = error) { "Wallet creation timed out during onboarding." }
-            }
         }
     }
 

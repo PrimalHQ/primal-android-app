@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -293,6 +294,108 @@ class CreateAccountHandlerTest {
 
             coVerify {
                 ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey)
+            }
+        }
+
+    @Test
+    fun createNostrAccount_createsWalletBeforeLoggingIn() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val authRepository = mockk<AuthRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true) {
+                coEvery { invoke(userId = any()) } returns Result.success("walletId")
+            }
+            val handler = createAccountHandler(
+                authRepository = authRepository,
+                credentialsStore = credentialsStore,
+                ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+            )
+            advanceUntilIdle()
+
+            // Wallet creation must complete before login; otherwise the active-user change wakes
+            // WalletSessionProvider while onboarding is still creating the wallet, racing it into a duplicate.
+            coVerifyOrder {
+                ensureSparkWalletExistsUseCase.invoke(userId = keyPair.pubKey)
+                authRepository.loginWithNsec(any())
+            }
+        }
+
+    @Test
+    fun createNostrAccount_setsLightningAddressInProfile_whenWalletCreationSucceeds() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val expectedLightningAddress = "user@primal.net"
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true) {
+                coEvery { invoke(userId = any()) } returns Result.success("walletId")
+            }
+            val sparkWalletAccountRepository = mockk<SparkWalletAccountRepository>(relaxed = true) {
+                coEvery { getLightningAddress(userId = any(), walletId = any()) } returns expectedLightningAddress
+            }
+            val userRepository = mockk<UserRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                credentialsStore = credentialsStore,
+                ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+                sparkWalletAccountRepository = sparkWalletAccountRepository,
+                userRepository = userRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+            )
+            advanceUntilIdle()
+
+            coVerify {
+                userRepository.setLightningAddress(
+                    userId = keyPair.pubKey,
+                    lightningAddress = expectedLightningAddress,
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_doesNotSetLightningAddress_whenWalletHasNoLightningAddress() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true) {
+                coEvery { invoke(userId = any()) } returns Result.success("walletId")
+            }
+            val sparkWalletAccountRepository = mockk<SparkWalletAccountRepository>(relaxed = true) {
+                coEvery { getLightningAddress(userId = any(), walletId = any()) } returns null
+            }
+            val userRepository = mockk<UserRepository>(relaxed = true)
+            val handler = createAccountHandler(
+                credentialsStore = credentialsStore,
+                ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+                sparkWalletAccountRepository = sparkWalletAccountRepository,
+                userRepository = userRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+            )
+            advanceUntilIdle()
+
+            coVerify(exactly = 0) {
+                userRepository.setLightningAddress(userId = any(), lightningAddress = any())
             }
         }
 
