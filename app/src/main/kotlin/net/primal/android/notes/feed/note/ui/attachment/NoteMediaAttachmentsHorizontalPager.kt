@@ -345,7 +345,6 @@ private fun SingleImageGallery(
             imageSizeDp = imageSizeDp,
             allowAutoPlay = true,
             couldAutoPlay = couldAutoPlay,
-            contentScale = ContentScale.Fit,
             onClick = { positionMs ->
                 onMediaClick(
                     MediaClickEvent(
