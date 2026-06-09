@@ -22,12 +22,6 @@ data class ActiveWallet(
         parentColumn = "walletId",
         entityColumn = "walletId",
     )
-    val primal: PrimalWalletData? = null,
-
-    @Relation(
-        parentColumn = "walletId",
-        entityColumn = "walletId",
-    )
     val nwc: NostrWalletData? = null,
 
     @Relation(

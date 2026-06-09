@@ -127,13 +127,7 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
-    override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean =
-        withContext(dispatcherProvider.io()) {
-            val sparkWalletData = walletDatabase.wallet().findSparkWalletData(walletId)
-            // Returns true if migration completed OR not needed (new user)
-            // null = new user (no migration needed), true = fully migrated, false = in progress
-            sparkWalletData?.primalTxsMigrated != false
-        }
+    override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean = true
 
     override suspend fun ensureWalletInfoExists(userId: String, walletId: String) {
         withContext(dispatcherProvider.io()) {
