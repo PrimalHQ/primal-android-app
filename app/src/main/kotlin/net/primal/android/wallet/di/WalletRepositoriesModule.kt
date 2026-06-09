@@ -60,16 +60,8 @@ object WalletRepositoriesModule {
 
     @Provides
     @Singleton
-    fun providesTransactionFeeRepository(
-        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
-        nostrNotary: NostrNotary,
-        eventRepository: EventRepository,
-    ): TransactionFeeRepository =
-        WalletRepositoryFactory.createTransactionFeeRepository(
-            primalWalletApiClient = primalApiClient,
-            nostrEventSignatureHandler = nostrNotary,
-            eventRepository = eventRepository,
-        )
+    fun providesTransactionFeeRepository(eventRepository: EventRepository): TransactionFeeRepository =
+        WalletRepositoryFactory.createTransactionFeeRepository(eventRepository = eventRepository)
 
     @Provides
     @Singleton
@@ -135,11 +127,9 @@ object WalletRepositoriesModule {
     fun providesWalletSessionProvider(
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
-        profileRepository: ProfileRepository,
     ): WalletSessionProvider =
         WalletRepositoryFactory.createWalletSessionProvider(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
-            profileRepository = profileRepository,
         )
 }

@@ -92,11 +92,9 @@ class WalletPickerViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             primalWalletAccountRepository.fetchWalletStatus(userId)
                 .onSuccess { status ->
-                    val registeredId = status.registeredSparkWalletId
-                        ?: if (status.hasCustodialWallet) userId else null
                     setState {
                         copy(
-                            registeredWalletId = registeredId,
+                            registeredWalletId = status.registeredSparkWalletId,
                             registeredLightningAddress = status.lightningAddress,
                         )
                     }
@@ -132,15 +130,6 @@ class WalletPickerViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             val reassignResult = when (targetWallet) {
                 is Wallet.Spark -> sparkWalletAccountRepository.registerSparkWallet(userId, targetWallet.walletId)
-                is Wallet.Primal -> {
-                    val sparkWalletId = currentState.registeredWalletId
-                    if (sparkWalletId == null) {
-                        setState { copy(isReassigning = false) }
-                        return@launch
-                    }
-                    sparkWalletAccountRepository.unregisterSparkWallet(userId, sparkWalletId)
-                }
-
                 is Wallet.NWC -> {
                     setState { copy(isReassigning = false) }
                     return@launch
@@ -154,9 +143,8 @@ class WalletPickerViewModel @Inject constructor(
             }
 
             val statusResult = primalWalletAccountRepository.fetchWalletStatus(userId)
-            val registeredId = statusResult.getOrNull()?.let { status ->
-                status.registeredSparkWalletId ?: if (status.hasCustodialWallet) userId else null
-            } ?: targetWallet.walletId
+            val registeredId = statusResult.getOrNull()?.registeredSparkWalletId
+                ?: targetWallet.walletId
 
             setState {
                 copy(

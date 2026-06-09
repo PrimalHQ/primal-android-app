@@ -11,11 +11,6 @@ import net.primal.wallet.data.local.dao.Wallet as WalletPO
 
 inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
     when (this.info.type) {
-        WalletType.PRIMAL -> error(
-            "Primal wallets are no longer supported (walletId=${info.walletId}). " +
-                "All custodial state should have been removed by MIGRATION_6_7.",
-        )
-
         WalletType.NWC ->
             NWC(
                 walletId = info.walletId,

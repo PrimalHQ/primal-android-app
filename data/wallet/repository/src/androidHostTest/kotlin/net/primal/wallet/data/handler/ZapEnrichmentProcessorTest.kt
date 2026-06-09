@@ -145,17 +145,6 @@ class ZapEnrichmentProcessorTest {
         }
 
     @Test
-    fun discoverySkipsPrimalWalletTransactions() =
-        runTest {
-            insertTransaction(txKind = TxKind.LIGHTNING, invoice = "lnbc-primal", walletType = WalletType.PRIMAL)
-
-            processor.processEnrichment()
-
-            val trackers = allPendingTrackers()
-            trackers.shouldBeEmpty()
-        }
-
-    @Test
     fun discoverySkipsAlreadyTrackedTransactions() =
         runTest {
             val txId = insertTransaction(txKind = TxKind.LIGHTNING, invoice = "lnbc-tracked")
@@ -249,22 +238,6 @@ class ZapEnrichmentProcessorTest {
 
             val trackers = allPendingTrackers()
             trackers shouldHaveSize 1
-        }
-
-    @Test
-    fun discoverySkipsPrimalWalletTransactionsAfterCutoffDate() =
-        runTest {
-            insertTransaction(
-                txKind = TxKind.LIGHTNING,
-                invoice = "lnbc-primal-post-cutoff",
-                walletType = WalletType.PRIMAL,
-                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
-            )
-
-            processor.processEnrichment()
-
-            val trackers = allPendingTrackers()
-            trackers.shouldBeEmpty()
         }
 
     @Test
@@ -627,16 +600,10 @@ class ZapEnrichmentProcessorTest {
             val zapTxId = insertTransaction(txKind = TxKind.ZAP, invoice = "lnbc-zap-kind")
             val onChainTxId = insertTransaction(txKind = TxKind.ON_CHAIN, invoice = "lnbc-onchain-kind")
             val nullInvoiceTxId = insertTransaction(txKind = TxKind.LIGHTNING, invoice = null)
-            val primalTxId = insertTransaction(
-                txKind = TxKind.LIGHTNING,
-                invoice = "lnbc-primal-single",
-                walletType = WalletType.PRIMAL,
-            )
 
             processor.enrichTransaction(zapTxId) shouldBe false
             processor.enrichTransaction(onChainTxId) shouldBe false
             processor.enrichTransaction(nullInvoiceTxId) shouldBe false
-            processor.enrichTransaction(primalTxId) shouldBe false
             fakeEventRepository.getZapRequestsCallCount shouldBe 0
         }
 
@@ -850,19 +817,6 @@ class ZapEnrichmentProcessorTest {
             )
             val tx = database.walletTransactions().findTransactionById(txId)!!
             tx.isEligibleForZapEnrichment() shouldBe true
-        }
-
-    @Test
-    fun isEligibleReturnsFalseForPrimalTransaction() =
-        runTest {
-            val txId = insertTransaction(
-                txKind = TxKind.LIGHTNING,
-                invoice = "lnbc-elig-primal",
-                walletType = WalletType.PRIMAL,
-                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
-            )
-            val tx = database.walletTransactions().findTransactionById(txId)!!
-            tx.isEligibleForZapEnrichment() shouldBe false
         }
 
     // endregion

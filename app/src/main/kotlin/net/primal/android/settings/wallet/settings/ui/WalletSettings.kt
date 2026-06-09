@@ -7,10 +7,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,13 +32,9 @@ import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
-import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.wallet.Wallet
-
-private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
 
 @Composable
-fun PrimalWalletSettings(
+fun WalletSettings(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onBackupWalletClick: (String) -> Unit,
@@ -72,30 +66,6 @@ fun PrimalWalletSettings(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        var maxWalletBalanceShown by remember { mutableStateOf(false) }
-        if (state.activeWallet?.wallet is Wallet.Primal) {
-            val primalWallet = state.activeWallet.wallet as Wallet.Primal
-            val maxBalanceInSats = numberFormat
-                .format((primalWallet.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
-            SettingsItem(
-                headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
-                supportText = "$maxBalanceInSats sats",
-                trailingContent = {
-                    IconButton(onClick = { maxWalletBalanceShown = true }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Info,
-                            contentDescription = stringResource(
-                                id = R.string.accessibility_info,
-                            ),
-                        )
-                    }
-                },
-                onClick = { maxWalletBalanceShown = true },
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         if (state.showBackupListItem) {
             SettingsItem(
                 headlineText = stringResource(id = R.string.settings_wallet_backup_wallet_title),
@@ -108,13 +78,6 @@ fun PrimalWalletSettings(
                 },
             )
             Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        if (maxWalletBalanceShown) {
-            MaxWalletBalanceDialog(
-                text = stringResource(id = R.string.settings_wallet_max_wallet_balance_hint),
-                onDialogDismiss = { maxWalletBalanceShown = false },
-            )
         }
     }
 }
@@ -169,23 +132,6 @@ private fun SpamThresholdAmountEditorDialog(onDialogDismiss: () -> Unit, onEditA
             ) {
                 Text(
                     text = stringResource(id = R.string.settings_wallet_save),
-                )
-            }
-        },
-    )
-}
-
-@Composable
-private fun MaxWalletBalanceDialog(text: String, onDialogDismiss: () -> Unit) {
-    AlertDialog(
-        containerColor = AppTheme.colorScheme.surfaceVariant,
-        onDismissRequest = onDialogDismiss,
-        title = { Text(text = stringResource(id = R.string.app_info)) },
-        text = { Text(text = text) },
-        confirmButton = {
-            TextButton(onClick = onDialogDismiss) {
-                Text(
-                    text = stringResource(id = android.R.string.ok),
                 )
             }
         },

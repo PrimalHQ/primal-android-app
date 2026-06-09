@@ -91,18 +91,16 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
             setState { copy(creatingSecret = true) }
             runCatching {
                 val userId = activeAccountStore.activeUserId()
-                when (val activeWallet = walletAccountRepository.getActiveWallet(userId)?.wallet) {
-                    is Wallet.Spark -> {
-                        nwcRepository.createNewWalletConnection(
-                            userId = userId,
-                            walletId = activeWallet.walletId,
-                            appName = appName,
-                            dailyBudget = dailyBudget,
-                        ).getOrThrow()
-                    }
-
-                    else -> error("Active wallet does not support NWC connections.")
+                val activeWallet = walletAccountRepository.getActiveWallet(userId)?.wallet
+                if (activeWallet !is Wallet.Spark) {
+                    error("Active wallet does not support NWC connections.")
                 }
+                nwcRepository.createNewWalletConnection(
+                    userId = userId,
+                    walletId = activeWallet.walletId,
+                    appName = appName,
+                    dailyBudget = dailyBudget,
+                ).getOrThrow()
             }.onSuccess { nwcConnectionUri ->
                 setState {
                     copy(

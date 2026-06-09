@@ -8,6 +8,5 @@ const val ENRICHMENT_CUTOFF_EPOCH_SECONDS: Long = 1772323200 // 2026-03-01T00:00
 fun WalletTransactionData.isEligibleForZapEnrichment(): Boolean {
     return (txKind == TxKind.LIGHTNING || txKind == TxKind.SPARK) &&
         invoice != null &&
-        walletType != WalletType.PRIMAL &&
         (createdAt >= ENRICHMENT_CUTOFF_EPOCH_SECONDS || walletType == WalletType.NWC)
 }

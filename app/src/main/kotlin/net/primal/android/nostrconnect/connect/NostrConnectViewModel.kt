@@ -174,18 +174,15 @@ class NostrConnectViewModel @Inject constructor(
                     val appName = currentState.appName ?: "External App"
                     val wallet = walletAccountRepository.getActiveWallet(userId)?.wallet
                     activeWallet = wallet
-                    when (wallet) {
-                        is Wallet.Spark -> {
-                            nwcRepository.createNewWalletConnection(
-                                userId = userId,
-                                walletId = wallet.walletId,
-                                appName = appName,
-                                dailyBudget = dailyBudget,
-                            ).getOrThrow()
-                        }
-
-                        else -> error("Active wallet does not support NWC connections.")
+                    if (wallet !is Wallet.Spark) {
+                        error("Active wallet does not support NWC connections.")
                     }
+                    nwcRepository.createNewWalletConnection(
+                        userId = userId,
+                        walletId = wallet.walletId,
+                        appName = appName,
+                        dailyBudget = dailyBudget,
+                    ).getOrThrow()
                 }.onSuccess { uri ->
                     nwcConnectionString = uri
                 }.onFailure { error ->

@@ -7,7 +7,6 @@ enum class PrimalWalletVerb(val id: String) {
     MEDIA_MANAGEMENT_DELETE("membership_media_management_delete"),
     GET_WALLET_STATUS("get_wallet_status"),
     WALLET("wallet"),
-    WALLET_MONITOR("wallet_monitor_2"),
     WALLET_MEMBERSHIP_NAME_AVAILABLE("membership_name_available"),
     WALLET_MEMBERSHIP_CHANGE_NAME("membership_change_name"),
     WALLET_MEMBERSHIP_STATUS("membership_status"),

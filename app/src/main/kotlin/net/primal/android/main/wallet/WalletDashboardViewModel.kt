@@ -50,7 +50,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.WalletRepository
-import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
 @HiltViewModel
@@ -67,7 +66,6 @@ class WalletDashboardViewModel @Inject constructor(
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
-    private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -98,7 +96,6 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToActiveAccount()
         subscribeToPurchases()
         checkForPersistedSparkWallet()
-        migratePrimalTransactionsIfNeeded()
         resolveDashboardState()
         bindToProcessLifecycle(pendingDepositsSyncer)
     }
@@ -119,21 +116,12 @@ class WalletDashboardViewModel @Inject constructor(
             val status = primalWalletAccountRepository.fetchWalletStatus(activeUserId).getOrNull()
                 ?: return@launch
 
-            val dashboardState = when {
-                status.hasMigratedToSparkWallet -> WalletDashboardState.WalletDetected
-                status.hasCustodialWallet -> return@launch
-                else -> WalletDashboardState.NoWallet
+            val dashboardState = if (status.hasMigratedToSparkWallet) {
+                WalletDashboardState.WalletDetected
+            } else {
+                WalletDashboardState.NoWallet
             }
             setState { copy(dashboardState = dashboardState) }
-        }
-
-    private fun migratePrimalTransactionsIfNeeded() =
-        viewModelScope.launch {
-            val sparkWalletId = sparkWalletAccountRepository.findRegisteredSparkWalletId(activeUserId) ?: return@launch
-            migratePrimalTransactionsHandler.invoke(
-                userId = activeUserId,
-                targetSparkWalletId = sparkWalletId,
-            )
         }
 
     private fun subscribeToEvents() =

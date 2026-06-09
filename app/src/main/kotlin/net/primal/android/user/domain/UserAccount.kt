@@ -9,8 +9,6 @@ import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.PrimalLegendProfile
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.wallet.NostrWalletConnect
-import net.primal.domain.wallet.WalletSettings
-import net.primal.domain.wallet.WalletState
 
 @Serializable
 data class UserAccount(
@@ -27,14 +25,7 @@ data class UserAccount(
     @Deprecated("Please use WalletDatabase for wallet information.")
     val nostrWallet: NostrWalletConnect? = null,
     @Deprecated("Please use WalletDatabase for wallet information.")
-    val primalWallet: PrimalWallet? = null,
-    @Deprecated("Please use WalletDatabase for wallet information.")
-    val primalWalletState: WalletState = WalletState(),
-    @Deprecated("Please use WalletDatabase for wallet information.")
-    val primalWalletSettings: WalletSettings = WalletSettings(),
-    @Deprecated("Please use WalletDatabase for wallet information.")
     val walletPreference: WalletPreference = when {
-        primalWallet != null -> WalletPreference.PrimalWallet
         nostrWallet != null -> WalletPreference.NostrWalletConnect
         else -> WalletPreference.Undefined
     },
@@ -52,7 +43,6 @@ data class UserAccount(
     val pushNotificationsEnabled: Boolean = false,
     val shouldShowStreamControlPopup: Boolean = true,
     val shouldShowWalletDetectedNotice: Boolean = true,
-    val shouldShowWalletDiscontinuedNotice: Boolean = true,
 ) {
     companion object {
         val EMPTY = UserAccount(

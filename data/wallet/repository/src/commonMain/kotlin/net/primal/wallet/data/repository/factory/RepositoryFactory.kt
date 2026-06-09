@@ -41,8 +41,6 @@ import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
 import net.primal.wallet.data.repository.WalletSessionProvider
-import net.primal.wallet.data.repository.handler.MigratePrimalToSparkWalletHandler
-import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
 import net.primal.wallet.data.spark.BreezApiKeyProvider
 import net.primal.wallet.data.spark.BreezSdkInstanceManager
@@ -89,23 +87,13 @@ abstract class RepositoryFactory {
             lightningPayHelper = lightningPayHelper,
             eventRepository = eventRepository,
             walletServiceFactory = createWalletServiceFactory(
-                primalWalletApiClient = primalWalletApiClient,
-                nostrEventSignatureHandler = nostrEventSignatureHandler,
                 eventRepository = eventRepository,
             ),
         )
     }
 
-    private fun createWalletServiceFactory(
-        primalWalletApiClient: PrimalApiClient,
-        nostrEventSignatureHandler: NostrEventSignatureHandler,
-        eventRepository: EventRepository,
-    ): WalletServiceFactoryImpl {
+    private fun createWalletServiceFactory(eventRepository: EventRepository): WalletServiceFactoryImpl {
         return WalletServiceFactoryImpl(
-            primalWalletService = WalletServiceFactoryImpl.createPrimalWalletService(
-                primalWalletApiClient = primalWalletApiClient,
-                nostrEventSignatureHandler = nostrEventSignatureHandler,
-            ),
             nostrWalletService = WalletServiceFactoryImpl.createNostrWalletService(
                 eventRepository = eventRepository,
                 lightningPayHelper = lightningPayHelper,
@@ -132,16 +120,10 @@ abstract class RepositoryFactory {
         )
     }
 
-    fun createTransactionFeeRepository(
-        primalWalletApiClient: PrimalApiClient,
-        nostrEventSignatureHandler: NostrEventSignatureHandler,
-        eventRepository: EventRepository,
-    ): TransactionFeeRepository {
+    fun createTransactionFeeRepository(eventRepository: EventRepository): TransactionFeeRepository {
         return TransactionFeeRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             walletServiceFactory = createWalletServiceFactory(
-                primalWalletApiClient = primalWalletApiClient,
-                nostrEventSignatureHandler = nostrEventSignatureHandler,
                 eventRepository = eventRepository,
             ),
             walletDatabase = resolveWalletDatabase(),
@@ -249,26 +231,9 @@ abstract class RepositoryFactory {
         )
     }
 
-    fun createMigratePrimalTransactionsHandler(
-        primalWalletApiClient: PrimalApiClient,
-        nostrEventSignatureHandler: NostrEventSignatureHandler,
-        profileRepository: ProfileRepository? = null,
-    ): MigratePrimalTransactionsHandler {
-        return MigratePrimalTransactionsHandler(
-            primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
-                primalApiClient = primalWalletApiClient,
-                nostrEventSignatureHandler = nostrEventSignatureHandler,
-            ),
-            walletDatabase = resolveWalletDatabase(),
-            profileRepository = profileRepository,
-            dispatcherProvider = dispatcherProvider,
-        )
-    }
-
     fun createWalletSessionProvider(
         primalWalletApiClient: PrimalApiClient,
         nostrEventSignatureHandler: NostrEventSignatureHandler,
-        profileRepository: ProfileRepository? = null,
     ): WalletSessionProvider {
         val primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
             primalApiClient = primalWalletApiClient,
@@ -300,51 +265,10 @@ abstract class RepositoryFactory {
                 ),
                 seedPhraseGenerator = RecoveryPhraseGenerator(),
             ),
-            migratePrimalTransactionsHandler = MigratePrimalTransactionsHandler(
-                primalWalletApi = primalWalletApi,
-                walletDatabase = resolveWalletDatabase(),
-                profileRepository = profileRepository,
-                dispatcherProvider = dispatcherProvider,
-            ),
             walletAccountRepository = WalletAccountRepositoryImpl(
                 dispatcherProvider = dispatcherProvider,
                 walletDatabase = resolveWalletDatabase(),
             ),
-        )
-    }
-
-    fun createMigratePrimalToSparkWalletHandler(
-        primalWalletApiClient: PrimalApiClient,
-        nostrEventSignatureHandler: NostrEventSignatureHandler,
-        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
-        walletRepository: WalletRepository,
-        profileRepository: ProfileRepository? = null,
-    ): MigratePrimalToSparkWalletHandler {
-        val primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
-            primalApiClient = primalWalletApiClient,
-            nostrEventSignatureHandler = nostrEventSignatureHandler,
-        )
-        return MigratePrimalToSparkWalletHandler(
-            ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
-            migratePrimalTransactionsHandler = MigratePrimalTransactionsHandler(
-                primalWalletApi = primalWalletApi,
-                walletDatabase = resolveWalletDatabase(),
-                profileRepository = profileRepository,
-                dispatcherProvider = dispatcherProvider,
-            ),
-            sparkWalletAccountRepository = SparkWalletAccountRepositoryImpl(
-                dispatcherProvider = dispatcherProvider,
-                walletApi = primalWalletApi,
-                walletDatabase = resolveWalletDatabase(),
-            ),
-            walletAccountRepository = WalletAccountRepositoryImpl(
-                dispatcherProvider = dispatcherProvider,
-                walletDatabase = resolveWalletDatabase(),
-            ),
-            walletRepository = walletRepository,
-            walletDatabase = resolveWalletDatabase(),
-            primalWalletApi = primalWalletApi,
-            dispatcherProvider = dispatcherProvider,
         )
     }
 }
