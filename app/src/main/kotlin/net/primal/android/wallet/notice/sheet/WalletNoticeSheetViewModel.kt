@@ -158,16 +158,6 @@ class WalletNoticeSheetViewModel @Inject constructor(
         userAccount: UserAccount,
     ): WalletNoticeType? {
         return when {
-            status.hasCustodialWallet && !status.hasMigratedToSparkWallet && !status.primalWalletDeprecated ->
-                WalletNoticeType.UpgradeWallet
-
-            status.hasCustodialWallet && !status.hasMigratedToSparkWallet && status.primalWalletDeprecated ->
-                if (userAccount.shouldShowWalletDiscontinuedNotice) {
-                    WalletNoticeType.WalletDiscontinued
-                } else {
-                    null
-                }
-
             status.hasMigratedToSparkWallet && !localSparkWalletExists(userId) ->
                 if (userAccount.shouldShowWalletDetectedNotice) {
                     WalletNoticeType.WalletDetected
@@ -218,13 +208,6 @@ class WalletNoticeSheetViewModel @Inject constructor(
         val userId = activeAccountStore.activeUserId.value
 
         when (currentState.noticeType) {
-            WalletNoticeType.UpgradeWallet -> {
-                setState { copy(shouldShowNotice = false) }
-            }
-            WalletNoticeType.WalletDiscontinued -> {
-                viewModelScope.launch { userRepository.dismissWalletDiscontinuedNotice(userId) }
-                setState { copy(noticeType = null, shouldShowNotice = false, creatingWallet = false) }
-            }
             WalletNoticeType.WalletDetected -> {
                 viewModelScope.launch { userRepository.dismissWalletDetectedNotice(userId) }
                 setState { copy(noticeType = null, shouldShowNotice = false, creatingWallet = false) }

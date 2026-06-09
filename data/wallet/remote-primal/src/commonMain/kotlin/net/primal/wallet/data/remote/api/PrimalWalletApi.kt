@@ -1,7 +1,6 @@
 package net.primal.wallet.data.remote.api
 
 import kotlinx.coroutines.flow.Flow
-import net.primal.domain.nostr.NostrEvent
 import net.primal.wallet.data.remote.model.BalanceResponse
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.remote.model.InAppPurchaseQuoteResponse
@@ -10,7 +9,6 @@ import net.primal.wallet.data.remote.model.MiningFeeTier
 import net.primal.wallet.data.remote.model.OnChainAddressResponse
 import net.primal.wallet.data.remote.model.ParsedLnInvoiceResponse
 import net.primal.wallet.data.remote.model.ParsedLnUrlResponse
-import net.primal.wallet.data.remote.model.PromoCodeDetailsResponse
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
 import net.primal.wallet.data.remote.model.WalletStatusResponse
@@ -38,10 +36,6 @@ interface PrimalWalletApi {
     suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse
 
     suspend fun getTransactions(userId: String, body: TransactionsRequestBody): TransactionsResponse
-
-    suspend fun getPromoCodeDetails(code: String): PromoCodeDetailsResponse
-
-    suspend fun redeemPromoCode(authorizationEvent: NostrEvent)
 
     suspend fun getInAppPurchaseQuote(
         userId: String,

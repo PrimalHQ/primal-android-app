@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
-import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -19,14 +18,12 @@ import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
-import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.wallet.Wallet
 
 @HiltViewModel
@@ -35,7 +32,6 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private val tokenUpdater: PushNotificationsTokenUpdater,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val nwcRepository: NwcRepository,
 ) : ViewModel() {
 
@@ -97,33 +93,17 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                 val userId = activeAccountStore.activeUserId()
                 when (val activeWallet = walletAccountRepository.getActiveWallet(userId)?.wallet) {
                     is Wallet.Spark -> {
-                        val uri = nwcRepository.createNewWalletConnection(
+                        nwcRepository.createNewWalletConnection(
                             userId = userId,
                             walletId = activeWallet.walletId,
                             appName = appName,
                             dailyBudget = dailyBudget,
                         ).getOrThrow()
-                        uri to true
-                    }
-
-                    is Wallet.Primal -> {
-                        val dailyBudgetBtc = dailyBudget?.toBtc()
-                        val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
-                            BigDecimal(it.toString())
-                                .stripTrailingZeros()
-                                .toPlainString()
-                        }
-                        val uri = primalWalletNwcRepository.createNewWalletConnection(
-                            userId = userId,
-                            appName = appName,
-                            dailyBudget = formattedDailyBudgetBtc,
-                        ).nwcConnectionUri
-                        uri to false
                     }
 
                     else -> error("Active wallet does not support NWC connections.")
                 }
-            }.onSuccess { (nwcConnectionUri, isSparkWallet) ->
+            }.onSuccess { nwcConnectionUri ->
                 setState {
                     copy(
                         nwcConnectionUri = nwcConnectionUri,
@@ -132,13 +112,11 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                 }
                 setEffect(
                     CreateNewWalletConnectionContract.SideEffect.CreateSuccess(
-                        nwcServiceIsRequired = isSparkWallet,
+                        nwcServiceIsRequired = true,
                     ),
                 )
-                if (isSparkWallet) {
-                    CoroutineScope(dispatchers.io()).launch {
-                        runCatching { tokenUpdater.updateTokenForNwcService() }
-                    }
+                CoroutineScope(dispatchers.io()).launch {
+                    runCatching { tokenUpdater.updateTokenForNwcService() }
                 }
             }.onFailure { error ->
                 setState { copy(creatingSecret = false) }

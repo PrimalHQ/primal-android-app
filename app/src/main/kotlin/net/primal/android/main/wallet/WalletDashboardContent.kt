@@ -44,9 +44,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
-import java.time.LocalDate
-import java.time.ZoneOffset
-import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NavigationBarFullHeightDp
@@ -56,7 +53,6 @@ import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWor
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.main.wallet.WalletDashboardContract.UiEvent
 import net.primal.android.main.wallet.WalletDashboardContract.WalletDashboardState
@@ -66,7 +62,6 @@ import net.primal.android.navigation.navigateToWalletBackup
 import net.primal.android.navigation.navigateToWalletReceive
 import net.primal.android.navigation.navigateToWalletRestore
 import net.primal.android.navigation.navigateToWalletSendPayment
-import net.primal.android.navigation.navigateToWalletUpgrade
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.ui.WalletAction
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionAnnotatedBox
@@ -79,12 +74,7 @@ import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.domain.utils.isConfigured
 import net.primal.domain.wallet.CurrencyMode
-import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.capabilities
-
-private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 4, 30)
-    .atTime(12, 0)
-    .toInstant(ZoneOffset.UTC)
 
 @Composable
 internal fun WalletDashboardContent(
@@ -114,7 +104,7 @@ internal fun WalletDashboardContent(
 
     @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
     val canBuySats = remember(walletState.wallet) {
-        isGoogleBuild() && walletState.wallet is Wallet.Primal && false
+        isGoogleBuild() && false
     }
 
     val pagingItems = walletState.transactions.collectAsLazyPagingItems()
@@ -161,7 +151,6 @@ internal fun WalletDashboardContent(
         eventPublisher = walletViewModel::setEvents,
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onTransactionClick = { txId -> navController.navigateToTransactionDetails(txId) },
-        onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
         onWalletBackupClick = { walletId -> navController.navigateToWalletBackup(walletId) },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
         onBuySatsClick = {},
@@ -187,7 +176,6 @@ private fun WalletDashboardContent(
     eventPublisher: (UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
-    onUpgradeWalletClick: () -> Unit,
     onWalletBackupClick: (String) -> Unit,
     onRestoreWalletClick: () -> Unit,
     onBuySatsClick: () -> Unit,
@@ -241,21 +229,6 @@ private fun WalletDashboardContent(
                 )
             }
 
-            WalletDashboardState.WalletDiscontinued -> {
-                WalletSetupCallToAction(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 32.dp)
-                        .padding(bottom = 32.dp)
-                        .navigationBarsPadding(),
-                    title = stringResource(id = R.string.wallet_dashboard_discontinued_title),
-                    description = stringResource(id = R.string.wallet_dashboard_discontinued_description),
-                    onRestoreWalletClick = onRestoreWalletClick,
-                    onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
-                )
-            }
-
             WalletDashboardState.ActiveWallet -> {
                 val isTransactionListSettled = pagingItems.loadState.refresh is LoadState.NotLoading &&
                     pagingItems.loadState.append is LoadState.NotLoading &&
@@ -284,17 +257,6 @@ private fun WalletDashboardContent(
                                 .fillMaxSize()
                                 .navigationBarsPadding(),
                         ) {
-                            if (state.wallet is Wallet.Primal) {
-                                DashboardUpgradeNotice(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .animateContentSize()
-                                        .padding(horizontal = 32.dp)
-                                        .padding(vertical = 16.dp),
-                                    onUpgradeWalletClick = onUpgradeWalletClick,
-                                )
-                            }
-
                             if (state.wallet?.balanceInBtc == 0.0) {
                                 WalletCallToActionBox(
                                     modifier = Modifier
@@ -336,16 +298,7 @@ private fun WalletDashboardContent(
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
                             header = {
-                                if (state.wallet is Wallet.Primal) {
-                                    DashboardUpgradeNotice(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .animateContentSize()
-                                            .padding(horizontal = 32.dp)
-                                            .padding(top = 16.dp, bottom = 12.dp),
-                                        onUpgradeWalletClick = onUpgradeWalletClick,
-                                    )
-                                } else if (!state.isWalletBackedUp) {
+                                if (!state.isWalletBackedUp) {
                                     val titleText = stringResource(
                                         id = R.string.wallet_dashboard_backup_notice_title,
                                     )
@@ -503,51 +456,6 @@ private fun WalletDashboardSection(
             }
         }
     }
-}
-
-@Composable
-private fun DashboardUpgradeNotice(onUpgradeWalletClick: () -> Unit, modifier: Modifier = Modifier) {
-    WalletCallToActionAnnotatedBox(
-        modifier = modifier,
-        message = buildAnnotatedString {
-            withStyle(
-                AppTheme.typography.bodyMedium.toSpanStyle()
-                    .copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2),
-            ) {
-                withStyle(
-                    SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                ) {
-                    append(
-                        stringResource(id = R.string.wallet_dashboard_upgrade_header),
-                    )
-                }
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    appendLine(":")
-                }
-                append(
-                    stringResource(id = R.string.wallet_dashboard_upgrade_expires_on),
-                )
-                append(" ")
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(
-                        DATE_OF_WALLET_EXPIRATION
-                            .formatToDefaultDateFormat(FormatStyle.LONG),
-                    )
-                }
-                appendLine(".")
-                append(
-                    stringResource(
-                        id = R.string.wallet_dashboard_upgrade_please_upgrade,
-                    ),
-                )
-            }
-        },
-        actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
-        onActionClick = onUpgradeWalletClick,
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

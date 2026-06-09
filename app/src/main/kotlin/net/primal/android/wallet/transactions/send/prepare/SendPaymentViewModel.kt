@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
-import net.primal.android.scan.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -77,9 +76,6 @@ class SendPaymentViewModel @Inject constructor(
         viewModelScope.launch {
             qrCodeEvents.distinctUntilChanged().collect { result ->
                 when (result.type) {
-                    QrCodeDataType.PROMO_CODE ->
-                        setEffect(SideEffect.PromoCodeDetected(result.value.getPromoCodeFromUrl()))
-
                     QrCodeDataType.NOSTR_CONNECT ->
                         setEffect(SideEffect.NostrConnectRequest(url = result.value))
 

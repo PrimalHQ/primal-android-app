@@ -17,7 +17,6 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.common.util.takeContentOrNull
-import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -43,8 +42,6 @@ import net.primal.wallet.data.remote.model.ParseLnInvoiceRequestBody
 import net.primal.wallet.data.remote.model.ParseLnUrlRequestBody
 import net.primal.wallet.data.remote.model.ParsedLnInvoiceResponse
 import net.primal.wallet.data.remote.model.ParsedLnUrlResponse
-import net.primal.wallet.data.remote.model.PromoCodeDetailsResponse
-import net.primal.wallet.data.remote.model.PromoCodeRequestBody
 import net.primal.wallet.data.remote.model.RegisterSparkPubkeyRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
@@ -262,32 +259,6 @@ class PrimalWalletApiImpl(
             transactions = transactions,
             paging = result.findPrimalEvent(kind = NostrEventKind.PrimalPaging)
                 ?.content?.decodeFromJsonStringOrNull(),
-        )
-    }
-
-    override suspend fun getPromoCodeDetails(code: String): PromoCodeDetailsResponse {
-        val result = primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalWalletVerb.PROMO_CODE_GET_DETAILS.id,
-                optionsJson = PromoCodeRequestBody(
-                    promoCode = code,
-                ).encodeToJsonString(),
-            ),
-        )
-
-        return result.findPrimalEvent(kind = NostrEventKind.PrimalPromoCodeDetails)
-            .takeContentOrNull<PromoCodeDetailsResponse>()
-            ?: throw NetworkException("Missing or invalid content in response.")
-    }
-
-    override suspend fun redeemPromoCode(authorizationEvent: NostrEvent) {
-        primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalWalletVerb.PROMO_CODES_REDEEM.id,
-                optionsJson = AppSpecificDataRequest(
-                    eventFromUser = authorizationEvent,
-                ).encodeToJsonString(),
-            ),
         )
     }
 

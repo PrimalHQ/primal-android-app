@@ -38,7 +38,6 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
 import net.primal.android.scan.ScanCodeContract
-import net.primal.android.scan.utils.isValidPromoCode
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.theme.AppTheme
 
@@ -227,7 +226,7 @@ private fun ParsingInputTextField(
 
 private fun String.isValidScanInput(scanMode: ScanCodeContract.ScanMode): Boolean {
     return when (scanMode) {
-        ScanCodeContract.ScanMode.Anything -> QrCodeDataType.from(this) != null || isValidPromoCode()
+        ScanCodeContract.ScanMode.Anything -> QrCodeDataType.from(this) != null
         ScanCodeContract.ScanMode.RemoteLogin -> QrCodeDataType.from(this) == QrCodeDataType.NOSTR_CONNECT
     }
 }

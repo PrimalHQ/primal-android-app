@@ -12,7 +12,6 @@ import net.primal.domain.billing.BillingRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.connections.nostr.handler.Nip47EventsHandler
-import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.profile.ProfileRepository
@@ -36,7 +35,6 @@ import net.primal.wallet.data.repository.InternalNwcRepository
 import net.primal.wallet.data.repository.NwcLogRepositoryImpl
 import net.primal.wallet.data.repository.NwcRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
-import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
 import net.primal.wallet.data.repository.SparkWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.SparkWalletManagerImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
@@ -181,7 +179,6 @@ abstract class RepositoryFactory {
                 primalApiClient = primalWalletApiClient,
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
-            signatureHandler = nostrEventSignatureHandler,
         )
     }
 
@@ -200,19 +197,6 @@ abstract class RepositoryFactory {
     }
 
     fun createSparkWalletManager(): SparkWalletManager = sparkWalletManager
-
-    fun createPrimalWalletNwcRepository(
-        primalWalletApiClient: PrimalApiClient,
-        nostrEventSignatureHandler: NostrEventSignatureHandler,
-    ): PrimalWalletNwcRepository {
-        return PrimalWalletNwcRepositoryImpl(
-            dispatcherProvider = dispatcherProvider,
-            primalWalletNwcApi = WalletApiServiceFactory.createPrimalWalletNwcApi(
-                primalApiClient = primalWalletApiClient,
-                nostrEventSignatureHandler = nostrEventSignatureHandler,
-            ),
-        )
-    }
 
     fun createNwcRepository(nip47EventsHandler: Nip47EventsHandler): NwcRepository =
         NwcRepositoryImpl(
@@ -297,7 +281,6 @@ abstract class RepositoryFactory {
                 dispatcherProvider = dispatcherProvider,
                 walletDatabase = resolveWalletDatabase(),
                 primalWalletApi = primalWalletApi,
-                signatureHandler = nostrEventSignatureHandler,
             ),
             sparkWalletAccountRepository = SparkWalletAccountRepositoryImpl(
                 dispatcherProvider = dispatcherProvider,

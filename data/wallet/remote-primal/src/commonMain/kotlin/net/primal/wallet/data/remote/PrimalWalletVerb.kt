@@ -27,6 +27,4 @@ enum class PrimalWalletVerb(val id: String) {
     MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS("rebroadcasting_status"),
     UPDATE_PUSH_NOTIFICATION_TOKEN("update_push_notification_token"),
     RECOMMENDED_BLOSSOM_SERVERS("get_recommended_blossom_servers"),
-    PROMO_CODE_GET_DETAILS("promo_code_get_details"),
-    PROMO_CODES_REDEEM("promo_codes_redeem"),
 }

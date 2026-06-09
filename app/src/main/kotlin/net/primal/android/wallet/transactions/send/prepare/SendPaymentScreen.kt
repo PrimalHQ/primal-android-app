@@ -46,7 +46,6 @@ fun SendPaymentScreen(
     viewModel: SendPaymentViewModel,
     onClose: () -> Unit,
     onCreateTransaction: (DraftTx) -> Unit,
-    onPromoCodeScan: (promoCode: String) -> Unit,
     onNostrConnectRequest: (url: String) -> Unit = {},
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -58,7 +57,6 @@ fun SendPaymentScreen(
                     onCreateTransaction(it.draft)
                 }
 
-                is SendPaymentContract.SideEffect.PromoCodeDetected -> onPromoCodeScan(it.promoCode)
                 is SendPaymentContract.SideEffect.NostrConnectRequest -> onNostrConnectRequest(it.url)
             }
         }

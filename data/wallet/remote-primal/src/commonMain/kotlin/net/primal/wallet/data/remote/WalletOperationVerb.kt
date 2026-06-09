@@ -14,9 +14,6 @@ enum class WalletOperationVerb(val identifier: String) {
     PARSE_LNURL("parse_lnurl"),
     PARSE_LNINVOICE("parse_lninvoice"),
     ONCHAIN_PAYMENT_TIERS("onchain_payment_tiers"),
-    NWC_CONNECTIONS("nwc_connections"),
-    NWC_REVOKE_CONNECTION("nwc_revoke"),
-    NWC_CREATE_NEW_CONNECTION("nwc_connect"),
     REGISTER_SPARK_PUBKEY("register_spark_pubkey"),
     UNREGISTER_SPARK_PUBKEY("unregister_spark_pubkey"),
 }

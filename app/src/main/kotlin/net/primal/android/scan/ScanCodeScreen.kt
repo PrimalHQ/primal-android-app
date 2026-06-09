@@ -2,7 +2,6 @@ package net.primal.android.scan
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,9 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -38,7 +35,6 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.scan.ScanCodeContract.UiEvent
 import net.primal.android.scan.ui.ScanCameraStage
 import net.primal.android.scan.ui.ScanManualEntryStage
-import net.primal.android.scan.ui.ScanSuccessStage
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -48,7 +44,6 @@ fun ScanCodeScreen(viewModel: ScanCodeViewModel, callbacks: ScanCodeContract.Scr
     LaunchedEffect(viewModel, callbacks) {
         viewModel.effects.collect {
             when (it) {
-                ScanCodeContract.SideEffect.PromoCodeApplied -> callbacks.onClose()
                 is ScanCodeContract.SideEffect.NostrConnectRequest -> {
                     callbacks.onNostrConnectRequest(it.url)
                 }
@@ -122,7 +117,6 @@ fun ScanCodeScreen(
         ScanCodeMainContent(
             paddingValues = paddingValues,
             state = state,
-            callbacks = callbacks,
             eventPublisher = eventPublisher,
             onCameraPermissionChange = { isCameraPermissionGranted = it },
         )
@@ -133,7 +127,6 @@ fun ScanCodeScreen(
 private fun ScanCodeMainContent(
     paddingValues: PaddingValues,
     state: ScanCodeContract.UiState,
-    callbacks: ScanCodeContract.ScreenCallbacks,
     eventPublisher: (UiEvent) -> Unit,
     onCameraPermissionChange: (Boolean) -> Unit,
 ) {
@@ -175,38 +168,6 @@ private fun ScanCodeMainContent(
                         },
                         onApplyClick = { eventPublisher(UiEvent.ProcessCode(it)) },
                     )
-                }
-            }
-            ScanCodeContract.ScanCodeStage.Success -> {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        painter = painterResource(id = R.drawable.onboarding_spot2),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
-                    state.welcomeMessage?.let {
-                        ScanSuccessStage(
-                            modifier = Modifier
-                                .padding(paddingValues)
-                                .padding(top = 32.dp, bottom = 64.dp)
-                                .padding(horizontal = 36.dp),
-                            title = it,
-                            userState = state.userState,
-                            requiresPrimalWallet = state.requiresPrimalWallet,
-                            isLoading = state.loading,
-                            benefits = state.promoCodeBenefits,
-                            onApplyCodeClick = {
-                                state.scannedValue?.let { code -> eventPublisher(UiEvent.ApplyPromoCode(code)) }
-                            },
-                            onOnboardToPrimalClick = {
-                                state.scannedValue?.let { code -> callbacks.navigateToOnboarding(code) }
-                            },
-                            onActivateWalletClick = {
-                                state.scannedValue?.let { code -> callbacks.navigateToWalletOnboarding(code) }
-                            },
-                        )
-                    }
                 }
             }
         }
@@ -254,5 +215,4 @@ private fun ScanCodeContract.ScanCodeStage.toTitle() =
     when (this) {
         ScanCodeContract.ScanCodeStage.ScanCamera -> stringResource(id = R.string.scan_code_title)
         ScanCodeContract.ScanCodeStage.ManualInput -> stringResource(id = R.string.scan_code_manual_entry_title)
-        ScanCodeContract.ScanCodeStage.Success -> stringResource(id = R.string.scan_code_success_title)
     }

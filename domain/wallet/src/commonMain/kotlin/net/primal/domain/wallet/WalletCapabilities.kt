@@ -32,7 +32,7 @@ private val PrimalCapabilities = WalletCapabilities(
     supportsOnChainReceive = true,
     supportsOnChainFees = true,
     supportsWalletBackup = false,
-    supportsNwcConnections = true,
+    supportsNwcConnections = false,
     supportsReceivableTracking = false,
     canAwaitLightningPayment = false,
 )
