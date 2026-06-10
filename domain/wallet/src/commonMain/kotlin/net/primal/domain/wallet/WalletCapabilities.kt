@@ -17,25 +17,9 @@ data class WalletCapabilities(
 
 val Wallet.capabilities: WalletCapabilities
     get() = when (this) {
-        is Wallet.Primal -> PrimalCapabilities
         is Wallet.NWC -> NwcCapabilities
         is Wallet.Spark -> SparkCapabilities
     }
-
-private val PrimalCapabilities = WalletCapabilities(
-    supportsBalance = true,
-    supportsBalanceSubscription = true,
-    supportsTransactions = true,
-    supportsLightningSend = true,
-    supportsLightningReceive = true,
-    supportsOnChainSend = true,
-    supportsOnChainReceive = true,
-    supportsOnChainFees = true,
-    supportsWalletBackup = false,
-    supportsNwcConnections = true,
-    supportsReceivableTracking = false,
-    canAwaitLightningPayment = false,
-)
 
 private val NwcCapabilities = WalletCapabilities(
     supportsBalance = true,

@@ -7,14 +7,11 @@ import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.withContext
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
-import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.fold
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.wallet.TransactionsRequest
-import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.handler.TransactionsHandler
 import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.dao.WalletTransactionRemoteKey
@@ -65,19 +62,11 @@ class TimestampBasedWalletTransactionsMediator internal constructor(
             walletDatabase.wallet().findWallet(walletId = walletId)
         } ?: return MediatorResult.Success(endOfPaginationReached = true)
 
-        val walletSettings = withContext(dispatcherProvider.io()) {
-            walletDatabase.walletSettings().findWalletSettings(walletId = wallet.info.walletId)
-        }
-
         val request = TransactionsRequest(
             limit = state.config.pageSize,
             since = null,
             until = remoteKey?.sinceId,
-            minAmountInBtc = if (wallet.info.type == WalletType.PRIMAL) {
-                walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString()
-            } else {
-                null
-            },
+            minAmountInBtc = null,
         )
 
         if (lastRequests[loadType] == request) {

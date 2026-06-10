@@ -290,7 +290,6 @@ class NwcRequestProcessor internal constructor(
             walletId = walletId,
             amountInBtc = amountBtcFormatted,
             comment = params.description,
-            expiry = params.expiry,
         )
 
         return if (result.isSuccess) {

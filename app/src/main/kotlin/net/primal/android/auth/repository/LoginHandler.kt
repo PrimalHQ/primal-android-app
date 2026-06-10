@@ -16,7 +16,6 @@ import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.getOrNull
-import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 
 @Suppress("LongParameterList")
 class LoginHandler @Inject constructor(
@@ -25,7 +24,6 @@ class LoginHandler @Inject constructor(
     private val userRepository: UserRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
-    private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -43,8 +41,6 @@ class LoginHandler @Inject constructor(
             ).getOrNull()
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
-
-            ensurePrimalWalletExistsUseCase.invoke(userId = userId, setAsActive = true)
 
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {

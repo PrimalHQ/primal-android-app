@@ -1,12 +1,7 @@
 package net.primal.domain.account
 
 data class PrimalWalletStatus(
-    val hasCustodialWallet: Boolean,
     val hasMigratedToSparkWallet: Boolean,
     val lightningAddress: String? = null,
-    val primalWalletDeprecated: Boolean = false,
-    val registeredSparkWalletId: String? = null,
-) {
-    val isEligibleToRegisterSparkWallet: Boolean
-        get() = !hasCustodialWallet || hasMigratedToSparkWallet || primalWalletDeprecated
-}
+    val registeredSparkWalletId: String?,
+)

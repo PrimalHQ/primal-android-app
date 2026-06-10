@@ -17,7 +17,6 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.Wallet
-import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
 class WalletSessionProvider internal constructor(
@@ -26,7 +25,6 @@ class WalletSessionProvider internal constructor(
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
-    private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
     private val walletAccountRepository: WalletAccountRepository,
 ) {
 
@@ -88,16 +86,12 @@ class WalletSessionProvider internal constructor(
 
             when {
                 hasLocalWallet -> {
-                    val shouldRegister = userWalletStatus?.isEligibleToRegisterSparkWallet == true
+                    val shouldRegister = userWalletStatus != null
                     ensureSparkWalletExistsAndConnected(userId = userId, register = shouldRegister)
                 }
 
                 userWalletStatus?.hasMigratedToSparkWallet == true -> {
                     Napier.d { "Spark wallet detected on backend for userId=$userId, skipping auto-create." }
-                }
-
-                userWalletStatus?.hasCustodialWallet == true -> {
-                    Napier.d { "Custodial wallet found for userId=$userId, skipping Spark wallet creation." }
                 }
 
                 userWalletStatus == null -> {
@@ -139,16 +133,6 @@ class WalletSessionProvider internal constructor(
             Napier.e(throwable = error) { "ensureWalletAndConnect failed for userId=$userId" }
         }.onSuccess { walletId ->
             Napier.d { "Wallet provisioned for userId=$userId, walletId=$walletId" }
-            migrateTransactions(userId = userId, walletId = walletId)
-        }
-    }
-
-    private suspend fun migrateTransactions(userId: String, walletId: String) {
-        migratePrimalTransactionsHandler.invoke(
-            userId = userId,
-            targetSparkWalletId = walletId,
-        ).onSuccess {
-            Napier.i { "Background transaction migration completed for walletId=$walletId" }
         }
     }
 

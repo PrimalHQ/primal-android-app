@@ -18,8 +18,6 @@ import net.primal.android.wallet.notice.sheet.WalletNoticeSheetViewModel
 @Composable
 fun AppOverlays(
     onRemoteSessionClick: () -> Unit,
-    onUpgradeWalletClick: () -> Unit,
-    onWalletFaqClick: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -31,8 +29,6 @@ fun AppOverlays(
 
     WalletNoticeBottomSheet(
         viewModel = walletNoticeSheetViewModel,
-        onUpgradeClick = onUpgradeWalletClick,
-        onFaqClick = onWalletFaqClick,
         onRestoreWalletClick = onRestoreWalletClick,
     ) {
         PermissionsBottomSheet(viewModel = permissionsViewModel) {

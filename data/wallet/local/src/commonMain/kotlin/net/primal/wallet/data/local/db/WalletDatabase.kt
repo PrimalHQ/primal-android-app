@@ -13,7 +13,6 @@ import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.NostrWalletData
-import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.ReceiveRequestDao
 import net.primal.wallet.data.local.dao.ReceiveRequestData
 import net.primal.wallet.data.local.dao.SparkWalletData
@@ -41,12 +40,12 @@ import net.primal.wallet.data.local.dao.nwc.NwcPendingEventDao
 import net.primal.wallet.data.local.dao.nwc.NwcPendingEventData
 import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLog
 import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
+import net.primal.wallet.data.local.db.migrations.MIGRATION_6_7 as MIGRATION_6_7_BODY
 
 @Database(
     entities = [
         WalletInfo::class,
         NostrWalletData::class,
-        PrimalWalletData::class,
         SparkWalletData::class,
         ActiveWalletData::class,
         WalletTransactionData::class,
@@ -63,7 +62,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         WalletUserLink::class,
         UserWalletPreferences::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -293,6 +292,8 @@ abstract class WalletDatabase : RoomDatabase() {
                 )
             }
         }
+
+        val MIGRATION_6_7: Migration = MIGRATION_6_7_BODY
 
         fun setEncryption(enableEncryption: Boolean) {
             EncryptableTypeConverters.enableEncryption = enableEncryption

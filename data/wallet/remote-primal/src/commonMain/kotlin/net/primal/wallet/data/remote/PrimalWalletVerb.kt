@@ -7,7 +7,6 @@ enum class PrimalWalletVerb(val id: String) {
     MEDIA_MANAGEMENT_DELETE("membership_media_management_delete"),
     GET_WALLET_STATUS("get_wallet_status"),
     WALLET("wallet"),
-    WALLET_MONITOR("wallet_monitor_2"),
     WALLET_MEMBERSHIP_NAME_AVAILABLE("membership_name_available"),
     WALLET_MEMBERSHIP_CHANGE_NAME("membership_change_name"),
     WALLET_MEMBERSHIP_STATUS("membership_status"),
@@ -27,6 +26,4 @@ enum class PrimalWalletVerb(val id: String) {
     MEMBERSHIP_MONITOR_CONTENT_BROADCAST_STATUS("rebroadcasting_status"),
     UPDATE_PUSH_NOTIFICATION_TOKEN("update_push_notification_token"),
     RECOMMENDED_BLOSSOM_SERVERS("get_recommended_blossom_servers"),
-    PROMO_CODE_GET_DETAILS("promo_code_get_details"),
-    PROMO_CODES_REDEEM("promo_codes_redeem"),
 }

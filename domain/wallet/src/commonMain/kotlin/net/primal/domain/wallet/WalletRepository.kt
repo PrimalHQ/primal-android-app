@@ -66,7 +66,6 @@ interface WalletRepository {
         walletId: String,
         amountInBtc: String?,
         comment: String?,
-        expiry: Long? = null,
     ): Result<LnInvoiceCreateResult>
 
     suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult>

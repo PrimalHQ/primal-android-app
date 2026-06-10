@@ -212,7 +212,6 @@ private fun WalletListItem(
                     }
                 } ?: when (wallet) {
                     is Wallet.NWC -> stringResource(id = R.string.wallet_picker_nwc_description)
-                    is Wallet.Primal -> stringResource(id = R.string.wallet_picker_no_lightning_address)
                     is Wallet.Spark -> stringResource(id = R.string.wallet_picker_no_lightning_address)
                 },
                 style = AppTheme.typography.bodyMedium,
@@ -275,6 +274,5 @@ private fun WalletListItem(
 private fun Wallet.displayName(): String =
     when (this) {
         is Wallet.NWC -> stringResource(id = R.string.wallet_picker_nwc_title)
-        is Wallet.Primal -> stringResource(id = R.string.wallet_picker_legacy_title)
         is Wallet.Spark -> stringResource(id = R.string.wallet_picker_spark_title)
     }

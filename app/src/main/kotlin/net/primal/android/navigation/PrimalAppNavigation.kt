@@ -243,8 +243,7 @@ fun NavController.navigateToWallet() = navigateToMain(PrimalTopLevelDestination.
 fun NavController.navigateToFollowPack(profileId: String, followPackId: String) =
     navigate(route = "explore/followPack/$profileId/$followPackId")
 
-fun NavController.navigateToScanCode(scanMode: ScanMode, promoCode: String? = null) =
-    navigate(route = "scanCode?$SCAN_MODE=$scanMode&$PROMO_CODE=$promoCode")
+fun NavController.navigateToScanCode(scanMode: ScanMode) = navigate(route = "scanCode?$SCAN_MODE=$scanMode")
 
 private fun NavController.navigateToMessages() = navigate(route = "messages")
 
@@ -462,8 +461,6 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
     SharedTransitionLayout {
         AppOverlays(
             onRemoteSessionClick = { navController.navigateToActiveSessions() },
-            onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
-            onWalletFaqClick = { navController.navigateToWalletUpgradeFaq() },
             onRestoreWalletClick = { navController.navigateToWalletRestore() },
         ) {
             PiPManagerProvider {
@@ -513,20 +510,11 @@ private fun PrimalAppNavigation(
         )
 
         scanCode(
-            route = "scanCode?$SCAN_MODE={$SCAN_MODE}&$PROMO_CODE={$PROMO_CODE}",
+            route = "scanCode?$SCAN_MODE={$SCAN_MODE}",
             arguments = listOf(
                 navArgument(SCAN_MODE) {
                     type = NavType.StringType
                     nullable = true
-                },
-                navArgument(PROMO_CODE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
                 },
             ),
             navController = navController,
@@ -1143,12 +1131,10 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
 private fun NavGraphBuilder.scanCode(
     route: String,
     arguments: List<NamedNavArgument>,
-    deepLinks: List<NavDeepLink>,
     navController: NavController,
 ) = composable(
     route = route,
     arguments = arguments,
-    deepLinks = deepLinks,
     enterTransition = {
         val initialRoute = initialState.destination.route
         when {
@@ -1182,8 +1168,6 @@ private fun NavGraphBuilder.scanCode(
         viewModel = viewModel,
         callbacks = ScanCodeContract.ScreenCallbacks(
             onClose = navController::navigateUp,
-            navigateToOnboarding = { navController.navigateToOnboarding() },
-            navigateToWalletOnboarding = { },
             onNostrConnectRequest = { url ->
                 navController.popBackStack()
                 navController.navigateToNostrConnectBottomSheet(url = url)
@@ -2332,10 +2316,6 @@ private fun NavGraphBuilder.profileQrCodeViewer(
                 onDraftTxScan = { draftTx ->
                     navController.popBackStack()
                     navController.navigateToWalletCreateTransaction(draftTx)
-                },
-                onPromoCodeScan = {
-                    navController.popBackStack()
-                    navController.navigateToScanCode(scanMode = ScanMode.Anything, promoCode = it)
                 },
             ),
         )

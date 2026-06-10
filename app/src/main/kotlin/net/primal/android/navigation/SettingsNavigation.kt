@@ -51,11 +51,8 @@ import net.primal.android.settings.network.NetworkSettingsScreen
 import net.primal.android.settings.network.NetworkSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
-import net.primal.android.settings.wallet.domain.parseAsPrimalWalletNwc
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionScreen
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionViewModel
-import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletScreen
-import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletViewModel
 import net.primal.android.settings.wallet.nwc.scan.NwcQrCodeScannerScreen
 import net.primal.android.settings.wallet.nwc.scan.NwcQrCodeScannerViewModel
 import net.primal.android.settings.wallet.settings.WalletSettingsScreen
@@ -105,14 +102,6 @@ private fun NavController.navigateToLocalAppPermissions(identifier: String) =
 
 fun NavController.navigateToWalletRestore() = navigate(route = "wallet_settings/restore")
 
-fun NavController.navigateToLinkPrimalWallet(
-    appName: String? = null,
-    appIcon: String? = null,
-    callback: String,
-) = navigate(
-    route = "wallet_settings/link_primal_wallet?appName=$appName&appIcon=$appIcon&callback=$callback",
-)
-
 @Suppress("LongMethod")
 fun NavGraphBuilder.settingsNavigation(route: String, navController: NavController) =
     navigation(
@@ -153,18 +142,6 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             navController = navController,
         )
         walletRestore(route = "wallet_settings/restore", navController = navController)
-        linkPrimalWallet(
-            route = "wallet_settings/link_primal_wallet",
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "nostrnwc://.*"
-                },
-                navDeepLink {
-                    uriPattern = "nostrnwc+primal://.*"
-                },
-            ),
-            navController = navController,
-        )
         scanNwcUrl(route = "wallet_settings/scan_nwc_url", navController = navController)
         createNewWalletConnection(route = "wallet_settings/create_new_nwc", navController = navController)
         network(route = "network", navController = navController)
@@ -362,41 +339,6 @@ private fun NavGraphBuilder.scanNwcUrl(route: String, navController: NavControll
             onClose = { navController.popBackStack() },
         )
     }
-
-private fun NavGraphBuilder.linkPrimalWallet(
-    route: String,
-    deepLinks: List<NavDeepLink>,
-    navController: NavController,
-) = composable(
-    route = route,
-    deepLinks = deepLinks,
-    enterTransition = { primalSlideInHorizontallyFromEnd },
-    exitTransition = { primalScaleOut },
-    popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontallyToEnd },
-) {
-    val activity = LocalActivity.current
-    fun dismissLinkPrimalWallet() {
-        if (!navController.popBackStack()) {
-            activity?.finishAfterTransition()
-        }
-    }
-
-    val nwcPrimalUrl = activity?.intent?.data?.toString()
-    if (nwcPrimalUrl == null) {
-        dismissLinkPrimalWallet()
-        return@composable
-    }
-
-    val viewModel = hiltViewModel<LinkPrimalWalletViewModel, LinkPrimalWalletViewModel.Factory> { factory ->
-        factory.create(nwcRequest = nwcPrimalUrl.parseAsPrimalWalletNwc())
-    }
-    LockToOrientationPortrait()
-    LinkPrimalWalletScreen(
-        viewModel = viewModel,
-        onDismiss = { dismissLinkPrimalWallet() },
-    )
-}
 
 private fun NavGraphBuilder.createNewWalletConnection(route: String, navController: NavController) =
     composable(

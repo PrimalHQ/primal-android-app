@@ -426,7 +426,6 @@ private fun WalletItem(
 
 private fun WalletType.toDisplayName(): String =
     when (this) {
-        WalletType.PRIMAL -> "Primal Wallet"
         WalletType.SPARK -> "Spark Wallet"
         WalletType.NWC -> "NWC Wallet"
     }

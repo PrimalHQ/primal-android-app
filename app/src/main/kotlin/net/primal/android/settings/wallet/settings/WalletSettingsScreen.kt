@@ -67,8 +67,8 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
 import net.primal.android.settings.wallet.settings.ui.EnableNwcNotificationsBottomSheet
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
-import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
+import net.primal.android.settings.wallet.settings.ui.WalletSettings
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.utils.saveNwcLogsToUri
@@ -389,7 +389,7 @@ private fun WalletSpecificSettingsItems(
             }
 
             false -> {
-                PrimalWalletSettings(
+                WalletSettings(
                     state = state,
                     eventPublisher = eventPublisher,
                     onBackupWalletClick = onBackupWalletClick,

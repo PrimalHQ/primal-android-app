@@ -8,15 +8,12 @@ import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlin.time.Clock
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 import net.primal.core.lightning.LightningPayHelper
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
-import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
@@ -178,7 +175,6 @@ internal class WalletRepositoryImpl(
 
             val walletPO = walletDatabase.wallet().findWallet(walletId = walletId) ?: return@withContext
             val wallet = walletPO.toDomain<Wallet>()
-            val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = walletId)
 
             transactionsHandler.fetchAndPersistLatestTransactions(
                 wallet = wallet,
@@ -186,11 +182,7 @@ internal class WalletRepositoryImpl(
                     limit = SYNC_TRANSACTIONS_PAGE_SIZE,
                     since = newestTx.updatedAt,
                     until = null,
-                    minAmountInBtc = if (walletPO.info.type == WalletType.PRIMAL) {
-                        walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString()
-                    } else {
-                        null
-                    },
+                    minAmountInBtc = null,
                 ),
             )
         }
@@ -199,12 +191,6 @@ internal class WalletRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val walletPO = walletDatabase.wallet().findWallet(walletId = walletId) ?: return@withContext
             val wallet = walletPO.toDomain<Wallet>()
-            val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = walletId)
-            val minAmountInBtc = if (walletPO.info.type == WalletType.PRIMAL) {
-                walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString()
-            } else {
-                null
-            }
 
             var until: Long? = walletDatabase.walletTransactions()
                 .firstByWalletId(walletId = walletId)
@@ -223,7 +209,7 @@ internal class WalletRepositoryImpl(
                         limit = SYNC_TRANSACTIONS_PAGE_SIZE,
                         since = null,
                         until = until,
-                        minAmountInBtc = minAmountInBtc,
+                        minAmountInBtc = null,
                     ),
                 ).getOrThrow()
 
@@ -342,7 +328,6 @@ internal class WalletRepositoryImpl(
         walletId: String,
         amountInBtc: String?,
         comment: String?,
-        expiry: Long?,
     ): Result<LnInvoiceCreateResult> {
         return withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
@@ -354,7 +339,6 @@ internal class WalletRepositoryImpl(
                 request = LnInvoiceCreateRequest(
                     description = comment,
                     amountInBtc = amountInBtc,
-                    expiry = if (wallet.info.type != WalletType.PRIMAL) 1.hours.inWholeSeconds else expiry,
                 ),
             )
 
