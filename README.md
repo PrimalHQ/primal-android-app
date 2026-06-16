@@ -32,7 +32,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/PrimalHQ/primal-android-app">
-    <img src="https://primal.net/assets/logo_fire-409917ad.svg" alt="Logo" width="80" height="80">
+    <img src="https://primal.net/assets/logo-d368885b.svg" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Primal</h3>
