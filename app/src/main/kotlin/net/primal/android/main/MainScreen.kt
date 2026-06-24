@@ -158,7 +158,11 @@ fun MainScreen(
     WalletErrorHandler(navBackStackEntry, sharedState.snackbarHostState)
 
     val onActiveDestinationClick: () -> Unit = {
-        handleActiveDestinationClick(activeTab, sharedState, uiScope)
+        if (activeTab == PrimalTopLevelDestination.Explore) {
+            navController.navigateToSearch(searchScope = SearchScope.Notes)
+        } else {
+            handleActiveDestinationClick(activeTab, sharedState, uiScope)
+        }
     }
 
     val onTabChanged: (PrimalTopLevelDestination) -> Unit = { destination ->
