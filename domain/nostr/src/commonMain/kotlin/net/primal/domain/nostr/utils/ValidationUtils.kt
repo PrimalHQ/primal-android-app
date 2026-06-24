@@ -7,7 +7,9 @@ import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 
 private val HEXADECIMAL_PATTERN = Regex("\\p{XDigit}+")
 
-fun String.isValidHex() = HEXADECIMAL_PATTERN.matches(this)
+private const val HEX_PUBKEY_LENGTH = 64
+
+fun String.isValidHex() = this.length == HEX_PUBKEY_LENGTH && HEXADECIMAL_PATTERN.matches(this)
 
 fun String?.isValidNostrPrivateKey(): Boolean {
     if (this == null) return false

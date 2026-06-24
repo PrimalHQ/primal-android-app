@@ -8,6 +8,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.user.domain.Relay
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.domain.nostr.utils.isValidHex
 
 fun String.parseKind3Relays(): List<Relay> {
     val jsonContent = try {
@@ -48,7 +49,9 @@ fun List<JsonArray>.parseFollowings(): Set<String> {
     this.forEach {
         if (it.getOrNull(0)?.jsonPrimitive?.content == "p") {
             val pubkey = it.getOrNull(1)?.jsonPrimitive?.content
-            if (pubkey != null) followings.add(pubkey)
+            if (pubkey != null && pubkey.isValidHex()) {
+                followings.add(pubkey)
+            }
         }
     }
     return followings

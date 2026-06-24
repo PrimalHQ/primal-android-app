@@ -128,20 +128,78 @@ class ParsersTest {
         val tags = listOf(
             buildJsonArray {
                 add("p")
-                add("invalidNpub")
+                add("b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b")
             },
             buildJsonArray {
                 add("p")
-                add("invalidNpub2")
+                add("88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079")
             },
             buildJsonArray {
                 add("p")
-                add("invalidNpub3")
+                add("d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a")
             },
         )
         val actual = tags.parseFollowings()
         actual.shouldNotBeEmpty()
         actual.size shouldBe tags.size
+    }
+
+    @Test
+    fun `parseFollowings ignores p tags with invalid public keys`() {
+        val tags = listOf(
+            buildJsonArray {
+                add("p")
+                add("invalidNpub")
+            },
+            buildJsonArray {
+                add("p")
+                add("88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079")
+            },
+            buildJsonArray {
+                add("p")
+                add("notavalidhexpubkey")
+            },
+        )
+        val actual = tags.parseFollowings()
+        actual shouldBe setOf("88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079")
+    }
+
+    @Test
+    fun `parseFollowings ignores p tags with correct length but non-hex characters`() {
+        val nonHex = "z".repeat(64)
+        val tags = listOf(
+            buildJsonArray {
+                add("p")
+                add(nonHex)
+            },
+        )
+        tags.parseFollowings() shouldBe emptySet()
+    }
+
+    @Test
+    fun `parseFollowings ignores p tags with valid hex of the wrong length`() {
+        val validPubkey = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079"
+        val tags = listOf(
+            buildJsonArray {
+                add("p")
+                add(validPubkey.dropLast(1))
+            },
+            buildJsonArray {
+                add("p")
+                add(validPubkey + "a")
+            },
+        )
+        tags.parseFollowings() shouldBe emptySet()
+    }
+
+    @Test
+    fun `parseFollowings ignores p tags without a value`() {
+        val tags = listOf(
+            buildJsonArray {
+                add("p")
+            },
+        )
+        tags.parseFollowings() shouldBe emptySet()
     }
 
     @Test
