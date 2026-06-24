@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -97,6 +99,7 @@ fun ProfileHeaderDetails(
 
     ProfileHeaderDetails(
         state = state,
+        eventPublisher = eventPublisher,
         onEditProfileClick = callbacks.onEditProfileClick,
         onMessageClick = { state.profileId?.let { callbacks.onMessageClick(state.profileId) } },
         onZapProfileClick = {
@@ -125,10 +128,12 @@ fun ProfileHeaderDetails(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 @Composable
 private fun ProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
+    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onEditProfileClick: () -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onZapProfileClick: () -> Unit,
@@ -163,6 +168,24 @@ private fun ProfileHeaderDetails(
             onDrawerQrCodeClick = onDrawerQrCodeClick,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
+            dropdownMenu = { expanded, onDismiss ->
+                state.profileId?.let { profileId ->
+                    ProfileDropdownMenu(
+                        profileId = profileId,
+                        profileName = state.resolveProfileName(),
+                        primalName = state.profileDetails?.primalName,
+                        isActiveUser = state.isActiveUser == true,
+                        isProfileMuted = state.isProfileMuted,
+                        isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
+                        expanded = expanded,
+                        onDismissRequest = onDismiss,
+                        onZapClick = onZapProfileClick,
+                        onMessageClick = onMessageClick,
+                        eventPublisher = eventPublisher,
+                        offset = DpOffset(x = 0.dp, y = 8.dp),
+                    )
+                }
+            },
         )
 
         state.profileId?.let { profileId ->
@@ -516,6 +539,7 @@ private fun PreviewProfileHeaderDetails() {
                         repliesCount = 14,
                     ),
                 ),
+                eventPublisher = {},
                 onEditProfileClick = {},
                 onZapProfileClick = {},
                 onMessageClick = {},

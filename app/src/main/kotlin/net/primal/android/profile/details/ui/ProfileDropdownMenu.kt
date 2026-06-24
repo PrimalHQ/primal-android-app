@@ -6,9 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
@@ -16,7 +17,8 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
-import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.Message
+import net.primal.android.core.compose.icons.primaliconpack.NavWalletBolt
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.utils.resolvePrimalProfileLink
 import net.primal.android.core.utils.systemShareText
@@ -24,6 +26,7 @@ import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 
+@Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @Composable
 fun ProfileDropdownMenu(
@@ -33,10 +36,14 @@ fun ProfileDropdownMenu(
     isActiveUser: Boolean,
     isProfileMuted: Boolean,
     isProfileFeedInActiveUserFeeds: Boolean,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onZapClick: () -> Unit,
+    onMessageClick: () -> Unit,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    offset: DpOffset = DpOffset(0.dp, 0.dp),
 ) {
     val context = LocalContext.current
-    var menuVisible by remember { mutableStateOf(false) }
 
     var reportDialogVisible by remember { mutableStateOf(false) }
     if (reportDialogVisible) {
@@ -54,27 +61,30 @@ fun ProfileDropdownMenu(
         )
     }
 
-    ProfileAppBarIcon(
-        icon = PrimalIcons.More,
-        onClick = { menuVisible = true },
-        appBarIconContentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
-        enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
-        tint = Color.White,
-    )
-
     DropdownPrimalMenu(
-        expanded = menuVisible,
-        onDismissRequest = { menuVisible = false },
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        offset = offset,
     ) {
         if (!isActiveUser) {
-            AddOrRemoveUserFeedMenuItem(
-                profileId = profileId,
-                profileName = profileName,
-                isProfileFeedInActiveUserFeeds = isProfileFeedInActiveUserFeeds,
-                eventPublisher = eventPublisher,
-                onDismiss = { menuVisible = false },
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.NavWalletBolt,
+                text = stringResource(id = R.string.profile_context_zap_user),
+                onClick = {
+                    onZapClick()
+                    onDismissRequest()
+                },
             )
         }
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.Message,
+            text = stringResource(id = R.string.profile_context_message_user),
+            onClick = {
+                onMessageClick()
+                onDismissRequest()
+            },
+        )
 
         DropdownPrimalMenuItem(
             trailingIconVector = PrimalIcons.ContextShare,
@@ -84,16 +94,32 @@ fun ProfileDropdownMenu(
                     context = context,
                     text = resolvePrimalProfileLink(profileId = profileId, primalName = primalName),
                 )
-                menuVisible = false
+                onDismissRequest()
             },
         )
 
         if (!isActiveUser) {
+            AddOrRemoveUserFeedMenuItem(
+                profileId = profileId,
+                profileName = profileName,
+                isProfileFeedInActiveUserFeeds = isProfileFeedInActiveUserFeeds,
+                eventPublisher = eventPublisher,
+                onDismiss = onDismissRequest,
+            )
+
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextMuteUser,
+                text = stringResource(id = R.string.profile_context_follow_mute_list),
+                onClick = {
+                    onDismissRequest()
+                },
+            )
+
             MuteOrUnmuteProfileMenuItem(
                 profileId = profileId,
                 isProfileMuted = isProfileMuted,
                 eventPublisher = eventPublisher,
-                onDismiss = { menuVisible = false },
+                onDismiss = onDismissRequest,
             )
 
             DropdownPrimalMenuItem(
@@ -102,7 +128,7 @@ fun ProfileDropdownMenu(
                 text = stringResource(id = R.string.context_menu_report_user),
                 onClick = {
                     reportDialogVisible = true
-                    menuVisible = false
+                    onDismissRequest()
                 },
             )
         }

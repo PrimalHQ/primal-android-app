@@ -1249,9 +1249,12 @@
     <string name="profile_failed_to_publish_metadata">Unable to post edited metadata. Please try again.</string>
     <string name="profile_save_profile_button">Save profile</string>
     <string name="profile_edit_profile_title">Edit Profile</string>
-    <string name="profile_context_add_user_feed">Add user feed</string>
-    <string name="profile_context_share_profile">Share user profile</string>
+    <string name="profile_context_add_user_feed">Add User Feed</string>
+    <string name="profile_context_share_profile">Share User Profile</string>
     <string name="profile_context_remove_user_feed">Remove user feed</string>
+    <string name="profile_context_zap_user">Zap User</string>
+    <string name="profile_context_message_user">Message User</string>
+    <string name="profile_context_follow_mute_list">Follow User\'s Mute List</string>
     <string name="profile_user_feed_title">%1$s\'s feed</string>
     <string name="profile_user_is_muted">%1$s is muted.</string>
     <string name="profile_follows_you">Follows you</string>

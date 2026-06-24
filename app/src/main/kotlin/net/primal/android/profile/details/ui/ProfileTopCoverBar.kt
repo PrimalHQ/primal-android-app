@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
@@ -76,7 +74,6 @@ private const val MAX_COVER_TRANSPARENCY = 0.70f
 @Composable
 fun ProfileTopCoverBar(
     listState: LazyListState,
-    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     state: ProfileDetailsContract.UiState,
     callbacks: ProfileDetailsContract.ScreenCallbacks,
     paddingValues: PaddingValues,
@@ -154,7 +151,6 @@ fun ProfileTopCoverBar(
             ) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
             avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
         ),
-        eventPublisher = eventPublisher,
         callbacks = callbacks,
         onClose = callbacks.onClose,
         paddingValues = paddingValues,
@@ -168,7 +164,6 @@ fun ProfileTopCoverBar(
 @Composable
 private fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
-    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     callbacks: ProfileDetailsContract.ScreenCallbacks,
     onMediaItemClick: (String) -> Unit,
     onClose: () -> Unit,
@@ -212,7 +207,6 @@ private fun ProfileTopCoverBar(
             state = state,
             onClose = onClose,
             titleVisible = titleVisible,
-            eventPublisher = eventPublisher,
             paddingValues = paddingValues,
             onSearchClick = onSearchClick,
             onMediaClick = { imageSource?.let { onMediaItemClick(it) } },
@@ -267,7 +261,6 @@ private fun ProfileTopAppBar(
     state: ProfileDetailsContract.UiState,
     titleVisible: Boolean,
     paddingValues: PaddingValues,
-    eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onSearchClick: () -> Unit,
     onMediaClick: () -> Unit,
@@ -325,20 +318,6 @@ private fun ProfileTopAppBar(
                     enabledBackgroundColor = Color.Black.copy(alpha = 0.5f),
                     tint = Color.White,
                 )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                if (state.profileId != null) {
-                    ProfileDropdownMenu(
-                        profileId = state.profileId,
-                        isActiveUser = state.isActiveUser == true,
-                        isProfileMuted = state.isProfileMuted,
-                        isProfileFeedInActiveUserFeeds = state.isProfileFeedInActiveUserFeeds,
-                        profileName = profileName,
-                        eventPublisher = eventPublisher,
-                        primalName = state.profileDetails?.primalName,
-                    )
-                }
             },
         )
 

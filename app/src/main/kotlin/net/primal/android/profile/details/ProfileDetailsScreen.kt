@@ -317,7 +317,6 @@ private fun ProfileDetailsContent(
             stickyHeader {
                 ProfileTopCoverBar(
                     listState = listState,
-                    eventPublisher = eventPublisher,
                     state = state,
                     callbacks = callbacks,
                     paddingValues = paddingValues,

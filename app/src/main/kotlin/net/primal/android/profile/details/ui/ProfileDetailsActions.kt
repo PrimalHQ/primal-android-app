@@ -1,10 +1,12 @@
 package net.primal.android.profile.details.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +17,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,6 +34,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.Message
+import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.theme.AppTheme
 
@@ -43,11 +50,25 @@ fun ProfileActions(
     onDrawerQrCodeClick: () -> Unit,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
+    dropdownMenu: (@Composable (expanded: Boolean, onDismiss: () -> Unit) -> Unit)? = null,
 ) {
+    var menuVisible by remember { mutableStateOf(false) }
+
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.End,
     ) {
+        if (dropdownMenu != null) {
+            ActionButton(
+                containerColor = containerColor,
+                onClick = { menuVisible = true },
+                iconVector = PrimalIcons.More,
+                contentDescription = stringResource(id = R.string.accessibility_profile_drop_down),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+
         ActionButton(
             containerColor = containerColor,
             onClick = onDrawerQrCodeClick,
@@ -58,26 +79,28 @@ fun ProfileActions(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        if (!isActiveUser) {
+        if (dropdownMenu == null) {
+            if (!isActiveUser) {
+                ActionButton(
+                    containerColor = containerColor,
+                    onClick = onZapProfileClick,
+                    iconVector = PrimalIcons.FeedZaps,
+                    contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
             ActionButton(
                 containerColor = containerColor,
-                onClick = onZapProfileClick,
-                iconVector = PrimalIcons.FeedZaps,
-                contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
+                onClick = onMessageClick,
+                iconVector = PrimalIcons.Message,
+                iconPadding = 3.dp,
+                contentDescription = stringResource(id = R.string.accessibility_profile_messages),
             )
 
             Spacer(modifier = Modifier.width(8.dp))
         }
-
-        ActionButton(
-            containerColor = containerColor,
-            onClick = onMessageClick,
-            iconVector = PrimalIcons.Message,
-            iconPadding = 3.dp,
-            contentDescription = stringResource(id = R.string.accessibility_profile_messages),
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         if (!isActiveUser) {
             when (isFollowed) {
@@ -86,6 +109,12 @@ fun ProfileActions(
             }
         } else {
             EditProfileButton(onClick = { onEditProfileClick() })
+        }
+
+        if (dropdownMenu != null) {
+            Box(modifier = Modifier.fillMaxHeight()) {
+                dropdownMenu(menuVisible) { menuVisible = false }
+            }
         }
     }
 }
