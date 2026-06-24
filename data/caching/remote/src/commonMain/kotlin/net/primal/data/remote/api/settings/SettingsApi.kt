@@ -18,5 +18,5 @@ interface SettingsApi {
 
     suspend fun getStreamMuteList(userId: String): Result<GetStreamMuteListResponse>
 
-    suspend fun getFollowedMuteListEvents(userId: String): List<NostrEvent>
+    suspend fun getFollowedMuteListEvent(userId: String): NostrEvent?
 }

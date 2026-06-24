@@ -1,7 +1,7 @@
 package net.primal.data.repository.mute
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -68,7 +68,7 @@ class MutedItemRepositoryImplTest {
     fun `followMuteList publishes a new kind 30000 event when none exists`() =
         runTest(testDispatcher) {
             val settingsApi = mockk<SettingsApi> {
-                coEvery { getFollowedMuteListEvents(userId) } returns emptyList()
+                coEvery { getFollowedMuteListEvent(userId) } returns null
             }
             val publishedSlot = slot<NostrUnsignedEvent>()
             val publisher = mockk<PrimalPublisher> {
@@ -93,7 +93,7 @@ class MutedItemRepositoryImplTest {
         runTest(testDispatcher) {
             val existing = followedMuteListEvent(content = "existing-content", followedAuthorIds = listOf(authorA))
             val settingsApi = mockk<SettingsApi> {
-                coEvery { getFollowedMuteListEvents(userId) } returns listOf(existing)
+                coEvery { getFollowedMuteListEvent(userId) } returns existing
             }
             val publishedSlot = slot<NostrUnsignedEvent>()
             val publisher = mockk<PrimalPublisher> {
@@ -113,15 +113,14 @@ class MutedItemRepositoryImplTest {
         }
 
     @Test
-    fun `followMuteList selects the mutelists set among other categorized people lists`() =
+    fun `followMuteList ignores a non-mutelists event and creates a fresh list`() =
         runTest(testDispatcher) {
             val otherList = dummyNostrEvent.copy(
                 content = "other",
                 tags = listOf("other-list".asIdentifierTag(), authorA.asFollowedMuteListPubkeyTag()),
             )
-            val muteLists = followedMuteListEvent(content = "mute-content", followedAuthorIds = listOf(authorA))
             val settingsApi = mockk<SettingsApi> {
-                coEvery { getFollowedMuteListEvents(userId) } returns listOf(otherList, muteLists)
+                coEvery { getFollowedMuteListEvent(userId) } returns otherList
             }
             val publishedSlot = slot<NostrUnsignedEvent>()
             val publisher = mockk<PrimalPublisher> {
@@ -132,10 +131,9 @@ class MutedItemRepositoryImplTest {
                 .followMuteList(userId = userId, muteListOwnerId = authorB)
 
             val published = publishedSlot.captured
-            published.content shouldBe "mute-content"
+            published.content shouldBe ""
             published.tags shouldBe listOf(
                 followedMuteListIdentifierTag(),
-                authorA.asFollowedMuteListPubkeyTag(),
                 authorB.asFollowedMuteListPubkeyTag(),
             )
         }
@@ -145,7 +143,7 @@ class MutedItemRepositoryImplTest {
         runTest(testDispatcher) {
             val existing = followedMuteListEvent(content = "", followedAuthorIds = listOf(authorA))
             val settingsApi = mockk<SettingsApi> {
-                coEvery { getFollowedMuteListEvents(userId) } returns listOf(existing)
+                coEvery { getFollowedMuteListEvent(userId) } returns existing
             }
             val publisher = mockk<PrimalPublisher>()
 
@@ -156,18 +154,19 @@ class MutedItemRepositoryImplTest {
         }
 
     @Test
-    fun `followMuteList propagates publish failures`() =
+    fun `followMuteList returns a failure Result when publishing fails`() =
         runTest(testDispatcher) {
             val settingsApi = mockk<SettingsApi> {
-                coEvery { getFollowedMuteListEvents(userId) } returns emptyList()
+                coEvery { getFollowedMuteListEvent(userId) } returns null
             }
             val publisher = mockk<PrimalPublisher> {
                 coEvery { signPublishImportNostrEvent(any(), any()) } throws NostrPublishException(cause = null)
             }
 
-            shouldThrow<NostrPublishException> {
-                buildRepository(settingsApi, publisher)
-                    .followMuteList(userId = userId, muteListOwnerId = authorA)
-            }
+            val result = buildRepository(settingsApi, publisher)
+                .followMuteList(userId = userId, muteListOwnerId = authorA)
+
+            result.isFailure shouldBe true
+            result.exceptionOrNull().shouldBeInstanceOf<NostrPublishException>()
         }
 }

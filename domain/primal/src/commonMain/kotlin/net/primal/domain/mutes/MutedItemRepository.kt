@@ -103,12 +103,5 @@ interface MutedItemRepository {
     )
     suspend fun unmuteWordAndPersistMuteList(userId: String, word: String)
 
-    @Throws(
-        MissingRelaysException::class,
-        NostrPublishException::class,
-        SignatureException::class,
-        CancellationException::class,
-        NetworkException::class,
-    )
-    suspend fun followMuteList(userId: String, muteListOwnerId: String)
+    suspend fun followMuteList(userId: String, muteListOwnerId: String): Result<Unit>
 }

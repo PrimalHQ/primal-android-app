@@ -73,7 +73,7 @@ class SettingsApiImpl(
         )
     }
 
-    override suspend fun getFollowedMuteListEvents(userId: String): List<NostrEvent> {
+    override suspend fun getFollowedMuteListEvent(userId: String): NostrEvent? {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.MUTE_LISTS.id,
@@ -81,7 +81,7 @@ class SettingsApiImpl(
             ),
         )
 
-        return queryResult.filterNostrEvents(NostrEventKind.CategorizedPeopleList)
+        return queryResult.findNostrEvent(NostrEventKind.CategorizedPeopleList)
     }
 
     override suspend fun getStreamMuteList(userId: String) =

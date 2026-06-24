@@ -188,27 +188,29 @@ class MutedItemRepositoryImpl(
             minus(MutedItemData(item = word, ownerId = userId, type = MutedItemType.Word, listType = ListType.MuteList))
         }
 
-    override suspend fun followMuteList(userId: String, muteListOwnerId: String) =
+    override suspend fun followMuteList(userId: String, muteListOwnerId: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
-            val existingEvent = settingsApi.getFollowedMuteListEvents(userId = userId)
-                .firstOrNull { event -> event.tags.any { it.isFollowedMuteListTag() } }
-            val existingTags = existingEvent?.tags
-                ?: listOf(followedMuteListIdentifierTag())
+            runCatching {
+                val existingEvent = settingsApi.getFollowedMuteListEvent(userId = userId)
+                    ?.takeIf { event -> event.tags.any { it.isFollowedMuteListTag() } }
+                val existingTags = existingEvent?.tags
+                    ?: listOf(followedMuteListIdentifierTag())
 
-            val alreadyFollowed = existingTags.any {
-                it.isPubKeyTag() && it.getTagValueOrNull() == muteListOwnerId
-            }
+                val alreadyFollowed = existingTags.any {
+                    it.isPubKeyTag() && it.getTagValueOrNull() == muteListOwnerId
+                }
 
-            if (!alreadyFollowed) {
-                val newTags = existingTags + listOf(muteListOwnerId.asFollowedMuteListPubkeyTag())
-                primalPublisher.signPublishImportNostrEvent(
-                    NostrUnsignedEvent(
-                        content = existingEvent?.content ?: "",
-                        pubKey = userId,
-                        kind = NostrEventKind.CategorizedPeopleList.value,
-                        tags = newTags,
-                    ),
-                )
+                if (!alreadyFollowed) {
+                    val newTags = existingTags + listOf(muteListOwnerId.asFollowedMuteListPubkeyTag())
+                    primalPublisher.signPublishImportNostrEvent(
+                        NostrUnsignedEvent(
+                            content = existingEvent?.content ?: "",
+                            pubKey = userId,
+                            kind = NostrEventKind.CategorizedPeopleList.value,
+                            tags = newTags,
+                        ),
+                    )
+                }
             }
         }
 
