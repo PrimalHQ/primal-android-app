@@ -20,6 +20,7 @@
     <string name="app_error_muting_word">Unable to mute word. Please try again.</string>
     <string name="app_error_muting_hashtag">Unable to mute hashtag. Please try again.</string>
     <string name="app_error_unmuting_user">Unable to unmute user. Please try again.</string>
+    <string name="app_error_following_mute_list">Unable to follow mute list. Please try again.</string>
     <string name="app_error_muting_thread">Unable to mute thread. Please try again.</string>
     <string name="app_error_unmuting_thread">Unable to unmute thread. Please try again.</string>
     <string name="app_error_unmuting_hashtag">Unable to unmute hashtag. Please try again.</string>
@@ -1268,6 +1269,7 @@
 
     <string name="profile_zap_bottom_sheet_fallback_title">Profile</string>
     <string name="profile_zap_sent_message">Zap sent successfully.</string>
+    <string name="profile_followed_mute_list_message">Mute list followed.</string>
 
     <string name="profile_qr_code_profile_tab">Public Key</string>
     <string name="profile_qr_code_lightning_tab">Lightning Address</string>

@@ -166,6 +166,10 @@ fun List<JsonArray>.findReplyTargetId(): String? {
 
 fun List<JsonArray>.findFirstHostPubkey() = firstOrNull { it.isPubKeyTag() && it.hasHostMarker() }?.getTagValueOrNull()
 
+fun followedMuteListIdentifierTag(): JsonArray = "mutelists".asIdentifierTag()
+
+fun JsonArray.isFollowedMuteListTag() = isIdentifierTag() && getTagValueOrNull() == "mutelists"
+
 fun JsonArray.isRecordingTag() = getOrNull(0)?.jsonPrimitive?.content == "recording"
 
 fun JsonArray.isEndsTag() = getOrNull(0)?.jsonPrimitive?.content == "ends"
@@ -330,6 +334,15 @@ fun String.asIdentifierTag(): JsonArray =
     buildJsonArray {
         add("d")
         add(this@asIdentifierTag)
+    }
+
+fun String.asFollowedMuteListPubkeyTag(): JsonArray =
+    buildJsonArray {
+        add("p")
+        add(this@asFollowedMuteListPubkeyTag)
+        add("wss://relay.primal.net")
+        add("")
+        add("""["content","trending"]""")
     }
 
 fun String.asReplaceableEventTag(relayHint: String? = null, marker: String? = null): JsonArray =

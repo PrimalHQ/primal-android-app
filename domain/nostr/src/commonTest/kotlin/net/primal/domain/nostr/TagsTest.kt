@@ -325,6 +325,38 @@ class TagsTest {
     }
 
     @Test
+    fun `asFollowedMuteListPubkeyTag returns proper 5-element JsonArray tag`() {
+        val pubkey = "myPubkey"
+
+        val actual = pubkey.asFollowedMuteListPubkeyTag()
+
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 5
+        actual[0].jsonPrimitive.content shouldBe "p"
+        actual[1].jsonPrimitive.content shouldBe pubkey
+        actual[2].jsonPrimitive.content shouldBe "wss://relay.primal.net"
+        actual[3].jsonPrimitive.content shouldBe ""
+        actual[4].jsonPrimitive.content shouldBe """["content","trending"]"""
+    }
+
+    @Test
+    fun `followedMuteListIdentifierTag returns the mutelists d-tag`() {
+        val actual = followedMuteListIdentifierTag()
+
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 2
+        actual[0].jsonPrimitive.content shouldBe "d"
+        actual[1].jsonPrimitive.content shouldBe "mutelists"
+    }
+
+    @Test
+    fun `isFollowedMuteListTag is true only for the mutelists d-tag`() {
+        followedMuteListIdentifierTag().isFollowedMuteListTag() shouldBe true
+        "other".asIdentifierTag().isFollowedMuteListTag() shouldBe false
+        "myPubkey".asFollowedMuteListPubkeyTag().isFollowedMuteListTag() shouldBe false
+    }
+
+    @Test
     fun `asReplaceableEventTag returns proper JsonArray tag`() {
         val identifier = "identifier"
         val expectedRelayHint = "wss://relay.primal.net"

@@ -22,11 +22,14 @@ import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asFollowedMuteListPubkeyTag
 import net.primal.domain.nostr.asHashtagTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asWordTag
+import net.primal.domain.nostr.followedMuteListIdentifierTag
 import net.primal.domain.nostr.getTagValueOrNull
 import net.primal.domain.nostr.isEventIdTag
+import net.primal.domain.nostr.isFollowedMuteListTag
 import net.primal.domain.nostr.isHashtagTag
 import net.primal.domain.nostr.isPubKeyTag
 import net.primal.domain.nostr.isWordTag
@@ -183,6 +186,30 @@ class MutedItemRepositoryImpl(
     override suspend fun unmuteWordAndPersistMuteList(userId: String, word: String) =
         updateAndPersistMuteList(userId = userId) {
             minus(MutedItemData(item = word, ownerId = userId, type = MutedItemType.Word, listType = ListType.MuteList))
+        }
+
+    override suspend fun followMuteList(userId: String, muteListOwnerId: String) =
+        withContext(dispatcherProvider.io()) {
+            val existingEvent = settingsApi.getFollowedMuteListEvents(userId = userId)
+                .firstOrNull { event -> event.tags.any { it.isFollowedMuteListTag() } }
+            val existingTags = existingEvent?.tags
+                ?: listOf(followedMuteListIdentifierTag())
+
+            val alreadyFollowed = existingTags.any {
+                it.isPubKeyTag() && it.getTagValueOrNull() == muteListOwnerId
+            }
+
+            if (!alreadyFollowed) {
+                val newTags = existingTags + listOf(muteListOwnerId.asFollowedMuteListPubkeyTag())
+                primalPublisher.signPublishImportNostrEvent(
+                    NostrUnsignedEvent(
+                        content = existingEvent?.content ?: "",
+                        pubKey = userId,
+                        kind = NostrEventKind.CategorizedPeopleList.value,
+                        tags = newTags,
+                    ),
+                )
+            }
         }
 
     private suspend fun updateAndPersistMuteList(

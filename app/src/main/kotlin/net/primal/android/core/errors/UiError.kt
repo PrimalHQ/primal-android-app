@@ -22,6 +22,7 @@ sealed class UiError {
     data class FailedToUpdateFollowList(val cause: Throwable) : UiError()
     data class FailedToMuteUser(val cause: Throwable) : UiError()
     data class FailedToUnmuteUser(val cause: Throwable) : UiError()
+    data class FailedToFollowMuteList(val cause: Throwable) : UiError()
 
     data class FailedToBookmarkNote(val cause: Throwable) : UiError()
 

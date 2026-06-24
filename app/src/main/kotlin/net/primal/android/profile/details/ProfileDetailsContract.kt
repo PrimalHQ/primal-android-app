@@ -49,6 +49,7 @@ interface ProfileDetailsContract {
         data object ProfileFeedAdded : SideEffect()
         data object ProfileFeedRemoved : SideEffect()
         data object ProfileZapSent : SideEffect()
+        data object FollowedUserMuteList : SideEffect()
     }
 
     sealed class UiEvent {
@@ -71,6 +72,7 @@ interface ProfileDetailsContract {
         data class RemoveProfileFeedAction(val profileId: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
         data class UnmuteAction(val profileId: String) : UiEvent()
+        data class FollowUserMuteList(val profileId: String) : UiEvent()
         data object RequestProfileIdResolution : UiEvent()
         data object RequestProfileUpdate : UiEvent()
         data class ReportAbuse(val type: ReportType, val profileId: String, val noteId: String? = null) : UiEvent()
