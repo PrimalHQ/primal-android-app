@@ -111,6 +111,7 @@ fun ProfileDropdownMenu(
                 trailingIconVector = PrimalIcons.ContextMuteUser,
                 text = stringResource(id = R.string.profile_context_follow_mute_list),
                 onClick = {
+                    eventPublisher(ProfileDetailsContract.UiEvent.FollowUserMuteList(profileId = profileId))
                     onDismissRequest()
                 },
             )
