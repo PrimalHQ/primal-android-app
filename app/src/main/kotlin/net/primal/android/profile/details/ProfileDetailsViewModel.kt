@@ -35,7 +35,6 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
@@ -148,6 +147,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     is UiEvent.RemoveProfileFeedAction -> removeProfileFeed(event)
                     is UiEvent.MuteAction -> mute(event)
                     is UiEvent.UnmuteAction -> unmute(event)
+                    is UiEvent.FollowUserMuteList -> followUserMuteList(event)
                     is UiEvent.ReportAbuse -> reportAbuse(event)
                     UiEvent.RequestProfileUpdate -> _state.value.profileId?.let { requestProfileUpdate(it) }
                     UiEvent.RequestProfileIdResolution -> resolveProfileId()
@@ -577,6 +577,32 @@ class ProfileDetailsViewModel @Inject constructor(
             } catch (error: NetworkException) {
                 Napier.w(throwable = error) { "Failed to unmute user: network error" }
                 setErrorState(error = UiError.FailedToUnmuteUser(error))
+            }
+        }
+
+    private fun followUserMuteList(action: UiEvent.FollowUserMuteList) =
+        viewModelScope.launch {
+            try {
+                mutedItemRepository.followMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    muteListOwnerId = action.profileId,
+                )
+                setEffect(ProfileDetailsContract.SideEffect.FollowedUserMuteList)
+            } catch (error: SigningKeyNotFoundException) {
+                Napier.w(throwable = error) { "Failed to follow mute list: key not found" }
+                setErrorState(error = UiError.MissingPrivateKey)
+            } catch (error: SigningRejectedException) {
+                Napier.w(throwable = error) { "Failed to follow mute list: signing rejected" }
+                setErrorState(error = UiError.NostrSignUnauthorized)
+            } catch (error: NostrPublishException) {
+                Napier.w(throwable = error) { "Failed to follow mute list: publish error" }
+                setErrorState(error = UiError.FailedToFollowMuteList(error))
+            } catch (error: MissingRelaysException) {
+                Napier.w(throwable = error) { "Failed to follow mute list: missing relays" }
+                setErrorState(error = UiError.MissingRelaysConfiguration(error))
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Failed to follow mute list: network error" }
+                setErrorState(error = UiError.FailedToFollowMuteList(error))
             }
         }
 

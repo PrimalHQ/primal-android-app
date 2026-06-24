@@ -109,6 +109,7 @@ fun ProfileDetailsScreen(
     val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
     val removedFromUserFeedsMessage = stringResource(id = R.string.app_removed_from_user_feeds)
     val profileZapSentMessage = stringResource(id = R.string.profile_zap_sent_message)
+    val followedMuteListMessage = stringResource(id = R.string.profile_followed_mute_list_message)
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
@@ -124,6 +125,10 @@ fun ProfileDetailsScreen(
 
                 ProfileDetailsContract.SideEffect.ProfileZapSent -> uiScope.launch {
                     snackbarHostState.showSnackbar(message = profileZapSentMessage)
+                }
+
+                ProfileDetailsContract.SideEffect.FollowedUserMuteList -> uiScope.launch {
+                    snackbarHostState.showSnackbar(message = followedMuteListMessage)
                 }
             }
         }

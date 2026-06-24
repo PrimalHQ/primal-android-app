@@ -23,6 +23,7 @@ enum class PrimalVerb(val id: String) {
     UPLOAD_CHUNK("upload_chunk"),
     UPLOAD_COMPLETE("upload_complete"),
     MUTE_LIST("mutelist"),
+    MUTE_LISTS("mutelists"),
     GET_DM_CONTACTS("get_directmsg_contacts"),
     GET_DMS("get_directmsgs"),
     MARK_DM_CONVERSATION_AS_READ("reset_directmsg_count"),

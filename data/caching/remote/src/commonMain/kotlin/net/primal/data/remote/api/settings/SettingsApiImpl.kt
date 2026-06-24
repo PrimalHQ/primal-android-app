@@ -6,6 +6,7 @@ import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.settings.model.GetAppSettingsResponse
+import net.primal.data.remote.api.settings.model.GetFollowedMuteListsRequest
 import net.primal.data.remote.api.settings.model.GetMuteListRequest
 import net.primal.data.remote.api.settings.model.GetMuteListResponse
 import net.primal.data.remote.api.settings.model.GetStreamMuteListResponse
@@ -70,6 +71,17 @@ class SettingsApiImpl(
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
+    }
+
+    override suspend fun getFollowedMuteListEvents(userId: String): List<NostrEvent> {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.MUTE_LISTS.id,
+                optionsJson = GetFollowedMuteListsRequest(pubkey = userId).encodeToJsonString(),
+            ),
+        )
+
+        return queryResult.filterNostrEvents(NostrEventKind.CategorizedPeopleList)
     }
 
     override suspend fun getStreamMuteList(userId: String) =
