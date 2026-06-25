@@ -15,6 +15,26 @@ style:
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
 
+coroutines:
+  # Disabled: this is a type-resolution rule and detekt 1.23.8 bundles the
+  # Kotlin 2.0.21 frontend, which cannot resolve cross-source-set `internal`
+  # symbols compiled by our Kotlin 2.4 toolchain. It then can't see that a
+  # called function is `suspend` and falsely reports the modifier as redundant
+  # (e.g. AndroidPrimalBlossomUploadService.upload -> internal commonMain
+  # PrimalUploadService.upload). Re-enable once on detekt 2.x (Kotlin 2.4).
+  RedundantSuspendModifier:
+    active: false
+
+potential-bugs:
+  # Disabled: same root cause as coroutines>RedundantSuspendModifier above.
+  # detekt 1.23.8's Kotlin 2.0.21 frontend mis-analyzes control flow around
+  # `Nothing`-returning calls (`error()`, `requireNotNull`, elvis like
+  # `?: error(...)`) in our Kotlin 2.4 code, falsely flagging clearly reachable
+  # statements as unreachable (e.g. the LocalSignerMethod*Serializer classes).
+  # Re-enable once on detekt 2.x (Kotlin 2.4).
+  UnreachableCode:
+    active: false
+
 complexity:
   LongMethod:
     threshold: 80
