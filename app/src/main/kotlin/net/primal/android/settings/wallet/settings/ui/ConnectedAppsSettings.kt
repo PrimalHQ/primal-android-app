@@ -27,11 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import java.util.*
 import net.primal.android.R
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
@@ -51,6 +51,7 @@ fun ConnectedAppsSettings(
 ) {
     var revokeDialogVisible by remember { mutableStateOf(false) }
     var revokeNwcPubkey by remember { mutableStateOf("") }
+    val locale = LocalLocale.current.platformLocale
 
     ListItem(
         colors = ListItemDefaults.colors(
@@ -60,7 +61,7 @@ fun ConnectedAppsSettings(
             Text(
                 text = stringResource(
                     id = R.string.settings_wallet_nwc_connections_connected_apps,
-                ).uppercase(Locale.getDefault()),
+                ).uppercase(locale),
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.colorScheme.onPrimary,
                 textAlign = TextAlign.Start,
