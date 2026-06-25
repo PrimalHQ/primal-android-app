@@ -7,7 +7,7 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.sqlite.execSQL
 import androidx.test.core.app.ApplicationProvider
 import io.kotest.matchers.shouldBe
-import java.util.UUID
+import java.util.*
 import kotlinx.coroutines.test.runTest
 import net.primal.wallet.data.local.db.WalletDatabase
 import org.junit.After
@@ -394,8 +394,8 @@ class WalletDatabaseMigration5to6Test {
             database.close()
         }
 
-    private fun openDatabaseWithMigration(): WalletDatabase {
-        return Room.databaseBuilder<WalletDatabase>(
+    private suspend fun openDatabaseWithMigration(): WalletDatabase {
+        val database = Room.databaseBuilder<WalletDatabase>(
             context = context,
             name = dbName,
         )
@@ -403,6 +403,9 @@ class WalletDatabaseMigration5to6Test {
             .addMigrations(WalletDatabase.MIGRATION_5_6)
             .allowMainThreadQueries()
             .build()
+        // Room opens connections lazily, so the migration only runs on first DB access.
+        database.wallet().findWalletInfo(walletId = "__migration_trigger__")
+        return database
     }
 
     private fun getTableColumns(tableName: String): Set<String> {
