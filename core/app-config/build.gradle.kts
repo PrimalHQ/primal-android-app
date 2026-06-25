@@ -12,7 +12,7 @@ private val xcfName = "PrimalAppConfig"
 
 kotlin {
     // Android target
-    androidLibrary {
+    android {
         namespace = "net.primal"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()

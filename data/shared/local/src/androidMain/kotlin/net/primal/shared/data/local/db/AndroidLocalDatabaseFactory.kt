@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
-import androidx.sqlite.driver.AndroidSQLiteDriver
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import net.primal.core.utils.coroutines.AndroidDispatcherProvider
 
 typealias LocalDatabaseFactory = AndroidLocalDatabaseFactory
@@ -26,7 +26,7 @@ object AndroidLocalDatabaseFactory {
         ) {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)
                 .setQueryCoroutineContext(AndroidDispatcherProvider().io())
-                .setDriver(AndroidSQLiteDriver())
+                .setDriver(BundledSQLiteDriver())
                 .run {
                     if (callback != null) {
                         this.addCallback(callback)

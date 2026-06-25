@@ -2,7 +2,6 @@ import java.util.*
 
 plugins {
     alias(libs.plugins.android.test)
-    alias(libs.plugins.org.jetbrains.kotlin.android)
 }
 
 val configProperties by lazy {
