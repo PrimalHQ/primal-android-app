@@ -2,7 +2,6 @@ import java.util.*
 
 plugins {
     alias(libs.plugins.com.android.application)
-    alias(libs.plugins.org.jetbrains.kotlin.android)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -126,19 +125,19 @@ android {
     signingConfigs {
         extractSigningConfigProperties("playStore")?.let {
             signingConfigs.create(it.storeName) {
-                storeFile(it.storeFile)
-                storePassword(it.storePassword)
-                keyAlias(it.keyAlias)
-                keyPassword(it.keyAliasPassword)
+                storeFile = it.storeFile
+                storePassword = it.storePassword
+                keyAlias = it.keyAlias
+                keyPassword = it.keyAliasPassword
             }
         }
 
         extractSigningConfigProperties("alternative")?.let {
             signingConfigs.create(it.storeName) {
-                storeFile(it.storeFile)
-                storePassword(it.storePassword)
-                keyAlias(it.keyAlias)
-                keyPassword(it.keyAliasPassword)
+                storeFile = it.storeFile
+                storePassword = it.storePassword
+                keyAlias = it.keyAlias
+                keyPassword = it.keyAliasPassword
             }
         }
     }
@@ -226,6 +225,12 @@ android {
 
     kotlin {
         jvmToolchain(21)
+        compilerOptions {
+            optIn.addAll(
+                "kotlin.time.ExperimentalTime",
+                "kotlin.uuid.ExperimentalUuidApi",
+            )
+        }
     }
 
     hilt {
@@ -256,6 +261,14 @@ android {
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
+    }
+}
+
+// Dagger/Hilt 2.59.2 bundles a kotlin-metadata-jvm that only reads metadata up to 2.3.0.
+// Force it to match the Kotlin version so the Hilt processor can read Kotlin 2.4.0 metadata.
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlin:kotlin-metadata-jvm:${libs.versions.kotlin.get()}")
     }
 }
 
@@ -349,6 +362,7 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.csv)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.guava)
 
     implementation(libs.coil)

@@ -12,7 +12,7 @@ private val xcfName = "PrimalDataSharedLocal"
 
 kotlin {
     // Android target
-    androidLibrary {
+    android {
         namespace = "net.primal"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -68,7 +68,7 @@ kotlin {
 
                 // Room
                 api(libs.room.runtime.android)
-                api(libs.jetpack.sqlite.framework.android)
+                api(libs.jetpack.sqlite.bundled.android)
             }
         }
 

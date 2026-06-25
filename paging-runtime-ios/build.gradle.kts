@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -11,7 +10,7 @@ private val xcfName = "PrimalPagingRuntimeUIKit"
 
 kotlin {
 
-    androidLibrary {
+    android {
         namespace = "net.primal"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()

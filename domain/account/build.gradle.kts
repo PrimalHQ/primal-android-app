@@ -9,7 +9,7 @@ plugins {
 private val xcfName = "PrimalAccountDomain"
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "net.primal.domain.account"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()

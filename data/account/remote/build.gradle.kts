@@ -12,7 +12,7 @@ private val xcfName = "PrimalDataAccountRemote"
 
 kotlin {
     // Android target
-    androidLibrary {
+    android {
         namespace = "net.primal.data.account.remote"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()

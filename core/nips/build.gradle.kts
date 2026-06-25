@@ -10,7 +10,7 @@ private val xcfName = "PrimalCoreNips"
 
 kotlin {
 
-    androidLibrary {
+    android {
         namespace = "net.primal.core.nips"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()

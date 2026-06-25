@@ -5,7 +5,6 @@ import org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.com.android.application) apply false
-    alias(libs.plugins.org.jetbrains.kotlin.android) apply false
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.compose.compiler) apply false
@@ -122,17 +121,6 @@ subprojects {
 
     pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
         configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
-            compilerOptions {
-                optIn.addAll(
-                    "kotlin.time.ExperimentalTime",
-                    "kotlin.uuid.ExperimentalUuidApi",
-                )
-            }
-        }
-    }
-
-    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
-        configure<org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension> {
             compilerOptions {
                 optIn.addAll(
                     "kotlin.time.ExperimentalTime",
