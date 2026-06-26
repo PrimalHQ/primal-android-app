@@ -36,7 +36,7 @@ object PrimalApiClientFactory {
     fun create(serverType: PrimalServerType): PrimalApiClient {
         return create(
             dispatcherProvider = createDispatcherProvider(),
-            httpClient = defaultSocketsHttpClient,
+            httpClient = keepAliveSocketsHttpClient,
             serverType = serverType,
         )
     }
