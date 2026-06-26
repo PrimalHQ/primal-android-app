@@ -38,6 +38,8 @@ import okio.InflaterSource
 import okio.buffer
 import okio.use
 
+internal val SILENCE_TIMEOUT = 10.seconds
+
 internal class NostrSocketClientImpl(
     dispatcherProvider: DispatcherProvider,
     wssUrl: String,
@@ -76,16 +78,21 @@ internal class NostrSocketClientImpl(
         }
     }
 
+    /**
+     * Whether the connection has been silent long enough to be treated as dead.
+     *
+     * Stale when a send is still outstanding — nothing received since the last send — and that
+     * silence has lasted at least [SILENCE_TIMEOUT], measured from the last received frame, or
+     * from the last send when nothing has ever come back. Only the most recent outstanding send
+     * is tracked.
+     *
+     * Transport-level death that outlives this window is caught separately by the keepalive ping.
+     */
     private fun isSocketStale(): Boolean {
         val sent = lastSentMark ?: return false
         val received = lastReceivedMark
-        // Silence is measured from the last received frame, so a socket that is being sent
-        // on but has gone quiet is detected. When nothing has ever been received, the anchor
-        // falls back to the last send — this catches only a single outstanding send (further
-        // sends refresh lastSentMark); the keepalive ping covers a cold socket that accepts
-        // but never replies.
         return (received == null || sent > received) &&
-            (received ?: sent).elapsedNow() >= SILENCE_THRESHOLD
+            (received ?: sent).elapsedNow() >= SILENCE_TIMEOUT
     }
 
     private suspend fun acquireWebSocketSession(url: String): WebSocketSession {
@@ -260,9 +267,5 @@ internal class NostrSocketClientImpl(
         return replace("https://", "wss://", ignoreCase = true)
             .replace("http://", "ws://", ignoreCase = true)
             .let { if (it.endsWith("/")) it.dropLast(1) else it }
-    }
-
-    private companion object {
-        val SILENCE_THRESHOLD = 10.seconds
     }
 }

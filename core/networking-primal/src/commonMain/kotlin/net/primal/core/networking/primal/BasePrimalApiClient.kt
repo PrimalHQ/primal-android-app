@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlinx.serialization.json.JsonObject
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientImpl
+import net.primal.core.networking.sockets.SILENCE_TIMEOUT
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
@@ -27,8 +28,6 @@ import net.primal.core.utils.bufferCountOrTimeout
 import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.common.exception.QueryTimeoutException
-
-private val QUERY_TIMEOUT = 15.seconds
 
 internal class BasePrimalApiClient(
     private val socketClient: NostrSocketClientImpl,
@@ -148,11 +147,11 @@ internal class BasePrimalApiClient(
             socketClient.incomingMessages
                 .filterBySubscriptionId(id = subscriptionId)
                 .transformWhileEventsAreIncoming()
-                .timeout(QUERY_TIMEOUT)
+                .timeout(SILENCE_TIMEOUT)
                 .toList()
         } catch (error: TimeoutCancellationException) {
             // Convert to a NetworkException so callers surface a retryable error.
-            throw QueryTimeoutException(verb = verb, timeout = QUERY_TIMEOUT, cause = error)
+            throw QueryTimeoutException(verb = verb, timeout = SILENCE_TIMEOUT, cause = error)
         }
 
         val terminationMessage = messages.lastOrNull()
