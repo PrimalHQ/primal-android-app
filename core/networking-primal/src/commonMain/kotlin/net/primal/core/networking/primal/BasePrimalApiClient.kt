@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlinx.serialization.json.JsonObject
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientImpl
+import net.primal.core.networking.sockets.SILENCE_THRESHOLD
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
@@ -143,7 +144,7 @@ internal class BasePrimalApiClient(
         val messages = socketClient.incomingMessages
             .filterBySubscriptionId(id = subscriptionId)
             .transformWhileEventsAreIncoming()
-            .timeout(15.seconds)
+            .timeout(SILENCE_THRESHOLD)
             .toList()
 
         val terminationMessage = messages.lastOrNull()
