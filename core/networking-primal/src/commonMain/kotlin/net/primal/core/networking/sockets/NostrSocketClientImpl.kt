@@ -9,8 +9,12 @@ import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
+import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.ComparableTimeMark
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -40,6 +44,7 @@ internal class NostrSocketClientImpl(
     private val incomingCompressionEnabled: Boolean = false,
     private val onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
     private val onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
+    private val timeSource: TimeSource.WithComparableMarks = TimeSource.Monotonic,
 ) : NostrSocketClient {
 
     private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
@@ -48,24 +53,40 @@ internal class NostrSocketClientImpl(
     private var wsSession: WebSocketSession? = null
     private var wsReceiverJob: Job? = null
 
+    @Volatile
+    private var lastSentMark: ComparableTimeMark? = null
+
+    @Volatile
+    private var lastReceivedMark: ComparableTimeMark? = null
+
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
     override val incomingMessages = _incomingMessages.asSharedFlow()
 
     override val socketUrl = wssUrl.cleanWebSocketUrl()
 
     override suspend fun ensureSocketConnectionOrThrow() {
-        if (wsSession != null && wsSession?.isActive == true) return
+        if (wsSession?.isActive == true && !isSocketStale()) return
 
         wsMutex.withLock {
-            if (wsSession == null || wsSession?.isActive == false) {
+            if (wsSession == null || wsSession?.isActive == false || isSocketStale()) {
+                close()
                 wsSession = acquireWebSocketSession(url = socketUrl)
             }
         }
     }
 
+    private fun isSocketStale(): Boolean {
+        val sent = lastSentMark ?: return false
+        val received = lastReceivedMark
+        return (received == null || sent > received) &&
+            (received ?: sent).elapsedNow() >= SILENCE_THRESHOLD
+    }
+
     private suspend fun acquireWebSocketSession(url: String): WebSocketSession {
         return try {
             httpClient.webSocketSession(urlString = url).apply {
+                lastSentMark = null
+                lastReceivedMark = null
                 launchWebSocketReceiver()
                 onSocketConnectionOpened?.invoke(url)
                 if (incomingCompressionEnabled) {
@@ -94,6 +115,7 @@ internal class NostrSocketClientImpl(
     private suspend fun WebSocketSession.receiveSocketMessages() {
         try {
             for (frame in incoming) {
+                lastReceivedMark = timeSource.markNow()
                 when (frame) {
                     is Frame.Text -> {
                         val text = frame.readText()
@@ -157,7 +179,10 @@ internal class NostrSocketClientImpl(
             ensureSocketConnectionOrThrow()
         }
         logLargeText(text = text, url = socketUrl, incoming = false)
-        wsSession?.send(Frame.Text(text = text))
+        wsSession?.let { session ->
+            session.send(Frame.Text(text = text))
+            lastSentMark = timeSource.markNow()
+        }
     }
 
     override suspend fun sendREQ(subscriptionId: String, data: JsonObject) {
@@ -216,5 +241,9 @@ internal class NostrSocketClientImpl(
         return replace("https://", "wss://", ignoreCase = true)
             .replace("http://", "ws://", ignoreCase = true)
             .let { if (it.endsWith("/")) it.dropLast(1) else it }
+    }
+
+    private companion object {
+        val SILENCE_THRESHOLD = 10.seconds
     }
 }
