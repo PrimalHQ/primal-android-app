@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -97,7 +98,13 @@ class NoteFeedViewModel @AssistedInject constructor(
         subscribeToEvents()
         observeActiveAccount()
         observeMutedUsers()
+        ensureNotesAreAlwaysCached()
     }
+
+    private fun ensureNotesAreAlwaysCached() =
+        viewModelScope.launch {
+            _state.value.notes.keepLoaded()
+        }
 
     private fun observeMutedUsers() =
         viewModelScope.launch {
