@@ -193,18 +193,18 @@ android {
 
     sourceSets {
         named("playRelease") {
-            java.srcDirs("src/release/kotlin")
-            res.srcDirs("src/release/res")
+            kotlin.directories.add("src/release/kotlin")
+            res.directories.add("src/release/res")
         }
 
         named("altRelease") {
-            java.srcDirs("src/release/kotlin")
-            res.srcDirs("src/release/res")
+            kotlin.directories.add("src/release/kotlin")
+            res.directories.add("src/release/res")
         }
 
         named("benchmark") {
-            java.srcDirs("src/release/kotlin")
-            res.srcDirs("src/release/res")
+            kotlin.directories.add("src/release/kotlin")
+            res.directories.add("src/release/res")
         }
     }
 
