@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,16 +18,22 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TestTimeSource
 import kotlin.time.TimeSource
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.buildJsonObject
+import net.primal.core.networking.primal.BasePrimalApiClient
+import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.testing.CoroutinesTestRule
@@ -244,6 +251,50 @@ class NostrSocketClientImplTest {
             client.ensureSocketConnectionOrThrow()
 
             coVerify(exactly = 1) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
+    @Test
+    fun query_afterUnansweredRequest_rebuildsSocketAndServesNextQuery() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            val sentFrames = mutableListOf<Frame>()
+            every { mockWebSocketSession.incoming } returns incomingChannel
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+
+            val socketClient = buildNostrSocketClient(timeSource = timeSource)
+            val apiClient = BasePrimalApiClient(socketClient = socketClient)
+
+            // A request is sent but the backend never returns a terminating frame, so it
+            // times out — this is the stuck request that used to wedge the shared socket.
+            shouldThrow<Throwable> {
+                apiClient.query(message = PrimalCacheFilter(primalVerb = "stuck_verb"))
+            }
+
+            // The socket has now been silent (sent, nothing received) past the watchdog window.
+            timeSource += 11.seconds
+
+            // A new query must NOT reuse the dead socket: the watchdog rebuilds it and the
+            // query is served on the fresh session instead of starving like everything else did.
+            val deferredResult = async {
+                apiClient.query(message = PrimalCacheFilter(primalVerb = "next_verb"))
+            }
+            runCurrent()
+
+            val reqText = (sentFrames.last() as Frame.Text).readText()
+            val nextSubId = Regex("\"REQ\",\"([^\"]+)\"").find(reqText)?.groupValues?.get(1)
+            incomingChannel.send(Frame.Text(text = "[\"EOSE\",\"$nextSubId\"]"))
+            advanceTimeBy(100.milliseconds)
+            runCurrent()
+
+            val result = deferredResult.await()
+            result.terminationMessage shouldNotBe null
+
+            // The dead socket was replaced, not reused: two sessions were acquired.
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
 
             incomingChannel.close()
             advanceUntilIdle()
