@@ -7,11 +7,19 @@ import coil3.decode.BitmapFactoryDecoder
 import coil3.disk.DiskCache
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
+import okio.Path
 import okio.Path.Companion.toOkioPath
 
 object AvatarCoilImageLoader {
     private var defaultImageLoader: ImageLoader? = null
     private var noGifsImageLoader: ImageLoader? = null
+
+    private lateinit var diskCachePath: Path
+    private val sharedDiskCache by lazy {
+        DiskCache.Builder()
+            .directory(diskCachePath)
+            .build()
+    }
 
     fun provideImageLoader(context: Context): ImageLoader =
         defaultImageLoader ?: constructImageLoader(context = context).also { defaultImageLoader = it }
@@ -38,11 +46,9 @@ object AvatarCoilImageLoader {
             }
             .build()
 
-    private fun getSharedImageLoaderBuilder(context: Context): ImageLoader.Builder =
-        ImageLoader.Builder(context = context)
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(context.cacheDir.resolve("avatar_image_cache").toOkioPath())
-                    .build()
-            }
+    private fun getSharedImageLoaderBuilder(context: Context): ImageLoader.Builder {
+        diskCachePath = context.cacheDir.resolve("avatar_image_cache").toOkioPath()
+        return ImageLoader.Builder(context = context)
+            .diskCache { sharedDiskCache }
+    }
 }
