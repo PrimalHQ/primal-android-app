@@ -46,9 +46,13 @@ internal class BasePrimalApiClient(
         }
     }
 
-    private suspend fun sendMessageOrThrow(subscriptionId: String, data: JsonObject) {
+    private suspend fun sendMessageOrThrow(
+        subscriptionId: String,
+        data: JsonObject,
+        durable: Boolean = false,
+    ) {
         try {
-            socketClient.sendREQ(subscriptionId = subscriptionId, data = data)
+            socketClient.sendREQ(subscriptionId = subscriptionId, data = data, durable = durable)
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
@@ -77,7 +81,11 @@ internal class BasePrimalApiClient(
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
             .onStart {
                 try {
-                    sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
+                    sendMessageOrThrow(
+                        subscriptionId = subscriptionId,
+                        data = message.toPrimalJsonObject(),
+                        durable = true,
+                    )
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {

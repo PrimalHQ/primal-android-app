@@ -26,5 +26,9 @@ interface NostrSocketClient {
 
     suspend fun sendEVENT(signedEvent: JsonObject)
 
-    suspend fun sendREQ(subscriptionId: String, data: JsonObject)
+    suspend fun sendREQ(
+        subscriptionId: String,
+        data: JsonObject,
+        durable: Boolean = false,
+    )
 }

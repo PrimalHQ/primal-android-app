@@ -27,6 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -299,4 +300,101 @@ class NostrSocketClientImplTest {
             incomingChannel.close()
             advanceUntilIdle()
         }
+
+    @Test
+    fun ensureConnection_afterRebuild_replaysDurableSubscriptions() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val sentFrames = mutableListOf<Frame>()
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            client.sendREQ(subscriptionId = subscriptionId, data = buildJsonObject {}, durable = true)
+
+            // Socket goes silent past the watchdog window, then the next ensure rebuilds it.
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+            // Original send + replay on the fresh session.
+            sentFrames.reqCountFor(subscriptionId) shouldBe 2
+        }
+
+    @Test
+    fun ensureConnection_afterRebuild_doesNotReplayClosedSubscriptions() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val sentFrames = mutableListOf<Frame>()
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            client.sendREQ(subscriptionId = subscriptionId, data = buildJsonObject {}, durable = true)
+            client.sendCLOSE(subscriptionId = subscriptionId)
+
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            // A closed subscription must not be replayed: only the original REQ was ever sent.
+            sentFrames.reqCountFor(subscriptionId) shouldBe 1
+        }
+
+    @Test
+    fun ensureConnection_afterRebuild_doesNotReplayNonDurableRequests() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val sentFrames = mutableListOf<Frame>()
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            // A plain query REQ (durable = false) must not be replayed.
+            client.sendREQ(subscriptionId = subscriptionId, data = buildJsonObject {})
+
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            sentFrames.reqCountFor(subscriptionId) shouldBe 1
+        }
+
+    @Test
+    fun subscribe_isReplayedAfterSocketRebuild() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            val sentFrames = mutableListOf<Frame>()
+            every { mockWebSocketSession.incoming } returns incomingChannel
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+
+            val socketClient = buildNostrSocketClient(timeSource = timeSource)
+            val apiClient = BasePrimalApiClient(socketClient = socketClient)
+
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            val job = launch {
+                apiClient.subscribe(
+                    subscriptionId = subscriptionId,
+                    message = PrimalCacheFilter(primalVerb = "sub_verb"),
+                ).collect { }
+            }
+            runCurrent()
+
+            // The subscription's connection goes silent; a rebuild must re-establish it.
+            timeSource += 11.seconds
+            socketClient.ensureSocketConnectionOrThrow()
+            runCurrent()
+
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+            sentFrames.reqCountFor(subscriptionId) shouldBe 2
+
+            job.cancel()
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
+    private fun List<Frame>.reqCountFor(subscriptionId: String): Int =
+        filterIsInstance<Frame.Text>().count { it.readText().contains("\"REQ\",\"$subscriptionId\"") }
 }

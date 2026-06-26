@@ -62,6 +62,11 @@ internal class NostrSocketClientImpl(
     @Volatile
     private var lastReceivedMark: ComparableTimeMark? = null
 
+    private val subscriptionsMutex = Mutex()
+
+    /** Long-lived subscription REQs to replay after a rebuild, keyed by subscription id. */
+    private val durableSubscriptions = LinkedHashMap<String, JsonObject>()
+
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
     override val incomingMessages = _incomingMessages.asSharedFlow()
 
@@ -74,7 +79,31 @@ internal class NostrSocketClientImpl(
             if (wsSession == null || wsSession?.isActive == false || isSocketStale()) {
                 cancelSocketSession()
                 wsSession = acquireWebSocketSession(url = socketUrl)
+                enableIncomingCompressionIfNeeded()
+                replayDurableSubscriptions()
             }
+        }
+    }
+
+    /** Negotiates zlib compression. Runs after [wsSession] is assigned, before any replay. */
+    private suspend fun enableIncomingCompressionIfNeeded() {
+        if (!incomingCompressionEnabled) return
+        val id = Uuid.random().toPrimalSubscriptionId()
+        sendMessage(
+            text = """["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""",
+            ensureSessionBeforeSend = false,
+        )
+    }
+
+    /**
+     * Re-sends tracked subscription REQs on the rebuilt session. Must run after [wsSession] is
+     * assigned (it is still unset inside [acquireWebSocketSession]); skips the connection check to
+     * avoid re-entering [ensureSocketConnectionOrThrow] under [wsMutex].
+     */
+    private suspend fun replayDurableSubscriptions() {
+        val pending = subscriptionsMutex.withLock { durableSubscriptions.toMap() }
+        pending.forEach { (subscriptionId, data) ->
+            sendMessage(text = data.buildNostrREQMessage(subscriptionId), ensureSessionBeforeSend = false)
         }
     }
 
@@ -102,13 +131,6 @@ internal class NostrSocketClientImpl(
                 lastReceivedMark = null
                 launchWebSocketReceiver()
                 onSocketConnectionOpened?.invoke(url)
-                if (incomingCompressionEnabled) {
-                    val id = Uuid.random().toPrimalSubscriptionId()
-                    sendMessage(
-                        text = """["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""",
-                        ensureSessionBeforeSend = false,
-                    )
-                }
             }
         } catch (error: Exception) {
             Napier.w("NostrSocketClient::acquireWebSocketSession($socketUrl) failed.", error)
@@ -211,9 +233,17 @@ internal class NostrSocketClientImpl(
         }
     }
 
-    override suspend fun sendREQ(subscriptionId: String, data: JsonObject) {
+    override suspend fun sendREQ(
+        subscriptionId: String,
+        data: JsonObject,
+        durable: Boolean,
+    ) {
         val reqMessage = data.buildNostrREQMessage(subscriptionId)
-        return sendMessage(text = reqMessage)
+        sendMessage(text = reqMessage)
+        // Track after sending so a rebuild triggered by this send doesn't replay the REQ twice.
+        if (durable) {
+            subscriptionsMutex.withLock { durableSubscriptions[subscriptionId] = data }
+        }
     }
 
     override suspend fun sendCOUNT(data: JsonObject): String {
@@ -223,7 +253,11 @@ internal class NostrSocketClientImpl(
         return subscriptionId
     }
 
-    override suspend fun sendCLOSE(subscriptionId: String) = sendMessage(text = subscriptionId.buildNostrCLOSEMessage())
+    override suspend fun sendCLOSE(subscriptionId: String) {
+        // Untrack first so a closed subscription is never replayed, even if the CLOSE send fails.
+        subscriptionsMutex.withLock { durableSubscriptions.remove(subscriptionId) }
+        sendMessage(text = subscriptionId.buildNostrCLOSEMessage())
+    }
 
     override suspend fun sendEVENT(signedEvent: JsonObject) = sendMessage(text = signedEvent.buildNostrEVENTMessage())
 

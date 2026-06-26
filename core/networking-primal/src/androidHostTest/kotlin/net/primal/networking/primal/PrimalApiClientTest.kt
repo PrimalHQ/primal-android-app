@@ -86,7 +86,7 @@ class PrimalApiClientTest {
             }
             advanceUntilIdle()
 
-            coVerify { mockSocketClient.sendREQ(eq("test-sub-id"), any()) }
+            coVerify { mockSocketClient.sendREQ(eq("test-sub-id"), any(), durable = true) }
             job.cancel()
         }
 

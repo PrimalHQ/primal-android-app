@@ -74,6 +74,7 @@ class RemoteSignerClient(
                     put("kinds", buildJsonArray { add(NostrEventKind.NostrConnect.value) })
                     put("#p", buildJsonArray { add(signerKeyPair.pubKey.assureValidPubKeyHex()) })
                 },
+                durable = true,
             )
 
             runCatching {
