@@ -17,9 +17,14 @@ import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TestTimeSource
+import kotlin.time.TimeSource
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.buildJsonObject
 import net.primal.core.networking.sockets.NostrSocketClientImpl
@@ -57,12 +62,15 @@ class NostrSocketClientImplTest {
         activeJob.cancel()
     }
 
-    private fun buildNostrSocketClient(httpClient: HttpClient = mockHttpClient) =
-        NostrSocketClientImpl(
-            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-            httpClient = httpClient,
-            wssUrl = "wss://relay.primal.net",
-        )
+    private fun buildNostrSocketClient(
+        httpClient: HttpClient = mockHttpClient,
+        timeSource: TimeSource.WithComparableMarks = TimeSource.Monotonic,
+    ) = NostrSocketClientImpl(
+        dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+        httpClient = httpClient,
+        wssUrl = "wss://relay.primal.net",
+        timeSource = timeSource,
+    )
 
     @Test
     fun sendREQ_sendsTextFrameToWebSocket() =
@@ -178,4 +186,65 @@ class NostrSocketClientImplTest {
 
         client.socketUrl shouldBe "wss://relay.primal.net/v1"
     }
+
+    @Test
+    fun ensureConnection_whenSilentAfterSend_rebuildsSocket() =
+        runTest {
+            val timeSource = TestTimeSource()
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+        }
+
+    @Test
+    fun ensureConnection_whenIdleWithoutSending_doesNotRebuild() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            timeSource += 30.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            coVerify(exactly = 1) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+        }
+
+    @Test
+    fun ensureConnection_whenFrameReceivedAfterSend_doesNotRebuild() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            every { mockWebSocketSession.incoming } returns incomingChannel
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+
+            timeSource += 1.seconds
+            // Frame content is irrelevant — any inbound frame proves the peer is answering.
+            incomingChannel.send(Frame.Text(text = "noop"))
+            advanceUntilIdle()
+
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            coVerify(exactly = 1) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
 }
