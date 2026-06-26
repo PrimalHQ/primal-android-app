@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.articleATag
@@ -53,6 +54,13 @@ class ReactionsViewModel @Inject constructor(
     init {
         fetchLikes()
         fetchReposts()
+        ensureZapsAreAlwaysCached()
+    }
+
+    private fun ensureZapsAreAlwaysCached() {
+        viewModelScope.launch {
+            _state.value.zaps.keepLoaded()
+        }
     }
 
     private fun fetchLikes() =

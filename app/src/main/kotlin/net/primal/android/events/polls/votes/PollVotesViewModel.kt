@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asUserProfileItemUi
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.events.polls.votes.PollVotesContract.UiEvent
 import net.primal.android.events.polls.votes.PollVotesContract.UiState
 import net.primal.android.events.polls.votes.model.PollVoterUi
@@ -62,6 +63,13 @@ class PollVotesViewModel @Inject constructor(
     init {
         observeEvents()
         observePollData()
+        ensureVotersAreAlwaysCached()
+    }
+
+    private fun ensureVotersAreAlwaysCached() {
+        viewModelScope.launch {
+            votersPagingData.keepLoaded()
+        }
     }
 
     private fun observePollData() =

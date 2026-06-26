@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.premium.api.paging.PremiumLeaderboardPagingSource
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
@@ -53,6 +54,13 @@ class OGLeaderboardViewModel @Inject constructor(
 
     init {
         observeActiveAccount()
+        ensureLeaderboardEntriesAreAlwaysCached()
+    }
+
+    private fun ensureLeaderboardEntriesAreAlwaysCached() {
+        viewModelScope.launch {
+            leaderboardEntries.keepLoaded()
+        }
     }
 
     private fun observeActiveAccount() =

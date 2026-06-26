@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.notes.feed.grid.MediaFeedContract.UiState
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.utils.hasPremiumMembership
@@ -43,7 +44,13 @@ class MediaFeedViewModel @AssistedInject constructor(
 
     init {
         observeActiveAccount()
+        ensureNotesAreAlwaysCached()
     }
+
+    private fun ensureNotesAreAlwaysCached() =
+        viewModelScope.launch {
+            _state.value.notes.keepLoaded()
+        }
 
     private fun observeActiveAccount() =
         viewModelScope.launch {
