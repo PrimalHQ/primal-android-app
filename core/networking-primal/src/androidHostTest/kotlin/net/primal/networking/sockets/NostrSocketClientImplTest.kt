@@ -204,6 +204,7 @@ class NostrSocketClientImplTest {
             client.ensureSocketConnectionOrThrow()
 
             coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+            activeJob.isCancelled shouldBe true
         }
 
     @Test
