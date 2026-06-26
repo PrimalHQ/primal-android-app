@@ -9,6 +9,7 @@ import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
+import kotlin.concurrent.Volatile
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
@@ -48,6 +49,12 @@ internal class NostrSocketClientImpl(
     private var wsSession: WebSocketSession? = null
     private var wsReceiverJob: Job? = null
 
+    @Volatile
+    private var connectionGeneration: Int = 0
+
+    @Volatile
+    private var poisonedConnectionGeneration: Int? = null
+
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
     override val incomingMessages = _incomingMessages.asSharedFlow()
 
@@ -66,7 +73,8 @@ internal class NostrSocketClientImpl(
     private suspend fun acquireWebSocketSession(url: String): WebSocketSession {
         return try {
             httpClient.webSocketSession(urlString = url).apply {
-                launchWebSocketReceiver()
+                connectionGeneration += 1
+                launchWebSocketReceiver(generation = connectionGeneration)
                 onSocketConnectionOpened?.invoke(url)
                 if (incomingCompressionEnabled) {
                     val id = Uuid.random().toPrimalSubscriptionId()
@@ -84,16 +92,19 @@ internal class NostrSocketClientImpl(
         }
     }
 
-    private fun WebSocketSession.launchWebSocketReceiver() {
+    private fun WebSocketSession.launchWebSocketReceiver(generation: Int) {
         wsReceiverJob?.cancel()
         wsReceiverJob = scope.launch {
-            receiveSocketMessages()
+            receiveSocketMessages(generation = generation)
         }
     }
 
-    private suspend fun WebSocketSession.receiveSocketMessages() {
+    private suspend fun WebSocketSession.receiveSocketMessages(generation: Int) {
         try {
             for (frame in incoming) {
+                if (isConnectionPoisoned(generation = generation)) {
+                    continue
+                }
                 when (frame) {
                     is Frame.Text -> {
                         val text = frame.readText()
@@ -126,6 +137,16 @@ internal class NostrSocketClientImpl(
             onSocketConnectionClosed?.invoke(socketUrl, error)
         }
     }
+
+    /**
+     * Debug-only (Developer Tools): once the "Latest feed" fault is armed, the connection that
+     * the Latest-feed request was sent on is poisoned — every inbound frame on it is dropped, so
+     * the whole connection looks silent (the Latest feed and every other request on it stall).
+     * This build has no liveness watchdog, so a poisoned connection is never rebuilt and the stall
+     * persists until the app is restarted. Disarmed in [sendREQ] once the toggle is turned off.
+     */
+    private fun isConnectionPoisoned(generation: Int): Boolean =
+        NetworkingFaultInjection.poisonConnectionOnLatestFeed && poisonedConnectionGeneration == generation
 
     override suspend fun close() {
         wsReceiverJob?.cancel()
@@ -161,6 +182,11 @@ internal class NostrSocketClientImpl(
     }
 
     override suspend fun sendREQ(subscriptionId: String, data: JsonObject) {
+        if (!NetworkingFaultInjection.poisonConnectionOnLatestFeed) {
+            poisonedConnectionGeneration = null
+        } else if (poisonedConnectionGeneration == null && NetworkingFaultInjection.isLatestFeedRequest(data)) {
+            poisonedConnectionGeneration = connectionGeneration
+        }
         val reqMessage = data.buildNostrREQMessage(subscriptionId)
         return sendMessage(text = reqMessage)
     }

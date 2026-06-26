@@ -1224,6 +1224,8 @@
     <string name="settings_developer_tools_error_export_failed">Failed to export logs</string>
     <string name="settings_developer_tools_wallet_picker_title">Wallet Picker</string>
     <string name="settings_developer_tools_wallet_picker_description">Show wallet picker on the wallet dashboard</string>
+    <string name="settings_developer_tools_latest_feed_fault_title">Poison connection via Latest feed</string>
+    <string name="settings_developer_tools_latest_feed_fault_description">Open the Latest feed with this on: it stops responding and wedges the whole socket connection (reproduces the caching stall). Builds with the watchdog recover on their own; without it the app stays frozen until restart.</string>
     <string name="settings_developer_tools_wallet_id_copy">Copy wallet ID</string>
     <string name="settings_developer_tools_wallet_id_copied">Wallet ID copied</string>
     <string name="settings_developer_tools_seed_words_copy">Copy seed words</string>

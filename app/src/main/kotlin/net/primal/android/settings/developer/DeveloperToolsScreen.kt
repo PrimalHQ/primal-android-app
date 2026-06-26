@@ -264,6 +264,27 @@ private fun DeveloperToolsScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Networking fault injection (debug): poison the connection via the Latest feed
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_developer_tools_latest_feed_fault_title),
+                    supportText = stringResource(
+                        id = R.string.settings_developer_tools_latest_feed_fault_description,
+                    ),
+                    trailingContent = {
+                        PrimalSwitch(
+                            checked = state.isLatestFeedFaultEnabled,
+                            onCheckedChange = {
+                                eventPublisher(UiEvent.ToggleLatestFeedFault(enabled = it))
+                            },
+                        )
+                    },
+                    onClick = {
+                        eventPublisher(UiEvent.ToggleLatestFeedFault(enabled = !state.isLatestFeedFaultEnabled))
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 state.wallets.forEach { wallet ->
                     WalletItem(
                         wallet = wallet,

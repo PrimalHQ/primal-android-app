@@ -28,6 +28,7 @@ import net.primal.android.settings.developer.DeveloperToolsContract.SideEffect
 import net.primal.android.settings.developer.DeveloperToolsContract.UiEvent
 import net.primal.android.settings.developer.DeveloperToolsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.networking.sockets.NetworkingFaultInjection
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
@@ -79,6 +80,7 @@ class DeveloperToolsViewModel @Inject constructor(
                 when (event) {
                     is UiEvent.ToggleLogging -> toggleLogging(event.enabled)
                     is UiEvent.ToggleWalletPicker -> toggleWalletPicker(event.enabled)
+                    is UiEvent.ToggleLatestFeedFault -> toggleLatestFeedFault(event.enabled)
                     UiEvent.ExportLogs -> exportLogs()
                     UiEvent.ClearLogs -> clearLogs()
                     is UiEvent.CopySeedWords -> copySeedWords(event.walletId)
@@ -92,10 +94,16 @@ class DeveloperToolsViewModel @Inject constructor(
             copy(
                 isLoggingEnabled = logController.loggingEnabled,
                 isWalletPickerEnabled = appLogPreferences.walletPickerEnabled,
+                isLatestFeedFaultEnabled = NetworkingFaultInjection.poisonConnectionOnLatestFeed,
                 logFileCount = logRecorder.getLogFileCount(),
                 totalLogSizeBytes = logRecorder.getTotalLogSize(),
             )
         }
+    }
+
+    private fun toggleLatestFeedFault(enabled: Boolean) {
+        NetworkingFaultInjection.poisonConnectionOnLatestFeed = enabled
+        setState { copy(isLatestFeedFaultEnabled = enabled) }
     }
 
     private fun toggleLogging(enabled: Boolean) {
