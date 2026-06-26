@@ -19,6 +19,7 @@ import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -69,7 +70,7 @@ internal class NostrSocketClientImpl(
 
         wsMutex.withLock {
             if (wsSession == null || wsSession?.isActive == false || isSocketStale()) {
-                close()
+                cancelSocketSession()
                 wsSession = acquireWebSocketSession(url = socketUrl)
             }
         }
@@ -78,6 +79,11 @@ internal class NostrSocketClientImpl(
     private fun isSocketStale(): Boolean {
         val sent = lastSentMark ?: return false
         val received = lastReceivedMark
+        // Silence is measured from the last received frame, so a socket that is being sent
+        // on but has gone quiet is detected. When nothing has ever been received, the anchor
+        // falls back to the last send — this catches only a single outstanding send (further
+        // sends refresh lastSentMark); the keepalive ping covers a cold socket that accepts
+        // but never replies.
         return (received == null || sent > received) &&
             (received ?: sent).elapsedNow() >= SILENCE_THRESHOLD
     }
@@ -147,6 +153,19 @@ internal class NostrSocketClientImpl(
             close()
             onSocketConnectionClosed?.invoke(socketUrl, error)
         }
+    }
+
+    /**
+     * Abruptly tears down the current session without the graceful close handshake.
+     * Used on the reconnect path: the existing socket is already dead or wedged, so a
+     * suspending [close] (which can block on the closing handshake of a half-open peer)
+     * would only serialize recovery while holding [wsMutex]. Cancelling is non-suspending.
+     */
+    private fun cancelSocketSession() {
+        wsReceiverJob?.cancel()
+        wsReceiverJob = null
+        wsSession?.cancel()
+        wsSession = null
     }
 
     override suspend fun close() {
