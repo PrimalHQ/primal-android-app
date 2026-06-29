@@ -16,7 +16,7 @@ import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.networking.sockets.SocketConnectionClosedCallback
 import net.primal.core.networking.sockets.SocketConnectionOpenedCallback
-import net.primal.core.networking.sockets.filterBySubscriptionId
+import net.primal.core.networking.sockets.subscription
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -67,34 +67,30 @@ class RemoteSignerClient(
         listenerJob?.cancel()
         listenerJob = scope.launch {
             val listenerId = Uuid.random().toPrimalSubscriptionId()
-
-            nostrSocketClient.sendREQ(
-                subscriptionId = listenerId,
-                data = buildJsonObject {
-                    put("kinds", buildJsonArray { add(NostrEventKind.NostrConnect.value) })
-                    put("#p", buildJsonArray { add(signerKeyPair.pubKey.assureValidPubKeyHex()) })
-                },
-            )
-
             runCatching {
-                nostrSocketClient.incomingMessages.filterBySubscriptionId(id = listenerId)
-                    .collect { message ->
-                        if (message is NostrIncomingMessage.EventMessage) {
-                            message.nostrEvent?.let { event ->
-                                remoteSignerMethodParser.parseNostrEvent(
-                                    event = event,
-                                    signerKeyPair = signerKeyPair,
-                                ).fold(
-                                    onSuccess = { method ->
-                                        scope.launch { _incomingMethods.send(method) }
-                                    },
-                                    onFailure = { error ->
-                                        scope.launch { _errors.send(error.mapAsRemoteSignerMethodException(event)) }
-                                    },
-                                )
-                            }
+                nostrSocketClient.subscription(
+                    subscriptionId = listenerId,
+                    data = buildJsonObject {
+                        put("kinds", buildJsonArray { add(NostrEventKind.NostrConnect.value) })
+                        put("#p", buildJsonArray { add(signerKeyPair.pubKey.assureValidPubKeyHex()) })
+                    },
+                ).collect { message ->
+                    if (message is NostrIncomingMessage.EventMessage) {
+                        message.nostrEvent?.let { event ->
+                            remoteSignerMethodParser.parseNostrEvent(
+                                event = event,
+                                signerKeyPair = signerKeyPair,
+                            ).fold(
+                                onSuccess = { method ->
+                                    scope.launch { _incomingMethods.send(method) }
+                                },
+                                onFailure = { error ->
+                                    scope.launch { _errors.send(error.mapAsRemoteSignerMethodException(event)) }
+                                },
+                            )
                         }
                     }
+                }
             }
         }
     }

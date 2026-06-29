@@ -22,7 +22,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -65,6 +68,9 @@ internal class NostrSocketClientImpl(
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
     override val incomingMessages = _incomingMessages.asSharedFlow()
 
+    private val _connectionGeneration = MutableStateFlow(0L)
+    override val connectionGeneration: StateFlow<Long> = _connectionGeneration.asStateFlow()
+
     override val socketUrl = wssUrl.cleanWebSocketUrl()
 
     override suspend fun ensureSocketConnectionOrThrow() {
@@ -74,6 +80,8 @@ internal class NostrSocketClientImpl(
             if (wsSession == null || wsSession?.isActive == false || isSocketStale()) {
                 cancelSocketSession()
                 wsSession = acquireWebSocketSession(url = socketUrl)
+                // Bump once the session is live so collectors re-subscribe on a ready socket.
+                _connectionGeneration.value += 1
             }
         }
     }

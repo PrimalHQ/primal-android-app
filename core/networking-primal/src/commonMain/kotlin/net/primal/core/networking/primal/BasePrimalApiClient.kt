@@ -10,9 +10,8 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
@@ -22,10 +21,10 @@ import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.networking.sockets.SILENCE_TIMEOUT
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterBySubscriptionId
+import net.primal.core.networking.sockets.subscription
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.bufferCountOrTimeout
-import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.common.exception.QueryTimeoutException
 
@@ -75,19 +74,13 @@ internal class BasePrimalApiClient(
         }
     }
 
-    fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
-        return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
-            .onStart {
-                try {
-                    sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
-                } catch (error: CancellationException) {
-                    throw error
-                } catch (error: Exception) {
-                    Napier.w(error) { "Unable to subscribe." }
-                    throw NetworkException(message = "Api unreachable at the moment.", cause = error)
-                }
-            }.onCompletion { runCatching { closeSubscription(subscriptionId = subscriptionId) } }
-    }
+    fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> =
+        socketClient.subscription(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
+            .catch { error ->
+                if (error is CancellationException) throw error
+                Napier.w(error) { "Unable to subscribe." }
+                throw NetworkException(message = "Api unreachable at the moment.", cause = error)
+            }
 
     @OptIn(FlowPreview::class)
     fun subscribeBufferedOnInactivity(

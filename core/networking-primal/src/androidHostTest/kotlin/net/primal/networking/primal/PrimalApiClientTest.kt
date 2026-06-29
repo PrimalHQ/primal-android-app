@@ -8,6 +8,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -33,6 +34,7 @@ class PrimalApiClientTest {
     private fun buildMockSocketClient(sendREQShouldFail: Boolean = false): NostrSocketClientImpl {
         val mockSocket = mockk<NostrSocketClientImpl>(relaxed = true)
         every { mockSocket.incomingMessages } returns incomingMessages.asSharedFlow()
+        every { mockSocket.connectionGeneration } returns MutableStateFlow(1L)
         if (sendREQShouldFail) {
             coEvery { mockSocket.sendREQ(any(), any()) } throws RuntimeException("Send failed")
         }
