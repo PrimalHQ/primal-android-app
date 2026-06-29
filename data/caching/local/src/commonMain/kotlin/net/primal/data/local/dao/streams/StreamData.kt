@@ -1,11 +1,16 @@
 package net.primal.data.local.dao.streams
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.domain.streams.StreamStatus
 import net.primal.domain.streams.mappers.resolveStreamStatus
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["mainHostId"]),
+    ],
+)
 data class StreamData(
     @PrimaryKey
     val aTag: String,

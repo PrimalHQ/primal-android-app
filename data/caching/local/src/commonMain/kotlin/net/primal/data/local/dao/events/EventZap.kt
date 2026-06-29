@@ -1,6 +1,7 @@
 package net.primal.data.local.dao.events
 
 import androidx.room.Entity
+import androidx.room.Index
 import net.primal.domain.events.ZapKind
 import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.PrimalLegendProfile
@@ -10,6 +11,9 @@ import net.primal.domain.membership.PrimalLegendProfile
         "zapSenderId",
         "eventId",
         "zapRequestAt",
+    ],
+    indices = [
+        Index(value = ["eventId"]),
     ],
 )
 data class EventZap(

@@ -1,10 +1,15 @@
 package net.primal.data.local.dao.notifications
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.domain.notifications.NotificationType
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["ownerId", "createdAt"]),
+    ],
+)
 data class NotificationData(
     @PrimaryKey
     val notificationId: String,

@@ -137,7 +137,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         DvmFeedFeaturedUserCrossRef::class,
         RecentSearch::class,
     ],
-    version = 34,
+    version = 35,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

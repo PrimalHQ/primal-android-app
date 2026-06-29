@@ -1,9 +1,14 @@
 package net.primal.data.local.dao.reads
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["referencedEventATag"]),
+    ],
+)
 data class HighlightData(
     @PrimaryKey
     val highlightId: String,

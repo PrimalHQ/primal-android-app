@@ -1,9 +1,15 @@
 package net.primal.data.local.dao.explore
 
 import androidx.room.Entity
+import androidx.room.Index
 import net.primal.domain.links.CdnImage
 
-@Entity(primaryKeys = ["identifier", "authorId"])
+@Entity(
+    primaryKeys = ["identifier", "authorId"],
+    indices = [
+        Index(value = ["aTag"]),
+    ],
+)
 data class FollowPackData(
     val aTag: String,
     val identifier: String,

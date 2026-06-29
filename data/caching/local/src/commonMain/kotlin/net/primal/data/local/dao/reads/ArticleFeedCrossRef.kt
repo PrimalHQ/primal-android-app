@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(
     indices = [
         Index(value = ["ownerId", "spec", "articleATag", "articleAuthorId"], unique = true),
+        Index(value = ["ownerId", "spec", "position"]),
     ],
 )
 data class ArticleFeedCrossRef(
