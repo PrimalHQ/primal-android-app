@@ -106,3 +106,13 @@ kotlin {
         }
     }
 }
+
+// Forward the optional caching-DB snapshot path so the opt-in DB benchmarks can run against a real
+// database: -PprimalDbSnapshot=/abs/path/primal_database.db. Absent it they no-op, keeping CI safe.
+tasks.withType<Test>().configureEach {
+    val snapshot = (project.findProperty("primalDbSnapshot") as String?)
+        ?: System.getProperty("primal.db.snapshot")
+    if (snapshot != null) {
+        systemProperty("primal.db.snapshot", snapshot)
+    }
+}
