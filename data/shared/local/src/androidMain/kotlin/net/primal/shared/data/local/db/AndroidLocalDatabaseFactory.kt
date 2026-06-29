@@ -1,10 +1,12 @@
 package net.primal.shared.data.local.db
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import java.util.concurrent.Executor
 import net.primal.core.utils.coroutines.AndroidDispatcherProvider
 
 typealias LocalDatabaseFactory = AndroidLocalDatabaseFactory
@@ -20,20 +22,17 @@ object AndroidLocalDatabaseFactory {
     ): T {
         val appContext = context.applicationContext
         val dbFile = context.getDatabasePath(databaseName)
+        val debugDiagnostics = (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         return buildLocalDatabase(
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            logEngineDiagnostics = debugDiagnostics,
             migrations = migrations,
         ) {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)
                 .setQueryCoroutineContext(AndroidDispatcherProvider().io())
                 .setDriver(BundledSQLiteDriver())
-                .run {
-                    if (callback != null) {
-                        this.addCallback(callback)
-                    } else {
-                        this
-                    }
-                }
+                .run { if (callback != null) addCallback(callback) else this }
+                .run { if (debugDiagnostics) setQueryCallback(QueryCountingCallback, Executor { it.run() }) else this }
         }
     }
 }

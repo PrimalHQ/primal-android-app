@@ -42,6 +42,9 @@ kotlin {
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
 
+                // Logging
+                implementation(libs.napier)
+
                 // Cryptography
                 implementation(libs.whyoleg.cryptography.core)
                 implementation(libs.whyoleg.cryptography.provider.optimal)
