@@ -27,6 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -35,6 +36,7 @@ import kotlinx.serialization.json.buildJsonObject
 import net.primal.core.networking.primal.BasePrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.NostrSocketClientImpl
+import net.primal.core.networking.sockets.subscription
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.testing.CoroutinesTestRule
 import net.primal.domain.common.exception.NetworkException
@@ -78,6 +80,16 @@ class NostrSocketClientImplTest {
         wssUrl = "wss://relay.primal.net",
         timeSource = timeSource,
     )
+
+    private fun newWebSocketSession(
+        incomingFrames: Channel<Frame>,
+        sentFrames: MutableList<Frame>,
+    ): DefaultClientWebSocketSession =
+        mockk(relaxed = true) {
+            every { coroutineContext } returns (Job() as CoroutineContext)
+            every { incoming } returns incomingFrames
+            coEvery { send(capture(sentFrames)) } just Runs
+        }
 
     @Test
     fun sendREQ_sendsTextFrameToWebSocket() =
@@ -215,6 +227,29 @@ class NostrSocketClientImplTest {
         }
 
     @Test
+    fun ensureConnection_bumpsConnectionGenerationOnEachConnect() =
+        runTest {
+            val timeSource = TestTimeSource()
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.connectionGeneration.value shouldBe 0L
+
+            client.ensureSocketConnectionOrThrow()
+            client.connectionGeneration.value shouldBe 1L
+
+            // Go silent past the watchdog window so the next ensure rebuilds the socket.
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            client.connectionGeneration.value shouldBe 2L
+        }
+
+    @Test
     fun ensureConnection_whenIdleWithoutSending_doesNotRebuild() =
         runTest {
             val timeSource = TestTimeSource()
@@ -299,4 +334,127 @@ class NostrSocketClientImplTest {
             incomingChannel.close()
             advanceUntilIdle()
         }
+
+    @Test
+    fun subscription_replaysReqAfterSocketRebuild() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            val sentFrames = mutableListOf<Frame>()
+            coEvery {
+                mockHttpClient.webSocketSession(urlString = any<String>())
+            } answers { newWebSocketSession(incomingChannel, sentFrames) }
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            val job = launch {
+                client.subscription(subscriptionId = subscriptionId, data = buildJsonObject {}).collect { }
+            }
+            runCurrent()
+
+            sentFrames.reqCountFor(subscriptionId) shouldBe 1
+
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+            runCurrent()
+
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+            sentFrames.reqCountFor(subscriptionId) shouldBe 2
+
+            job.cancel()
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
+    @Test
+    fun subscription_afterCompletion_sendsCloseAndStopsReplaying() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            val sentFrames = mutableListOf<Frame>()
+            every { mockWebSocketSession.incoming } returns incomingChannel
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            val job = launch {
+                client.subscription(subscriptionId = subscriptionId, data = buildJsonObject {}).collect { }
+            }
+            runCurrent()
+            sentFrames.reqCountFor(subscriptionId) shouldBe 1
+
+            // Completing the collection must send CLOSE.
+            job.cancel()
+            advanceUntilIdle()
+            sentFrames.closeCountFor(subscriptionId) shouldBe 1
+
+            // A rebuild after completion must NOT replay the closed subscription.
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+            runCurrent()
+            sentFrames.reqCountFor(subscriptionId) shouldBe 1
+
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
+    @Test
+    fun subscribe_isReplayedAfterSocketRebuild() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            val sentFrames = mutableListOf<Frame>()
+
+            coEvery {
+                mockHttpClient.webSocketSession(urlString = any<String>())
+            } answers { newWebSocketSession(incomingChannel, sentFrames) }
+
+            val socketClient = buildNostrSocketClient(timeSource = timeSource)
+            val apiClient = BasePrimalApiClient(socketClient = socketClient)
+
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            val job = launch {
+                apiClient.subscribe(
+                    subscriptionId = subscriptionId,
+                    message = PrimalCacheFilter(primalVerb = "sub_verb"),
+                ).collect { }
+            }
+            runCurrent()
+
+            timeSource += 11.seconds
+            socketClient.ensureSocketConnectionOrThrow()
+            runCurrent()
+
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+            sentFrames.reqCountFor(subscriptionId) shouldBe 2
+
+            job.cancel()
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
+    @Test
+    fun ensureConnection_afterRebuild_doesNotReplayPlainReq() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val sentFrames = mutableListOf<Frame>()
+            coEvery { mockWebSocketSession.send(capture(sentFrames)) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            // A plain query-style REQ (not via subscription()) must never be replayed.
+            client.sendREQ(subscriptionId = subscriptionId, data = buildJsonObject {})
+
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            sentFrames.reqCountFor(subscriptionId) shouldBe 1
+        }
+
+    private fun List<Frame>.reqCountFor(subscriptionId: String): Int =
+        filterIsInstance<Frame.Text>().count { it.readText().contains("\"REQ\",\"$subscriptionId\"") }
+
+    private fun List<Frame>.closeCountFor(subscriptionId: String): Int =
+        filterIsInstance<Frame.Text>().count { it.readText().contains("\"CLOSE\",\"$subscriptionId\"") }
 }
