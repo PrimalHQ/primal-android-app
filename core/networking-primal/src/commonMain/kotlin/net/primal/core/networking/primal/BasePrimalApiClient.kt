@@ -6,6 +6,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,9 @@ import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.bufferCountOrTimeout
 import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.common.exception.QueryTimeoutException
+
+private val QUERY_TIMEOUT = 15.seconds
 
 internal class BasePrimalApiClient(
     private val socketClient: NostrSocketClientImpl,
@@ -34,7 +38,7 @@ internal class BasePrimalApiClient(
         return try {
             coroutineScope {
                 val subscriptionId = Uuid.random().toPrimalSubscriptionId()
-                val deferredQueryResult = async { collectQueryResult(subscriptionId) }
+                val deferredQueryResult = async { collectQueryResult(subscriptionId, message.primalVerb) }
                 sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
                 deferredQueryResult.await()
             }
@@ -139,12 +143,17 @@ internal class BasePrimalApiClient(
     }
 
     @OptIn(FlowPreview::class)
-    private suspend fun collectQueryResult(subscriptionId: String): PrimalQueryResult {
-        val messages = socketClient.incomingMessages
-            .filterBySubscriptionId(id = subscriptionId)
-            .transformWhileEventsAreIncoming()
-            .timeout(15.seconds)
-            .toList()
+    private suspend fun collectQueryResult(subscriptionId: String, verb: String?): PrimalQueryResult {
+        val messages = try {
+            socketClient.incomingMessages
+                .filterBySubscriptionId(id = subscriptionId)
+                .transformWhileEventsAreIncoming()
+                .timeout(QUERY_TIMEOUT)
+                .toList()
+        } catch (error: TimeoutCancellationException) {
+            // Convert to a NetworkException so callers surface a retryable error.
+            throw QueryTimeoutException(verb = verb, timeout = QUERY_TIMEOUT, cause = error)
+        }
 
         val terminationMessage = messages.lastOrNull()
         terminationMessage.verifyOrThrow(subscriptionId)

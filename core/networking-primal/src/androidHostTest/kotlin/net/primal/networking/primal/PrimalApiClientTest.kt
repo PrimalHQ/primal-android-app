@@ -18,6 +18,7 @@ import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.testing.CoroutinesTestRule
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.common.exception.QueryTimeoutException
 import org.junit.Rule
 import org.junit.Test
 
@@ -88,6 +89,20 @@ class PrimalApiClientTest {
 
             coVerify { mockSocketClient.sendREQ(eq("test-sub-id"), any()) }
             job.cancel()
+        }
+
+    @Test
+    fun query_throwsQueryTimeoutException_whenNoEventsArriveBeforeDeadline() =
+        runTest {
+            val apiClient = buildPrimalApiClient()
+
+            val error = shouldThrow<QueryTimeoutException> {
+                apiClient.query(message = PrimalCacheFilter(primalVerb = "trending_verb"))
+            }
+
+            // Contract the RemoteMediator relies on: it IS a NetworkException.
+            (error is NetworkException) shouldBe true
+            error.verb shouldBe "trending_verb"
         }
 
     @Test
