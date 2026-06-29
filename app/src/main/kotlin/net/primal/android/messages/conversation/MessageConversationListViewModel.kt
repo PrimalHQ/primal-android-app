@@ -3,11 +3,13 @@ package net.primal.android.messages.conversation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
@@ -48,7 +51,8 @@ class MessageConversationListViewModel @Inject constructor(
                     userId = activeAccountStore.activeUserId(),
                     relation = ConversationRelation.Follows,
                 )
-                .mapAsPagingDataOfMessageConversationUi(),
+                .mapAsPagingDataOfMessageConversationUi()
+                .cachedIn(viewModelScope),
         ),
     )
     val state = _state.asStateFlow()
@@ -57,10 +61,20 @@ class MessageConversationListViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var keepConversationsLoadedJob: Job? = null
+
     init {
         observeEvents()
         subscribeToTotalUnreadCountChanges()
         fetchConversations()
+        ensureConversationsAreAlwaysCached(_state.value.conversations)
+    }
+
+    private fun ensureConversationsAreAlwaysCached(conversations: Flow<PagingData<MessageConversationUi>>) {
+        keepConversationsLoadedJob?.cancel()
+        keepConversationsLoadedJob = viewModelScope.launch {
+            conversations.keepLoaded()
+        }
     }
 
     private fun observeEvents() =
@@ -109,14 +123,17 @@ class MessageConversationListViewModel @Inject constructor(
         }
 
     private fun changeRelation(relation: ConversationRelation) {
+        val conversations = chatRepository
+            .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
+            .mapAsPagingDataOfMessageConversationUi()
+            .cachedIn(viewModelScope)
         setState {
             copy(
                 activeRelation = relation,
-                conversations = chatRepository
-                    .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
-                    .mapAsPagingDataOfMessageConversationUi(),
+                conversations = conversations,
             )
         }
+        ensureConversationsAreAlwaysCached(conversations)
     }
 
     private fun markAllConversationAsRead() =
