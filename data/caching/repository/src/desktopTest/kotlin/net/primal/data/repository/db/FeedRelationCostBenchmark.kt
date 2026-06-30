@@ -168,7 +168,11 @@ class FeedRelationCostBenchmark {
         }
     }
 
-    private fun readRow(s: SQLiteStatement, cols: Int, decode: Boolean) {
+    private fun readRow(
+        s: SQLiteStatement,
+        cols: Int,
+        decode: Boolean,
+    ) {
         for (i in 0 until cols) {
             if (s.isNull(i)) continue
             val t = s.getText(i)
