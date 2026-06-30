@@ -1234,6 +1234,16 @@
     <string name="settings_developer_tools_delete_wallet_text">If you haven\'t backed up your seed phrase, you may permanently lose access to funds on this wallet.</string>
     <string name="settings_developer_tools_wallet_deleted">Wallet deleted</string>
     <string name="settings_developer_tools_wallet_delete_failed">Failed to delete wallet</string>
+    <string name="settings_developer_tools_data_inspector_title">Inspect User Data</string>
+    <string name="settings_developer_tools_data_inspector_description">Browse and export local app data files</string>
+    <string name="settings_developer_tools_data_inspector_screen_title">User Data</string>
+    <string name="settings_developer_tools_data_inspector_intro">You\'re inspecting your app\'s local user data - the files counted under \"User data\" in App info (cache excluded).</string>
+    <string name="settings_developer_tools_data_inspector_summary">%1$d files · %2$s total</string>
+    <string name="settings_developer_tools_data_inspector_group_stats">%1$d files · %2$s</string>
+    <string name="settings_developer_tools_data_inspector_root">(root)</string>
+    <string name="settings_developer_tools_data_inspector_export">Export</string>
+    <string name="settings_developer_tools_data_inspector_export_chooser">Export file</string>
+    <string name="settings_developer_tools_data_inspector_export_failed">Export failed</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
     <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>

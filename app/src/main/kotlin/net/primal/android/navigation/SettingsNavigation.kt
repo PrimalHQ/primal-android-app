@@ -40,6 +40,8 @@ import net.primal.android.settings.content.ContentDisplaySettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.developer.DeveloperToolsScreen
 import net.primal.android.settings.developer.DeveloperToolsViewModel
+import net.primal.android.settings.developer.datainspector.DataInspectorScreen
+import net.primal.android.settings.developer.datainspector.DataInspectorViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
@@ -79,6 +81,7 @@ private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_ac
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
 fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
 private fun NavController.navigateToDeveloperTools() = navigate(route = "developer_tools")
+private fun NavController.navigateToDataInspector() = navigate(route = "developer_tools_data_inspector")
 
 private fun NavController.navigateToRemoteSessionDetails(sessionId: String) =
     navigate(route = "session_details/remote/$sessionId")
@@ -176,6 +179,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         zaps(route = "zaps_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
         developerTools(route = "developer_tools", navController = navController)
+        dataInspector(route = "developer_tools_data_inspector", navController = navController)
         connectedRemoteAppDetails(
             route = "connected_apps/remote/{$REMOTE_LOGIN_CLIENT_PUBKEY}",
             arguments = listOf(
@@ -539,6 +543,23 @@ private fun NavGraphBuilder.developerTools(route: String, navController: NavCont
         val viewModel = hiltViewModel<DeveloperToolsViewModel>()
         LockToOrientationPortrait()
         DeveloperToolsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onInspectUserDataClick = { navController.navigateToDataInspector() },
+        )
+    }
+
+private fun NavGraphBuilder.dataInspector(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<DataInspectorViewModel>()
+        LockToOrientationPortrait()
+        DataInspectorScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

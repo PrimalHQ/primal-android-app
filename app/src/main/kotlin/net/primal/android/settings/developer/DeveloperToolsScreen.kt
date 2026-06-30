@@ -69,7 +69,11 @@ import net.primal.domain.wallet.WalletType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit) {
+fun DeveloperToolsScreen(
+    viewModel: DeveloperToolsViewModel,
+    onClose: () -> Unit,
+    onInspectUserDataClick: () -> Unit,
+) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -134,6 +138,7 @@ fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit
     DeveloperToolsScreen(
         state = uiState.value,
         onClose = onClose,
+        onInspectUserDataClick = onInspectUserDataClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -144,6 +149,7 @@ fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit
 private fun DeveloperToolsScreen(
     state: UiState,
     onClose: () -> Unit,
+    onInspectUserDataClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -284,6 +290,22 @@ private fun DeveloperToolsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Data inspection section
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_developer_tools_data_inspector_title),
+                    supportText = stringResource(
+                        id = R.string.settings_developer_tools_data_inspector_description,
+                    ),
+                    onClick = onInspectUserDataClick,
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
