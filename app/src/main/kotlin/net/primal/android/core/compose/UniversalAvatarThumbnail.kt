@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -167,8 +169,13 @@ private fun AvatarThumbnailListItemImage(
     }
 
     if (currentUrl != null) {
+        val cacheKey = MemoryCache.Key(sourceUrl ?: currentUrl)
         PrimalAsyncImage(
-            model = currentUrl,
+            model = ImageRequest.Builder(context)
+                .data(currentUrl)
+                .memoryCacheKey(cacheKey)
+                .placeholderMemoryCacheKey(cacheKey)
+                .build(),
             imageLoader = imageLoader,
             modifier = sharedModifier,
             contentDescription = stringResource(id = R.string.accessibility_profile_image),
