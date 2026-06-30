@@ -192,6 +192,6 @@ class ArticleRepositoryImpl(
     )
 
     companion object {
-        private const val PAGE_SIZE = 25
+        private const val PAGE_SIZE = 20
     }
 }

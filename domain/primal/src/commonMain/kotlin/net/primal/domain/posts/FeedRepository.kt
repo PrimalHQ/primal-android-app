@@ -70,7 +70,7 @@ interface FeedRepository {
     suspend fun findConversation(userId: String, noteId: String): List<FeedPost>
 
     companion object {
-        const val DEFAULT_PAGE_SIZE = 25
+        const val DEFAULT_PAGE_SIZE = 20
 
         val DEFAULT_THREAD_KINDS = listOf(
             NostrEventKind.ShortTextNote.value,
