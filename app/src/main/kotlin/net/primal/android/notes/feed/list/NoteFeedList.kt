@@ -552,6 +552,7 @@ private fun FeedMediaUrlPreLoader(
     preloadCount: Int = INITIAL_PRELOAD_COUNT,
 ) {
     val currentMediaCacher by rememberUpdatedState(mediaCacher)
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(pagingItems) {
         snapshotFlow { pagingItems.itemCount > 0 }
@@ -565,7 +566,7 @@ private fun FeedMediaUrlPreLoader(
                     val urls = initialItems.flatMap { it.extractMediaUrls(feedWidthPx) }
 
                     if (urls.isNotEmpty()) {
-                        currentMediaCacher.preCacheFeedMedia(urls)
+                        currentMediaCacher.preCacheFeedMedia(urls, scope)
                     }
                 }
             }
@@ -588,7 +589,7 @@ private fun FeedMediaUrlPreLoader(
                         val urls = upcomingItems.flatMap { it.extractMediaUrls(feedWidthPx) }
 
                         if (urls.isNotEmpty()) {
-                            currentMediaCacher.preCacheFeedMedia(urls)
+                            currentMediaCacher.preCacheFeedMedia(urls, scope)
                         }
                     }
                 }

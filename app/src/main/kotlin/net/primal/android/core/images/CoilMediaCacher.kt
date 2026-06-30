@@ -14,11 +14,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 
 @Singleton
 class CoilMediaCacher @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    dispatchers: DispatcherProvider,
+    private val dispatchers: DispatcherProvider,
     private val avatarImageLoader: ImageLoader,
     private val feedImageLoader: ImageLoader,
 ) : MediaCacher {
@@ -26,47 +27,51 @@ class CoilMediaCacher @Inject constructor(
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
 
     override fun preCacheUserAvatars(urls: List<String>) {
-        preCacheImages(
-            urls = urls,
-            imageLoader = avatarImageLoader,
-            memoryCachePolicy = CachePolicy.DISABLED,
-        )
-    }
-
-    override fun preCacheFeedMedia(urls: List<String>) {
-        preCacheImages(
-            urls = urls,
-            imageLoader = feedImageLoader,
-            memoryCachePolicy = CachePolicy.ENABLED,
-        )
-    }
-
-    private fun preCacheImages(
-        urls: List<String>,
-        imageLoader: ImageLoader,
-        memoryCachePolicy: CachePolicy,
-    ) {
-        if (urls.isEmpty()) return
+        val uniqueUrls = urls.filter { it.isNotBlank() }.distinct()
+        if (uniqueUrls.isEmpty()) return
 
         scope.launch {
             withTimeout(PRE_CACHE_TIMEOUT) {
-                val uniqueUrls = urls
-                    .filter { it.isNotBlank() }
-                    .distinct()
-
-                for (url in uniqueUrls) {
-                    val request = ImageRequest.Builder(context)
-                        .data(url)
-                        .memoryCachePolicy(memoryCachePolicy)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .networkCachePolicy(CachePolicy.ENABLED)
-                        .build()
-
-                    imageLoader.enqueue(request)
+                uniqueUrls.forEach { url ->
+                    avatarImageLoader.enqueue(
+                        request = buildRequest(
+                            url = url,
+                            memoryCachePolicy = CachePolicy.DISABLED,
+                        )
+                    )
                 }
             }
         }
     }
+
+    override fun preCacheFeedMedia(urls: List<String>, scope: CoroutineScope?) {
+        val targetScope = scope ?: this.scope
+        val uniqueUrls = urls.filter { it.isNotBlank() }.distinct()
+        if (uniqueUrls.isEmpty()) return
+
+        uniqueUrls.forEach { url ->
+            targetScope.launch(dispatchers.io()) {
+                runCatching {
+                    withTimeout(PRE_CACHE_TIMEOUT) {
+                        feedImageLoader.execute(
+                            request = buildRequest(
+                                url = url,
+                                memoryCachePolicy = CachePolicy.ENABLED,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun buildRequest(url: String, memoryCachePolicy: CachePolicy): ImageRequest =
+        ImageRequest.Builder(context)
+            .data(url)
+            .memoryCachePolicy(memoryCachePolicy)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .networkCachePolicy(CachePolicy.ENABLED)
+            .build()
 
     private companion object {
         val PRE_CACHE_TIMEOUT = 20.seconds
