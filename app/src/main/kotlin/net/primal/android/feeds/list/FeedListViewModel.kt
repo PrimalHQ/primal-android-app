@@ -34,7 +34,6 @@ import net.primal.domain.posts.FeedRepository
 
 @HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)
 class FeedListViewModel @AssistedInject constructor(
-    @Assisted activeFeed: FeedUi,
     @Assisted private val specKind: FeedSpecKind,
     private val feedRepository: FeedRepository,
     private val feedsRepository: FeedsRepository,
@@ -44,10 +43,10 @@ class FeedListViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory {
-        fun create(activeFeed: FeedUi, specKind: FeedSpecKind): FeedListViewModel
+        fun create(specKind: FeedSpecKind): FeedListViewModel
     }
 
-    private val _state = MutableStateFlow(UiState(activeFeed = activeFeed, specKind = specKind))
+    private val _state = MutableStateFlow(UiState(specKind = specKind))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 

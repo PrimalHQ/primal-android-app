@@ -6,7 +6,6 @@ import net.primal.domain.feeds.FeedSpecKind
 
 interface FeedListContract {
     data class UiState(
-        val activeFeed: FeedUi,
         val specKind: FeedSpecKind,
         val feeds: List<FeedUi> = emptyList(),
         val isEditMode: Boolean = false,

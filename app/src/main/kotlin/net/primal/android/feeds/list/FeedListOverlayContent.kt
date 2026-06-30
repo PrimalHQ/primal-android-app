@@ -35,12 +35,13 @@ fun FeedListOverlayContent(
     onEditAdvancedSearchFeedClick: ((feedSpec: String) -> Unit)? = null,
 ) {
     val viewModel = hiltViewModel<FeedListViewModel, FeedListViewModel.Factory>(
-        key = "FeedListViewModel_${activeFeed.spec}",
-        creationCallback = { it.create(activeFeed = activeFeed, specKind = feedSpecKind) },
+        key = "FeedListViewModel_$feedSpecKind",
+        creationCallback = { it.create(specKind = feedSpecKind) },
     )
     val uiState = viewModel.state.collectAsState()
 
     FeedListOverlayContent(
+        activeFeed = activeFeed,
         state = uiState.value,
         onFeedClick = onFeedClick,
         onDismiss = onDismiss,
@@ -52,6 +53,7 @@ fun FeedListOverlayContent(
 
 @Composable
 private fun FeedListOverlayContent(
+    activeFeed: FeedUi,
     state: FeedListContract.UiState,
     onFeedClick: (FeedUi) -> Unit,
     onDismiss: () -> Unit,
@@ -82,6 +84,7 @@ private fun FeedListOverlayContent(
     ) { target ->
         when (target) {
             FeedMarketplaceStage.FeedList -> FeedListStage(
+                activeFeed = activeFeed,
                 state = state,
                 onFeedClick = onFeedClick,
                 onCloseClick = onDismiss,
@@ -108,6 +111,7 @@ private fun FeedListOverlayContent(
 
 @Composable
 private fun FeedListStage(
+    activeFeed: FeedUi,
     state: FeedListContract.UiState,
     onFeedClick: (FeedUi) -> Unit,
     onCloseClick: () -> Unit,
@@ -117,7 +121,7 @@ private fun FeedListStage(
     FeedList(
         modifier = Modifier.fillMaxSize(),
         feeds = state.feeds,
-        activeFeed = state.activeFeed,
+        activeFeed = activeFeed,
         onFeedClick = { feed ->
             if (state.isEditMode) {
                 eventPublisher(
