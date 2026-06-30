@@ -1,6 +1,11 @@
 ## Fixes
 - Implemented follow mute list
 - Improved profile context menu
+- Improved performances when loading feeds
 - Fixed parseFollowings to take only valid pubkeys from p tags (#1058)
 - Fixed to open search screen when tapping the Explore tab
 - Fixed rendering single-image notes at full content width
+- Fixed feed media prefetch wasn’t canceled when leaving the feed (#1066)
+- Fixed top zaps avatar flash on thread open (#1067)
+- Fixed the feed picker re-firing config requests on every feed switch
+- Fixed timeout doesn’t propagate to UI properly
