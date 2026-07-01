@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
@@ -44,9 +45,10 @@ fun NoteCardDialogs(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: (() -> Unit)?,
 ) {
+    val zappingState = LocalZappingState.current
     if (dialogsState.showCantZapWarning) {
         UnableToZapBottomSheet(
-            zappingState = noteState.zappingState,
+            zappingState = zappingState,
             onDismissRequest = { dialogsState.showCantZapWarning = false },
             onGoToWallet = { onGoToWallet?.invoke() },
         )
@@ -56,9 +58,9 @@ fun NoteCardDialogs(
         ZapBottomSheet(
             onDismissRequest = { dialogsState.showZapOptions = false },
             receiverName = data.authorName,
-            zappingState = noteState.zappingState,
+            zappingState = zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (noteState.zappingState.canZap(zapAmount)) {
+                if (zappingState.canZap(zapAmount)) {
                     eventPublisher(
                         UiEvent.ZapAction(
                             postId = data.postId,

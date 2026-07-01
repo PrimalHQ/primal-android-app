@@ -100,6 +100,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.activity.LocalPrimalTheme
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.IconText
@@ -184,7 +185,7 @@ fun LiveStreamScreen(
         else -> state.streamInfo?.mainHostProfile?.authorDisplayName
     }
 
-    val zapHostState = rememberZapHostState(zappingState = state.zappingState, receiverName = receiverName)
+    val zapHostState = rememberZapHostState(zappingState = LocalZappingState.current, receiverName = receiverName)
 
     ZapHost(
         zapHostState = zapHostState,

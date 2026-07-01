@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -88,7 +89,6 @@ fun DvmFeedListItem(
         onFeedClick = onFeedClick,
         onProfileClick = onProfileClick,
         eventPublisher = viewModel::setEvent,
-        state = uiState.value,
         listItemContainerColor = listItemContainerColor,
         avatarSize = avatarSize,
         extended = extended,
@@ -103,7 +103,6 @@ fun DvmFeedListItem(
 private fun DvmFeedListItem(
     modifier: Modifier = Modifier,
     dvmFeed: DvmFeedUi,
-    state: DvmFeedListItemContract.UiState,
     onFeedClick: ((dvmFeed: DvmFeedUi) -> Unit)? = null,
     onProfileClick: ((profileId: String) -> Unit)? = null,
     onGoToWallet: (() -> Unit)? = null,
@@ -114,10 +113,11 @@ private fun DvmFeedListItem(
     extended: Boolean = false,
     showFollowsActionsAvatarRow: Boolean = false,
 ) {
+    val zappingState = LocalZappingState.current
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
-            zappingState = state.zappingState,
+            zappingState = zappingState,
             onDismissRequest = { showCantZapWarning = false },
             onGoToWallet = { onGoToWallet?.invoke() },
         )
@@ -128,9 +128,9 @@ private fun DvmFeedListItem(
         ZapBottomSheet(
             onDismissRequest = { showZapOptions = false },
             receiverName = dvmFeed.data.title,
-            zappingState = state.zappingState,
+            zappingState = zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount)) {
+                if (zappingState.canZap(zapAmount)) {
                     eventPublisher(
                         DvmFeedListItemContract.UiEvent.OnZapClick(
                             dvmFeed = dvmFeed,
@@ -231,7 +231,7 @@ private fun DvmFeedListItem(
                                 )
                             },
                             onZapClick = {
-                                if (state.zappingState.walletConnected) {
+                                if (zappingState.walletConnected) {
                                     showZapOptions = true
                                 } else {
                                     showCantZapWarning = true

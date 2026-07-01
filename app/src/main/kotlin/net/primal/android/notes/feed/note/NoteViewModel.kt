@@ -27,7 +27,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.onFailure
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.BookmarkType
@@ -50,7 +49,6 @@ import net.primal.domain.polls.PollExpiredException
 import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
-import net.primal.domain.utils.isConfigured
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)
 class NoteViewModel @AssistedInject constructor(
@@ -87,7 +85,6 @@ class NoteViewModel @AssistedInject constructor(
 
     init {
         observeEvents()
-        observeActiveWallet()
         fetchExchangeRate()
         observeUsdExchangeRate()
         subscribeToActiveAccount()
@@ -116,34 +113,10 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
-    private fun observeActiveWallet() =
-        viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { userWallet ->
-                    val wallet = userWallet?.wallet
-                    setState {
-                        copy(
-                            zappingState = zappingState.copy(
-                                walletConnected = wallet.isConfigured(),
-                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
-                            ),
-                        )
-                    }
-                }
-        }
-
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        activeAccountUserId = activeAccountStore.activeUserId(),
-                        zappingState = this.zappingState.copy(
-                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
-                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                        ),
-                    )
-                }
+                setState { copy(activeAccountUserId = activeAccountStore.activeUserId()) }
             }
         }
 

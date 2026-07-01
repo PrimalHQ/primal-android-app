@@ -11,7 +11,6 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.wallet.DraftTx
-import net.primal.domain.zaps.ZappingState
 
 interface ProfileDetailsContract {
     data class UiState(
@@ -39,7 +38,6 @@ interface ProfileDetailsContract {
         val error: UiError? = null,
         val shouldApproveProfileAction: FollowsApproval? = null,
         val zapError: UiError? = null,
-        val zappingState: ZappingState = ZappingState(),
     ) {
         fun resolveProfileName() = profileDetails?.authorDisplayName ?: profileId?.asEllipsizedNpub() ?: ""
     }

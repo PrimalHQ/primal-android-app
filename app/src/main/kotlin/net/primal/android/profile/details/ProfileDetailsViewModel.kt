@@ -33,7 +33,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
@@ -57,7 +56,6 @@ import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
-import net.primal.domain.utils.isConfigured
 
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
@@ -90,7 +88,6 @@ class ProfileDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeActiveWallet()
         observeActiveAccount()
         observeFollowsResults()
         resolveProfileId()
@@ -247,32 +244,12 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeActiveWallet() =
-        viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { userWallet ->
-                    val wallet = userWallet?.wallet
-                    setState {
-                        copy(
-                            zappingState = zappingState.copy(
-                                walletConnected = wallet.isConfigured(),
-                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
-                            ),
-                        )
-                    }
-                }
-        }
-
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
                         activeUserPremiumTier = it.premiumMembership?.tier,
-                        zappingState = this.zappingState.copy(
-                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
-                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                        ),
                     )
                 }
             }

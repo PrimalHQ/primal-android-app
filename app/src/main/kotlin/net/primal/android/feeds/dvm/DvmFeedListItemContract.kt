@@ -2,12 +2,10 @@ package net.primal.android.feeds.dvm
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
-import net.primal.domain.zaps.ZappingState
 
 interface DvmFeedListItemContract {
 
     data class UiState(
-        val zappingState: ZappingState = ZappingState(),
         val error: UiError? = null,
     )
 
