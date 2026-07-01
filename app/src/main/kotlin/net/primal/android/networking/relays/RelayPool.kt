@@ -37,7 +37,7 @@ class RelayPool(
 ) {
 
     companion object {
-        const val PUBLISH_TIMEOUT = 30_000
+        const val PUBLISH_TIMEOUT = 10_000
     }
 
     private val scope = CoroutineScope(dispatchers.io())
