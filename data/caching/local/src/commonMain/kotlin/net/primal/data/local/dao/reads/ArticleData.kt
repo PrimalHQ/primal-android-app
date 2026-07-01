@@ -1,10 +1,16 @@
 package net.primal.data.local.dao.reads
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.domain.links.CdnImage
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["articleId", "authorId"]),
+        Index(value = ["eventId"]),
+    ],
+)
 data class ArticleData(
     @PrimaryKey
     val aTag: String,

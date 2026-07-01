@@ -1,9 +1,15 @@
 package net.primal.data.local.dao.messages
 
 import androidx.room.Entity
+import androidx.room.Index
 import net.primal.shared.data.local.encryption.Encryptable
 
-@Entity(primaryKeys = ["messageId", "ownerId"])
+@Entity(
+    primaryKeys = ["messageId", "ownerId"],
+    indices = [
+        Index(value = ["ownerId", "participantId", "createdAt"]),
+    ],
+)
 data class DirectMessageData(
     val messageId: String,
     val ownerId: String,

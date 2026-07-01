@@ -14,6 +14,7 @@ import net.primal.domain.membership.PrimalLegendProfile
     ],
     indices = [
         Index(value = ["eventId"]),
+        Index(value = ["invoice"]),
     ],
 )
 data class EventZap(
