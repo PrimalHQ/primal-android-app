@@ -8,6 +8,7 @@ import breez_sdk_spark.LnurlPayRequest
 import breez_sdk_spark.OnchainConfirmationSpeed
 import breez_sdk_spark.Payment
 import breez_sdk_spark.PaymentDetails
+import breez_sdk_spark.PaymentRequest
 import breez_sdk_spark.PaymentType
 import breez_sdk_spark.PrepareLnurlPayRequest
 import breez_sdk_spark.PrepareSendPaymentRequest
@@ -260,7 +261,7 @@ internal class SparkWalletServiceImpl(
             val sdk = breezSdkInstanceManager.requireInstance(wallet.walletId)
             val response = sdk.receivePayment(
                 ReceivePaymentRequest(
-                    paymentMethod = ReceivePaymentMethod.BitcoinAddress,
+                    paymentMethod = ReceivePaymentMethod.BitcoinAddress(newAddress = false),
                 ),
             )
 
@@ -284,7 +285,9 @@ internal class SparkWalletServiceImpl(
                     val amountSats = parseAmountSats(request.amountSats)
                     val prepareResponse = sdk.prepareSendPayment(
                         PrepareSendPaymentRequest(
-                            paymentRequest = request.onChainAddress,
+                            paymentRequest = PaymentRequest.Input(
+                                input = request.onChainAddress,
+                            ),
                             amount = amountSats,
                         ),
                     )
@@ -320,7 +323,9 @@ internal class SparkWalletServiceImpl(
 
                 is TxRequest.Lightning.LnInvoice -> {
                     val prepareRequest = PrepareSendPaymentRequest(
-                        paymentRequest = request.lnInvoice,
+                        paymentRequest = PaymentRequest.Input(
+                            input = request.lnInvoice,
+                        ),
                         amount = request.amountSats.toBigInteger(),
                     )
                     val prepareResponse = sdk.prepareSendPayment(prepareRequest)
@@ -345,7 +350,7 @@ internal class SparkWalletServiceImpl(
 
                     val prepareResponse = sdk.prepareLnurlPay(
                         PrepareLnurlPayRequest(
-                            amountSats = request.amountSats.toULong(),
+                            amount = request.amountSats.toULong().toBigInteger(),
                             payRequest = payRequest,
                             comment = request.noteRecipient,
                             validateSuccessActionUrl = false,
@@ -377,7 +382,9 @@ internal class SparkWalletServiceImpl(
 
             val amountSats = amountInBtc.toSats()
             val prepareRequest = PrepareSendPaymentRequest(
-                paymentRequest = onChainAddress,
+                paymentRequest = PaymentRequest.Input(
+                    input = onChainAddress,
+                ),
                 amount = amountSats.toBigInteger(),
             )
 

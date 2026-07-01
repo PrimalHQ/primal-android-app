@@ -7,7 +7,7 @@ import breez_sdk_spark.Network
 import breez_sdk_spark.SignMessageRequest
 import breez_sdk_spark.connectWithSigner
 import breez_sdk_spark.defaultConfig
-import breez_sdk_spark.defaultExternalSigner
+import breez_sdk_spark.defaultExternalSigners
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -83,23 +83,24 @@ internal class BreezSdkInstanceManager(
             syncIntervalSecs = 15.toUInt()
             privateEnabledDefault = true
             preferSparkOverLightning = true
-            supportLnurlVerify = true
         }
 
         val storageDir = storageProvider.getStorageDirectory(walletId)
 
-        val signer = defaultExternalSigner(
+        val signers = defaultExternalSigners(
             mnemonic = seedWords,
             passphrase = null,
             network = Network.MAINNET,
-            keySetConfig = null,
+            accountNumber = null,
         )
 
         return connectWithSigner(
             request = ConnectWithSignerRequest(
                 config = config,
-                signer = signer,
+                breezSigner = signers.breezSigner,
+                sparkSigner = signers.sparkSigner,
                 storageDir = storageDir,
+
             ),
         )
     }

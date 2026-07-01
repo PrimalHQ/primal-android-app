@@ -111,12 +111,16 @@ internal class SparkWalletManagerImpl(
                     _balanceChanged.emit(walletId)
                 }
 
-                is SdkEvent.Optimization -> {
-                    Napier.d { "SdkEvent.Optimization walletId=$walletId" }
-                }
-
                 is SdkEvent.LightningAddressChanged -> {
                     Napier.d { "SdkEvent.LightningAddressChanged changed to ${event.lightningAddress}" }
+                }
+
+                is SdkEvent.AutoOptimization -> {
+                    Napier.d { "SdkEvent.AutoOptimization walletId=$walletId" }
+                }
+
+                is SdkEvent.NewDeposits -> {
+                    Napier.d { "SdkEvent.NewDeposits walletId=$walletId" }
                 }
             }
         }
