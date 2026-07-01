@@ -54,6 +54,7 @@ import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
@@ -292,10 +293,11 @@ private fun ProfileDetailsContent(
     screenHeight: Dp,
     snackbarHostState: SnackbarHostState,
 ) {
+    val zappingState = LocalZappingState.current
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
-            zappingState = state.zappingState,
+            zappingState = zappingState,
             onDismissRequest = { showCantZapWarning = false },
             onGoToWallet = { callbacks.onGoToWallet() },
         )

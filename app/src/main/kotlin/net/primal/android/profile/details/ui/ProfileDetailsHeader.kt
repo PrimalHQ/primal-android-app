@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.IconText
@@ -75,9 +76,10 @@ fun ProfileHeaderDetails(
 ) {
     val uiScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val zappingState = LocalZappingState.current
 
     fun onZapProfile(draftTx: DraftTx) {
-        if (state.zappingState.walletConnected) {
+        if (zappingState.walletConnected) {
             callbacks.onSendWalletTx(draftTx)
         } else {
             showCantZapWarning()

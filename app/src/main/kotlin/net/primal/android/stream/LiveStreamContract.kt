@@ -17,7 +17,6 @@ import net.primal.domain.nostr.ReportType
 import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamStatus
 import net.primal.domain.wallet.DraftTx
-import net.primal.domain.zaps.ZappingState
 
 interface LiveStreamContract {
     data class UiState(
@@ -33,7 +32,6 @@ interface LiveStreamContract {
         val contentModerationMode: StreamContentModerationMode = StreamContentModerationMode.Moderated,
         val zaps: List<EventZapUiModel> = emptyList(),
         val chatItems: List<StreamChatItem> = emptyList(),
-        val zappingState: ZappingState = ZappingState(),
         val sendingMessage: Boolean = false,
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),

@@ -34,7 +34,6 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
@@ -67,7 +66,6 @@ import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
-import net.primal.domain.utils.isConfigured
 
 @HiltViewModel
 class ArticleDetailsViewModel @Inject constructor(
@@ -113,7 +111,6 @@ class ArticleDetailsViewModel @Inject constructor(
                 fetchData(naddr)
                 observeArticle(naddr)
                 observeArticleComments(naddr = naddr)
-                observeActiveWallet()
                 observeActiveAccount()
             }
 
@@ -241,22 +238,6 @@ class ArticleDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeActiveWallet() =
-        viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { userWallet ->
-                    val wallet = userWallet?.wallet
-                    setState {
-                        copy(
-                            zappingState = zappingState.copy(
-                                walletConnected = wallet.isConfigured(),
-                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
-                            ),
-                        )
-                    }
-                }
-        }
-
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeAccountState
@@ -266,10 +247,6 @@ class ArticleDetailsViewModel @Inject constructor(
                         copy(
                             activeAccountUserId = activeAccountStore.activeUserId(),
                             isAuthorFollowed = it.data.following.contains(naddr?.userId),
-                            zappingState = this.zappingState.copy(
-                                zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
-                                zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                            ),
                         )
                     }
                 }

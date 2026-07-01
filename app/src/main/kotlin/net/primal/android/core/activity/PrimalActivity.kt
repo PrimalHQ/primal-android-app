@@ -130,4 +130,4 @@ val LocalContentDisplaySettings = compositionLocalOf<ContentDisplaySettings> {
     error("No ContentDisplay settings provided.")
 }
 
-val LocalZappingState = compositionLocalOf { ZappingState() }
+val LocalZappingState = compositionLocalOf<ZappingState> { error("No ZappingState provided.") }

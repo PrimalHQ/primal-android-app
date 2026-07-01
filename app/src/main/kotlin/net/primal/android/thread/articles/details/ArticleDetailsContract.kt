@@ -7,7 +7,6 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.thread.articles.details.ui.ArticleDetailsUi
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
-import net.primal.domain.zaps.ZappingState
 
 interface ArticleDetailsContract {
     data class UiState(
@@ -22,7 +21,6 @@ interface ArticleDetailsContract {
         val npubToDisplayNameMap: Map<String, String> = emptyMap(),
         val topZaps: List<EventZapUiModel> = emptyList(),
         val comments: List<FeedPostUi> = emptyList(),
-        val zappingState: ZappingState = ZappingState(),
         val selectedHighlight: JoinedHighlightsUi? = null,
         val isHighlighted: Boolean = false,
         val error: UiError? = null,

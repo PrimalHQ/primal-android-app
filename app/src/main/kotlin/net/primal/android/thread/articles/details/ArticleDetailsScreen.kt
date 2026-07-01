@@ -56,6 +56,7 @@ import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenu
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListNoContent
@@ -197,6 +198,7 @@ private fun ArticleDetailsScreen(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val zappingState = LocalZappingState.current
 
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
@@ -214,7 +216,7 @@ private fun ArticleDetailsScreen(
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
-            zappingState = detailsState.zappingState,
+            zappingState = zappingState,
             onDismissRequest = { showCantZapWarning = false },
             onGoToWallet = callbacks.onGoToWallet,
         )
@@ -225,9 +227,9 @@ private fun ArticleDetailsScreen(
         ZapBottomSheet(
             onDismissRequest = { showZapOptions = false },
             receiverName = detailsState.article.authorDisplayName,
-            zappingState = detailsState.zappingState,
+            zappingState = zappingState,
             onZap = { zapAmount, zapDescription ->
-                if (detailsState.zappingState.canZap(zapAmount)) {
+                if (zappingState.canZap(zapAmount)) {
                     detailsEventPublisher(
                         UiEvent.ZapArticle(
                             zapAmount = zapAmount.toULong(),
@@ -242,7 +244,7 @@ private fun ArticleDetailsScreen(
     }
 
     fun invokeZapOptionsOrShowWarning() {
-        if (detailsState.zappingState.walletConnected) {
+        if (zappingState.walletConnected) {
             showZapOptions = true
         } else {
             showCantZapWarning = true
@@ -379,7 +381,7 @@ private fun ArticleDetailsScreen(
                             }
 
                             FeedPostAction.Zap -> {
-                                if (detailsState.zappingState.canZap()) {
+                                if (zappingState.canZap()) {
                                     detailsEventPublisher(UiEvent.ZapArticle())
                                 } else {
                                     showCantZapWarning = true

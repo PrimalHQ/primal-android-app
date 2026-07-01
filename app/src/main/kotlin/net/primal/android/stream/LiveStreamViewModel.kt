@@ -50,7 +50,6 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.handler.ProfileFollowsHandler.Companion.foldActions
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
@@ -75,6 +74,7 @@ import net.primal.domain.nostr.utils.usernameUiFriendly
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.notifications.DEFAULT_ZAP_DEFAULT
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
@@ -82,7 +82,6 @@ import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.StreamStatus
 import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
-import net.primal.domain.utils.isConfigured
 
 @Suppress("LargeClass")
 class LiveStreamViewModel @AssistedInject constructor(
@@ -142,7 +141,6 @@ class LiveStreamViewModel @AssistedInject constructor(
         observeFollowsResults()
         observeUserTaggingState()
         observeStreamInfo()
-        observeActiveWallet()
         observeActiveAccount()
         observeFollowState()
         observeMuteState()
@@ -628,22 +626,6 @@ class LiveStreamViewModel @AssistedInject constructor(
             updateChatItems()
         }
 
-    private fun observeActiveWallet() =
-        viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { userWallet ->
-                    val wallet = userWallet?.wallet
-                    setState {
-                        copy(
-                            zappingState = zappingState.copy(
-                                walletConnected = wallet.isConfigured(),
-                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
-                            ),
-                        )
-                    }
-                }
-        }
-
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeAccountState
@@ -651,10 +633,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .collect {
                     setState {
                         copy(
-                            zappingState = this.zappingState.copy(
-                                zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
-                                zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                            ),
                             showStreamControlPopup = it.data.shouldShowStreamControlPopup,
                         )
                     }
@@ -716,7 +694,8 @@ class LiveStreamViewModel @AssistedInject constructor(
     }
 
     private fun addZapOptimistically(zapAction: UiEvent.ZapStream, activeAccount: UserAccount): String {
-        val zapAmount = zapAction.zapAmount ?: _state.value.zappingState.zapDefault.amount.toULong()
+        val zapAmount = zapAction.zapAmount
+            ?: (activeAccount.appSettings?.zapDefault?.amount ?: DEFAULT_ZAP_DEFAULT.amount).toULong()
         val tempZapId = UUID.randomUUID().toString()
         val temporaryZap = StreamChatItem.ZapMessageItem(
             zap = EventZapUiModel(

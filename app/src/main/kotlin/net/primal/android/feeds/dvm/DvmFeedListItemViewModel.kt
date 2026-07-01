@@ -16,7 +16,6 @@ import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.feeds.DvmFeed
@@ -28,7 +27,6 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.utils.isConfigured
 
 @HiltViewModel
 class DvmFeedListItemViewModel @Inject constructor(
@@ -47,8 +45,6 @@ class DvmFeedListItemViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeActiveWallet()
-        subscribeToActiveAccount()
     }
 
     private fun observeEvents() =
@@ -58,36 +54,6 @@ class DvmFeedListItemViewModel @Inject constructor(
                     is UiEvent.OnLikeClick -> onLikeClick(it.dvmFeed.data)
                     is UiEvent.OnZapClick -> onZapClick(it)
                     UiEvent.DismissError -> setState { copy(error = null) }
-                }
-            }
-        }
-
-    private fun observeActiveWallet() =
-        viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { userWallet ->
-                    val wallet = userWallet?.wallet
-                    setState {
-                        copy(
-                            zappingState = zappingState.copy(
-                                walletConnected = wallet.isConfigured(),
-                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
-                            ),
-                        )
-                    }
-                }
-        }
-
-    private fun subscribeToActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        zappingState = this.zappingState.copy(
-                            zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
-                            zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                        ),
-                    )
                 }
             }
         }
