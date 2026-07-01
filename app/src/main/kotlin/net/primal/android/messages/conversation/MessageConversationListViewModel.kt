@@ -9,11 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
@@ -61,21 +61,20 @@ class MessageConversationListViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private var keepConversationsLoadedJob: Job? = null
-
     init {
         observeEvents()
         subscribeToTotalUnreadCountChanges()
         fetchConversations()
-        ensureConversationsAreAlwaysCached(_state.value.conversations)
+        ensureConversationsAreAlwaysCached()
     }
 
-    private fun ensureConversationsAreAlwaysCached(conversations: Flow<PagingData<MessageConversationUi>>) {
-        keepConversationsLoadedJob?.cancel()
-        keepConversationsLoadedJob = viewModelScope.launch {
-            conversations.keepLoaded()
+    private fun ensureConversationsAreAlwaysCached() =
+        viewModelScope.launch {
+            state
+                .map { it.conversations }
+                .distinctUntilChanged()
+                .collectLatest { it.keepLoaded() }
         }
-    }
 
     private fun observeEvents() =
         viewModelScope.launch {
@@ -123,17 +122,15 @@ class MessageConversationListViewModel @Inject constructor(
         }
 
     private fun changeRelation(relation: ConversationRelation) {
-        val conversations = chatRepository
-            .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
-            .mapAsPagingDataOfMessageConversationUi()
-            .cachedIn(viewModelScope)
         setState {
             copy(
                 activeRelation = relation,
-                conversations = conversations,
+                conversations = chatRepository
+                    .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
+                    .mapAsPagingDataOfMessageConversationUi()
+                    .cachedIn(viewModelScope),
             )
         }
-        ensureConversationsAreAlwaysCached(conversations)
     }
 
     private fun markAllConversationAsRead() =

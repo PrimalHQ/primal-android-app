@@ -11,13 +11,14 @@ import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -92,12 +93,11 @@ class WalletDashboardViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private var keepTransactionsLoadedJob: Job? = null
-
     init {
         observeUsdExchangeRate()
         subscribeToEvents()
         subscribeToActiveWalletData()
+        ensureTransactionsAreAlwaysCached()
         subscribeToActiveAccount()
         subscribeToPurchases()
         checkForPersistedSparkWallet()
@@ -185,7 +185,6 @@ class WalletDashboardViewModel @Inject constructor(
                                 .latestTransactions(walletId = walletId)
                                 .mapAsPagingDataOfTransactionUi()
                                 .cachedIn(viewModelScope)
-                                .also { ensureTransactionsAreAlwaysCached(it) }
                         } else {
                             null
                         }
@@ -207,12 +206,13 @@ class WalletDashboardViewModel @Inject constructor(
                 }
         }
 
-    private fun ensureTransactionsAreAlwaysCached(transactions: Flow<PagingData<TransactionListItemDataUi>>) {
-        keepTransactionsLoadedJob?.cancel()
-        keepTransactionsLoadedJob = viewModelScope.launch {
-            transactions.keepLoaded()
+    private fun ensureTransactionsAreAlwaysCached() =
+        viewModelScope.launch {
+            state
+                .map { it.transactions }
+                .distinctUntilChanged()
+                .collectLatest { it.keepLoaded() }
         }
-    }
 
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {
