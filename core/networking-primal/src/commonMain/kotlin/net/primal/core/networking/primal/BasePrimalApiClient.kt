@@ -123,10 +123,10 @@ internal class BasePrimalApiClient(
         val eventsMessage = this.filterIsInstance<NostrIncomingMessage.EventsMessage>()
 
         val allNostrEvents = eventMessages.mapNotNull { it.nostrEvent } +
-            eventsMessage.map { it.nostrEvents }.flatten()
+            eventsMessage.flatMap { it.nostrEvents }
 
         val allPrimalEvents = eventMessages.mapNotNull { it.primalEvent } +
-            eventsMessage.map { it.primalEvents }.flatten()
+            eventsMessage.flatMap { it.primalEvents }
 
         return PrimalSubscriptionBufferedResult(
             nostrEvents = allNostrEvents,
@@ -155,10 +155,10 @@ internal class BasePrimalApiClient(
         val eventsMessage = messages.filterIsInstance<NostrIncomingMessage.EventsMessage>()
 
         val allNostrEvents = eventMessages.mapNotNull { it.nostrEvent } +
-            eventsMessage.map { it.nostrEvents }.flatten()
+            eventsMessage.flatMap { it.nostrEvents }
 
         val allPrimalEvents = eventMessages.mapNotNull { it.primalEvent } +
-            eventsMessage.map { it.primalEvents }.flatten()
+            eventsMessage.flatMap { it.primalEvents }
 
         return PrimalQueryResult(
             terminationMessage = terminationMessage,
