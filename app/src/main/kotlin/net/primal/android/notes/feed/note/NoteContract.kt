@@ -3,13 +3,11 @@ package net.primal.android.notes.feed.note
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.PollUi
 import net.primal.domain.nostr.ReportType
-import net.primal.domain.zaps.ZappingState
 
 interface NoteContract {
 
     data class UiState(
         val activeAccountUserId: String,
-        val zappingState: ZappingState = ZappingState(),
         val shouldApproveBookmark: Boolean = false,
         val relayHints: List<String> = emptyList(),
         val currentExchangeRate: Double = 0.0,

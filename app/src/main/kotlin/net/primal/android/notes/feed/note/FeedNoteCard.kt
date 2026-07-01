@@ -53,6 +53,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -181,6 +182,7 @@ private fun FeedNoteCard(
     onGoToWallet: (() -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
+    val zappingState = LocalZappingState.current
     val dialogsState = rememberNoteCardDialogsState()
     NoteCardDialogs(
         dialogsState = dialogsState,
@@ -201,7 +203,7 @@ private fun FeedNoteCard(
             valueMinimum = zapPoll.valueMinimum,
             valueMaximum = zapPoll.valueMaximum,
             exchangeRate = state.currentExchangeRate,
-            defaultZapAmounts = state.zappingState.zapsConfig.map { it.amount },
+            defaultZapAmounts = zappingState.zapsConfig.map { it.amount },
             onDismissRequest = { zapPollSelectedOptionId = null },
             onVote = { optionId, amount, comment ->
                 eventPublisher(
@@ -368,7 +370,7 @@ private fun FeedNoteCard(
                                 }
 
                                 FeedPostAction.Zap -> {
-                                    if (state.zappingState.canZap()) {
+                                    if (zappingState.canZap()) {
                                         eventPublisher(
                                             UiEvent.ZapAction(
                                                 postId = data.postId,
@@ -401,7 +403,7 @@ private fun FeedNoteCard(
                         onPostLongClickAction = { postAction ->
                             when (postAction) {
                                 FeedPostAction.Zap -> {
-                                    if (state.zappingState.walletConnected) {
+                                    if (zappingState.walletConnected) {
                                         dialogsState.showZapOptions = true
                                     } else {
                                         dialogsState.showCantZapWarning = true

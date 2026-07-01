@@ -59,6 +59,7 @@ import java.time.Instant
 import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalClickableText
@@ -177,6 +178,7 @@ private fun MediaFeedCardBody(
     onExpandClick: () -> Unit,
 ) {
     val graphicsLayer = rememberGraphicsLayer()
+    val zappingState = LocalZappingState.current
     val displaySettings = LocalContentDisplaySettings.current
     val avatarSizeDp = displaySettings.contentAppearance.noteAvatarSize
 
@@ -251,7 +253,7 @@ private fun MediaFeedCardBody(
                         noteCallbacks.onNoteReplyClick?.invoke(data.asNeventString())
 
                     FeedPostAction.Zap -> {
-                        if (state.zappingState.canZap()) {
+                        if (zappingState.canZap()) {
                             eventPublisher(
                                 UiEvent.ZapAction(
                                     postId = data.postId,
@@ -279,7 +281,7 @@ private fun MediaFeedCardBody(
             onPostLongPressAction = { postAction ->
                 when (postAction) {
                     FeedPostAction.Zap -> {
-                        if (state.zappingState.walletConnected) {
+                        if (zappingState.walletConnected) {
                             dialogsState.showZapOptions = true
                         } else {
                             dialogsState.showCantZapWarning = true

@@ -29,6 +29,8 @@ import net.primal.android.theme.defaultPrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.ContentDisplaySettings
+import net.primal.android.user.zaps.ZappingStateStore
+import net.primal.domain.zaps.ZappingState
 
 @AndroidEntryPoint
 abstract class PrimalActivity : FragmentActivity() {
@@ -37,6 +39,9 @@ abstract class PrimalActivity : FragmentActivity() {
 
     @Inject
     lateinit var activeAccountStore: ActiveAccountStore
+
+    @Inject
+    lateinit var zappingStateStore: ZappingStateStore
 
     private val splashViewModel: SplashViewModel by viewModels()
 
@@ -65,6 +70,10 @@ abstract class PrimalActivity : FragmentActivity() {
                 .collect { value = it }
         }
 
+        val zappingState = produceState(initialValue = ZappingState()) {
+            zappingStateStore.zappingState.collect { value = it }
+        }
+
         val primalRippleConfiguration = RippleConfiguration(
             color = AppTheme.colorScheme.outline,
             rippleAlpha = RippleDefaults.RippleAlpha,
@@ -75,6 +84,7 @@ abstract class PrimalActivity : FragmentActivity() {
                 LocalPrimalTheme provides primalTheme,
                 LocalRippleConfiguration provides primalRippleConfiguration,
                 LocalContentDisplaySettings provides contentDisplaySettings.value,
+                LocalZappingState provides zappingState.value,
             ) {
                 ApplyEdgeToEdge()
                 val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
@@ -119,3 +129,5 @@ val LocalPrimalTheme = compositionLocalOf<PrimalTheme> { error("No PrimalTheme p
 val LocalContentDisplaySettings = compositionLocalOf<ContentDisplaySettings> {
     error("No ContentDisplay settings provided.")
 }
+
+val LocalZappingState = compositionLocalOf { ZappingState() }
