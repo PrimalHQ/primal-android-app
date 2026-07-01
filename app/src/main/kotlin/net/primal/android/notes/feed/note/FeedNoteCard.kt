@@ -52,6 +52,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.PrimalDivider
@@ -295,7 +296,7 @@ private fun FeedNoteCard(
                     authorId = data.authorId,
                     isBookmarked = data.isBookmarked,
                     isThreadMuted = data.isThreadMuted,
-                    isNoteAuthor = data.authorId == state.activeAccountUserId,
+                    isNoteAuthor = data.authorId == LocalActiveAccountId.current,
                     isPoll = data.poll != null,
                     relayHints = state.relayHints,
                     enabled = noteOptionsMenuEnabled,
@@ -741,7 +742,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Ice) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = false,
@@ -759,7 +760,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
     PrimalPreview(primalTheme = PrimalTheme.Ice) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = true,
@@ -777,7 +778,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
@@ -795,7 +796,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
@@ -813,7 +814,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Ice) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
@@ -833,7 +834,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         FeedNoteCard(
             data = feedPostUi,
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
@@ -880,7 +881,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollPending() {
                     state = PollState.Pending,
                 ),
             ),
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
@@ -943,7 +944,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollVoted() {
                     userVotedOptionId = "4",
                 ),
             ),
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
@@ -1006,7 +1007,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollEnded() {
                     userVotedOptionId = "4",
                 ),
             ),
-            state = NoteContract.UiState(activeAccountUserId = ""),
+            state = NoteContract.UiState(),
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,

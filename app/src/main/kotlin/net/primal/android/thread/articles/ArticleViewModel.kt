@@ -43,7 +43,7 @@ class ArticleViewModel @Inject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -56,15 +56,7 @@ class ArticleViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observeActiveAccount()
     }
-
-    private fun observeActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState { copy(activeAccountUserId = activeAccountStore.activeUserId()) }
-            }
-        }
 
     private fun observeEvents() =
         viewModelScope.launch {

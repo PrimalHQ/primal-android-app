@@ -6,7 +6,6 @@ import net.primal.domain.nostr.ReportType
 interface ArticleContract {
 
     data class UiState(
-        val activeAccountUserId: String,
         val shouldApproveBookmark: Boolean = false,
         val error: UiError? = null,
     )

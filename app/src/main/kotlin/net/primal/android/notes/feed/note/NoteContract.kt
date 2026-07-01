@@ -7,7 +7,6 @@ import net.primal.domain.nostr.ReportType
 interface NoteContract {
 
     data class UiState(
-        val activeAccountUserId: String,
         val shouldApproveBookmark: Boolean = false,
         val relayHints: List<String> = emptyList(),
         val currentExchangeRate: Double = 0.0,
