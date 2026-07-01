@@ -33,9 +33,7 @@ import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asKeyPair
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.isValidExchangeRate
-import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
@@ -45,7 +43,6 @@ import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.connections.nostr.NwcRepository
-import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.wallet.Wallet
 
@@ -59,7 +56,6 @@ class NostrConnectViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializer: SignerConnectionInitializer,
-    private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val nwcRepository: NwcRepository,
     private val walletAccountRepository: WalletAccountRepository,
     private val tokenUpdater: PushNotificationsTokenUpdater,
@@ -178,27 +174,15 @@ class NostrConnectViewModel @Inject constructor(
                     val appName = currentState.appName ?: "External App"
                     val wallet = walletAccountRepository.getActiveWallet(userId)?.wallet
                     activeWallet = wallet
-                    when (wallet) {
-                        is Wallet.Spark -> {
-                            nwcRepository.createNewWalletConnection(
-                                userId = userId,
-                                walletId = wallet.walletId,
-                                appName = appName,
-                                dailyBudget = dailyBudget,
-                            ).getOrThrow()
-                        }
-
-                        is Wallet.Primal -> {
-                            val budgetBtc = dailyBudget?.toBtc()?.formatAsString()
-                            primalWalletNwcRepository.createNewWalletConnection(
-                                userId = userId,
-                                appName = appName,
-                                dailyBudget = budgetBtc,
-                            ).nwcConnectionUri
-                        }
-
-                        else -> error("Active wallet does not support NWC connections.")
+                    if (wallet !is Wallet.Spark) {
+                        error("Active wallet does not support NWC connections.")
                     }
+                    nwcRepository.createNewWalletConnection(
+                        userId = userId,
+                        walletId = wallet.walletId,
+                        appName = appName,
+                        dailyBudget = dailyBudget,
+                    ).getOrThrow()
                 }.onSuccess { uri ->
                     nwcConnectionString = uri
                 }.onFailure { error ->

@@ -400,7 +400,7 @@ class WalletDatabaseMigration5to6Test {
             name = dbName,
         )
             .setDriver(AndroidSQLiteDriver())
-            .addMigrations(WalletDatabase.MIGRATION_5_6)
+            .addMigrations(WalletDatabase.MIGRATION_5_6, WalletDatabase.MIGRATION_6_7)
             .allowMainThreadQueries()
             .build()
         // Room opens connections lazily, so the migration only runs on first DB access.

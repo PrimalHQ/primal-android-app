@@ -48,8 +48,6 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.user.UserDataCleanupRepository
-import net.primal.domain.wallet.WalletSettings
-import net.primal.domain.wallet.WalletState
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -78,11 +76,8 @@ class UserRepository @Inject constructor(
         withContext(dispatchers.io()) {
             accountsStore.getAndUpdateAccount(userId = userId) {
                 copy(
-                    primalWallet = null,
                     nostrWallet = null,
                     walletPreference = WalletPreference.Undefined,
-                    primalWalletState = WalletState(),
-                    primalWalletSettings = WalletSettings(),
                 )
             }
         }
@@ -270,12 +265,6 @@ class UserRepository @Inject constructor(
     suspend fun dismissWalletDetectedNotice(userId: String) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(shouldShowWalletDetectedNotice = false)
-        }
-    }
-
-    suspend fun dismissWalletDiscontinuedNotice(userId: String) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(shouldShowWalletDiscontinuedNotice = false)
         }
     }
 

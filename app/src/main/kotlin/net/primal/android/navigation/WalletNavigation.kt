@@ -9,11 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
-import net.primal.android.scan.ScanCodeContract.ScanMode
 import net.primal.android.wallet.backup.WalletBackupContract
 import net.primal.android.wallet.backup.WalletBackupScreen
 import net.primal.android.wallet.backup.WalletBackupViewModel
-import net.primal.android.wallet.faq.WalletUpgradeFaqScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsViewModel
 import net.primal.android.wallet.transactions.receive.ReceivePaymentScreen
@@ -23,8 +21,6 @@ import net.primal.android.wallet.transactions.send.create.CreateTransactionViewM
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentScreen
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentViewModel
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
-import net.primal.android.wallet.upgrade.UpgradeWalletScreen
-import net.primal.android.wallet.upgrade.UpgradeWalletViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.wallet.DraftTx
 
@@ -48,10 +44,6 @@ fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx? =
 }
 
 internal fun NavController.navigateToWalletReceive() = navigate(route = "walletReceive")
-
-fun NavController.navigateToWalletUpgrade() = navigate(route = "walletUpgrade")
-
-fun NavController.navigateToWalletUpgradeFaq() = navigate(route = "walletUpgradeFaq")
 
 internal fun NavController.navigateToTransactionDetails(txId: String) = navigate(route = "walletTransaction/$txId")
 
@@ -94,16 +86,6 @@ fun NavGraphBuilder.walletScreens(navController: NavController) {
 
     receive(
         route = "walletReceive",
-        navController = navController,
-    )
-
-    upgradeWallet(
-        route = "walletUpgrade",
-        navController = navController,
-    )
-
-    walletUpgradeFaq(
-        route = "walletUpgradeFaq",
         navController = navController,
     )
 
@@ -162,10 +144,6 @@ private fun NavGraphBuilder.send(
     SendPaymentScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPromoCodeScan = { promoCode ->
-            navController.popBackStack()
-            navController.navigateToScanCode(ScanMode.Anything, promoCode)
-        },
         onCreateTransaction = { draft ->
             navController.popBackStack()
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)
@@ -212,40 +190,6 @@ private fun NavGraphBuilder.receive(route: String, navController: NavController)
         ReceivePaymentScreen(
             viewModel = viewModel,
             onBuyPremium = { navController.navigateToPremiumBuying() },
-            onClose = { navController.navigateUp() },
-        )
-    }
-
-private fun NavGraphBuilder.upgradeWallet(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<UpgradeWalletViewModel>()
-
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-        UpgradeWalletScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onFaqClick = { navController.navigateToWalletUpgradeFaq() },
-        )
-    }
-
-private fun NavGraphBuilder.walletUpgradeFaq(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-        WalletUpgradeFaqScreen(
             onClose = { navController.navigateUp() },
         )
     }

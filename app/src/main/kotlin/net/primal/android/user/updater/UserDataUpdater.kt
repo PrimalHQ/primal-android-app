@@ -22,7 +22,6 @@ import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.profile.ProfileRepository
-import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 
@@ -33,7 +32,6 @@ class UserDataUpdater @AssistedInject constructor(
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
     private val walletAccountRepository: WalletAccountRepository,
-    private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
@@ -47,7 +45,7 @@ class UserDataUpdater @AssistedInject constructor(
 
     override suspend fun doUpdate(): Result<Unit> {
         activeAccountStore.activeUserAccount().let { activeAccount ->
-            if (activeAccount.nostrWallet != null || activeAccount.primalWallet != null) {
+            if (activeAccount.nostrWallet != null) {
                 runCatching { migrateWalletData(userAccount = activeAccount) }
             }
         }
@@ -78,7 +76,6 @@ class UserDataUpdater @AssistedInject constructor(
             }
         }
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
-        runCatching { ensurePrimalWalletExistsUseCase.invoke(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() }
         runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
@@ -113,20 +110,7 @@ class UserDataUpdater @AssistedInject constructor(
                 }
             }
 
-            WalletPreference.Undefined, WalletPreference.PrimalWallet -> {
-                ensurePrimalWalletExistsUseCase.invoke(userId = userAccount.pubkey, setAsActive = true)
-
-                walletRepository.updateWalletBalance(
-                    walletId = userAccount.pubkey,
-                    balanceInBtc = userAccount.primalWalletState.balanceInBtc?.toDouble() ?: 0.0,
-                    maxBalanceInBtc = userAccount.primalWalletSettings.maxBalanceInBtc.toDouble(),
-                )
-
-                walletRepository.upsertWalletSettings(
-                    walletId = userAccount.pubkey,
-                    spamThresholdAmountInSats = userAccount.primalWalletSettings.spamThresholdAmountInSats,
-                )
-            }
+            WalletPreference.Undefined -> Unit
         }
 
         userRepository.clearWalletData(userId = userAccount.pubkey)

@@ -15,42 +15,28 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
-import net.primal.android.navigation.promoCode
 import net.primal.android.navigation.scanMode
 import net.primal.android.scan.ScanCodeContract.ScanCodeStage
 import net.primal.android.scan.ScanCodeContract.SideEffect
 import net.primal.android.scan.ScanCodeContract.UiEvent
 import net.primal.android.scan.ScanCodeContract.UiState
-import net.primal.android.scan.utils.getPromoCodeFromUrl
-import net.primal.android.scan.utils.isValidPromoCode
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.UserAccount
-import net.primal.core.networking.sockets.errors.NostrNoticeException
-import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
-import net.primal.core.utils.runCatching
-import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.PromoCodeDetails
-import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.takeAsNaddrOrNull
 import net.primal.domain.parser.WalletTextParser
-import net.primal.domain.wallet.Wallet
 
 @HiltViewModel
 class ScanCodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val walletTextParser: WalletTextParser,
 ) : ViewModel() {
 
-    private val preFilledCode = savedStateHandle.promoCode
     private val scanMode = savedStateHandle.scanMode
 
     private val _state = MutableStateFlow(UiState(scanMode = scanMode))
@@ -67,17 +53,7 @@ class ScanCodeViewModel @Inject constructor(
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
-        if (preFilledCode != null) {
-            setState {
-                copy(
-                    scannedValue = preFilledCode,
-                    stageStack = listOf(ScanCodeStage.ManualInput),
-                )
-            }
-            processCode(code = preFilledCode)
-        }
         observeEvents()
-        observeActiveAccount()
         observeQrCodeEvents()
     }
 
@@ -89,7 +65,6 @@ class ScanCodeViewModel @Inject constructor(
                     UiEvent.GoToManualInput ->
                         setState { copy(stageStack = stageStack.pushStage(ScanCodeStage.ManualInput)) }
 
-                    is UiEvent.ApplyPromoCode -> applyPromoCode(it.code)
                     UiEvent.DismissError -> setState { copy(error = null, showErrorBadge = false) }
                     UiEvent.PreviousStage -> setState { copy(stageStack = stageStack.popStage()) }
                     is UiEvent.QrCodeDetected -> viewModelScope.launch { qrCodeEvents.emit(it.result.value) }
@@ -101,26 +76,6 @@ class ScanCodeViewModel @Inject constructor(
         viewModelScope.launch {
             qrCodeEvents.distinctUntilChanged().collect { processCode(it) }
         }
-
-    private fun observeActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                val userState = resolveUserState(it)
-                setState { copy(userState = userState) }
-            }
-        }
-
-    private suspend fun resolveUserState(userAccount: UserAccount): ScanCodeContract.UserState {
-        if (userAccount == UserAccount.EMPTY) return ScanCodeContract.UserState.NoUser
-        val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)?.wallet
-
-        return when (wallet) {
-            is Wallet.NWC, is Wallet.Spark, null,
-            -> ScanCodeContract.UserState.UserWithoutPrimalWallet
-
-            is Wallet.Primal -> ScanCodeContract.UserState.UserWithPrimalWallet
-        }
-    }
 
     private fun processCode(code: String) =
         viewModelScope.launch {
@@ -173,12 +128,6 @@ class ScanCodeViewModel @Inject constructor(
                 setEffect(SideEffect.NostrConnectRequest(url = code))
             }
 
-            QrCodeDataType.PROMO_CODE -> {
-                getPromoCodeDetails(code.getPromoCodeFromUrl())
-            }
-
-            null -> processUnknownCode(code)
-
             else -> setState { copy(showErrorBadge = true) }
         }
     }
@@ -196,14 +145,6 @@ class ScanCodeViewModel @Inject constructor(
         }
     }
 
-    private fun processUnknownCode(code: String) {
-        if (code.isValidPromoCode()) {
-            getPromoCodeDetails(code)
-        } else {
-            setState { copy(showErrorBadge = true) }
-        }
-    }
-
     private suspend fun processAsPayment(code: String) {
         walletTextParser.parseAndQueryText(userId = activeAccountStore.activeUserId(), text = code)
             .onSuccess {
@@ -214,62 +155,6 @@ class ScanCodeViewModel @Inject constructor(
                 setState { copy(error = UiError.GenericError()) }
             }
     }
-
-    private fun applyPromoCode(promoCode: String) =
-        viewModelScope.launch {
-            setState { copy(loading = true, error = null) }
-            runCatching {
-                primalWalletAccountRepository.redeemPromoCode(
-                    userId = activeAccountStore.activeUserId(),
-                    code = promoCode,
-                ).getOrThrow()
-            }.onSuccess {
-                setEffect(SideEffect.PromoCodeApplied)
-            }.onFailure { error ->
-                Napier.w(throwable = error) { "Failed to apply promo code." }
-
-                val uiError = if (error.cause is NostrNoticeException) {
-                    UiError.InvalidPromoCode(error)
-                } else {
-                    UiError.NetworkError(error)
-                }
-
-                setState { copy(error = uiError) }
-            }
-            setState { copy(loading = false) }
-        }
-
-    private fun getPromoCodeDetails(code: String) =
-        viewModelScope.launch {
-            setState { copy(loading = true, error = null, showErrorBadge = false) }
-            primalWalletAccountRepository.getPromoCodeDetails(code = code)
-                .onSuccess { response ->
-                    setState {
-                        copy(
-                            scannedValue = code,
-                            welcomeMessage = response.welcomeMessage,
-                            promoCodeBenefits = response.toBenefitsList(),
-                            requiresPrimalWallet = response.preloadedBtc != null,
-                            stageStack = listOf(ScanCodeStage.Success),
-                        )
-                    }
-                }.onFailure { error ->
-                    Napier.w(throwable = error) { "Failed to get promo code details for code=$code" }
-                    if (error.cause is NostrNoticeException) {
-                        setState { copy(showErrorBadge = true) }
-                    } else {
-                        setState { copy(error = UiError.NetworkError(error)) }
-                    }
-                }
-            setState { copy(loading = false) }
-        }
-
-    private fun PromoCodeDetails.toBenefitsList() =
-        listOfNotNull(
-            this.preloadedBtc?.toSats()?.let {
-                ScanCodeContract.PromoCodeBenefit.WalletBalance(sats = it)
-            },
-        )
 
     private fun List<ScanCodeStage>.popStage() =
         if (this.size > 1) {

@@ -5,7 +5,6 @@
     <string name="nsec">nsec</string>
     <string name="npub">npub</string>
 
-    <string name="app_info">Info</string>
     <string name="app_generic_error">Something went wrong. Please try again.</string>
     <string name="app_missing_relays_config">No relays found. Please configure your Network.</string>
     <string name="app_error_loading_prev_page">Unable to load newer content at the moment.</string>
@@ -42,8 +41,6 @@
     <string name="app_error_restore_default_blossom_server">Unable to restore default blossom server. Please try again.</string>
     <string name="app_error_unable_to_update_blossom_server_list">Unable to update blossom server list. Please try again.</string>
     <string name="app_error_fetching_mute_list">Failed to load your mute list. Please check your connection and try again.</string>
-    <string name="app_error_invalid_promo_code">Sorry, we couldn’t find a match for that promo code. Please check the spelling and try again.</string>
-    <string name="app_error_invalid_promo_code_try_later">Sorry, we couldn’t find a match for that promo code. Don\'t worry, you can proceed and try to redeem your code again.</string>
     <string name="app_no_connection_notice">Unable to connect</string>
     <string name="app_error_stream_not_found">Unable to find stream.</string>
     <string name="app_nostr_connect_session_active">Remote Session Active</string>
@@ -95,26 +92,12 @@
     <string name="scan_code_title">Scan Code</string>
     <string name="scan_code_remote_login_title">Remote Login</string>
     <string name="scan_code_manual_entry_title">Enter Anything</string>
-    <string name="scan_code_success_title">Success!</string>
     <string name="scan_code_apply_button">Apply</string>
     <string name="scan_code_error_invalid_login_string">Invalid remote login string. Please try again.</string>
-    <string name="scan_code_redeem_button">Redeem code</string>
-    <string name="scan_code_onboard_button">Onboard to Primal</string>
-    <string name="scan_code_activate_wallet_button">Activate Wallet</string>
     <string name="scan_code_use_keyboard_button">Use Keyboard instead</string>
     <string name="scan_code_enter_placeholder">Enter code…</string>
     <string name="scan_code_remote_login_manual_entry_placeholder">nostrconnect://</string>
     <string name="scan_code_paste">Paste</string>
-    <string name="scan_code_loaded_with">This code is loaded with:</string>
-    <string name="scan_code_get_zapping">Get Zapping!</string>
-    <string name="scan_code_sats">sats</string>
-    <string name="scan_code_primal_premium">Primal Premium</string>
-    <plurals name="scan_code_premium_months">
-        <item quantity="one">%1$s month</item>
-        <item quantity="other">%1$s months</item>
-    </plurals>
-    <string name="scan_code_to_redeem_notice">To redeem your code, onboard to Primal by\ncreating your Nostr account and activating\nyour Primal Wallet.</string>
-    <string name="scan_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
     <string name="scan_code_scan_anything_title">Scan Anything:</string>
     <string name="scan_code_scan_anything_subtitle">Invite code, payment invoice, login string, user link, content link, primal gift card</string>
     <string name="scan_code_remote_login_camera_title">Login to Any Nostr App</string>
@@ -297,7 +280,7 @@
     <string name="legend_contribution_amount_stage_title">Enter Amount</string>
     <string name="legend_contribution_payment_instructions_on_chain_stage_title">On-chain Payment</string>
     <string name="legend_contribution_payment_instructions_lightning_stage_title">Lightning Payment</string>
-    <string name="legend_contribution_payment_instructions_pay_with_primal_wallet">Pay Now via Primal Wallet</string>
+    <string name="legend_contribution_payment_instructions_pay_with_primal_wallet">Pay Now</string>
     <string name="legend_contribution_payment_instructions_copy_invoice">Copy Invoice</string>
     <string name="legend_contribution_payment_instructions_error_on_fetching_mining_fees">Unable to load mining fees. Please try again.</string>
     <string name="legend_contribution_success_stage_title">Success</string>
@@ -858,7 +841,6 @@
     <string name="wallet_picker_reassign_error">Failed to reassign Lightning address. Please try again.</string>
     <string name="wallet_picker_nwc_title">NWC Wallet</string>
     <string name="wallet_picker_spark_title">Spark Wallet</string>
-    <string name="wallet_picker_legacy_title">Legacy Wallet</string>
     <string name="wallet_picker_no_lightning_address">[ no lightning address ]</string>
     <string name="wallet_picker_nwc_description">Your external lightning wallet</string>
     <string name="wallet_top_app_bar_subtitle">All transactions</string>
@@ -972,8 +954,6 @@
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profile settings</string>
-    <string name="settings_wallet_max_wallet_balance">Max wallet balance</string>
-    <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet is a transactional wallet, designed for handling small amounts. We recommend self-custody for larger amounts.</string>
     <string name="settings_wallet_hide_transactions_below">Hide transactions below</string>
     <string name="settings_wallet_nwc_connections_header_app">App</string>
     <string name="settings_wallet_nwc_connections_header_daily_budget">Daily Budget</string>
@@ -1003,7 +983,7 @@
     <string name="settings_wallet_export_nwc_logs_subtitle">Download logs history for all NWC connections in CSV format</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
-    <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>
+    <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your wallet settings.</string>
     <string name="settings_wallet_new_nwc_connection_create_new_connection_button">Create Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_cancel_button">Cancel</string>
     <string name="settings_wallet_new_nwc_connection_bottom_sheet_pick_daily_budget_title">Pick maximum daily budget</string>
@@ -1012,9 +992,6 @@
     <string name="settings_wallet_new_nwc_connection_copy_nwc_string_button">Copy NWC String</string>
     <string name="settings_wallet_new_nwc_connection_done_button">Done</string>
     <string name="settings_wallet_new_nwc_connection_connection_created_text">Connection created</string>
-    <string name="settings_wallet_link_primal_wallet_title">Link Primal Wallet</string>
-    <string name="settings_wallet_link_external_app_request">An external app “%1$s” is requesting access to your Primal Wallet. If you wish to allow this, click “Give Wallet Access” below.</string>
-    <string name="settings_wallet_link_give_wallet_access_button">Give Wallet Access</string>
 
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>
@@ -1346,7 +1323,7 @@
     <string name="zap_bottom_sheet_custom_amount_placeholder">Custom amount…</string>
     <string name="zap_bottom_sheet_zap_button">Zap</string>
 
-    <string name="zap_warning_bottom_sheet_enable_wallet_text">To zap people on Nostr, you need to enable your Primal wallet or connect the external wallet.</string>
+    <string name="zap_warning_bottom_sheet_enable_wallet_text">To zap people on Nostr, you need to enable your wallet or connect the external wallet.</string>
     <string name="zap_warning_bottom_sheet_no_sats_to_zap">Insufficient sats to zap, you need to get some sats before you can zap.</string>
     <string name="zap_warning_bottom_sheet_go_to_wallet_button">Go to Wallet</string>
 
@@ -1363,80 +1340,16 @@
     <string name="wallet_dashboard_backup_notice_title">Important:</string>
     <string name="wallet_dashboard_backup_notice_description">This wallet has not been \n backed up. You need to backup your wallet \n so you don\'t lose access to your funds.</string>
     <string name="wallet_dashboard_backup_button">Backup Wallet Now</string>
-    <string name="wallet_dashboard_upgrade_header">IMPORTANT</string>
-    <string name="wallet_dashboard_upgrade_expires_on">This wallet will expire on</string>
-    <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
-    <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
     <string name="wallet_dashboard_detected_title">Wallet Detected</string>
     <string name="wallet_dashboard_detected_description">We detected that you already have a non-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
-    <string name="wallet_dashboard_discontinued_title">Wallet Discontinued</string>
-    <string name="wallet_dashboard_discontinued_description">The custodial wallet service has been discontinued. To recover your funds, please contact us at support@primal.net.</string>
     <string name="wallet_dashboard_restore_button">Restore Existing Wallet</string>
     <string name="wallet_dashboard_create_new_button">Create New Wallet</string>
 
-    <!-- Wallet Notice: Upgrade (Case 1) -->
-    <string name="wallet_notice_upgrade_title">Upgrade Your Wallet!</string>
-    <string name="wallet_notice_upgrade_description_first">Good news: Primal now features a new non-custodial wallet, which is a required upgrade for all users.</string>
-    <string name="wallet_notice_upgrade_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new non-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
-    <string name="wallet_notice_upgrade_faqs">FAQs</string>
-    <string name="wallet_notice_upgrade_button">Start Wallet Upgrade</string>
-
-    <!-- Wallet Notice: Discontinued (Case 2) -->
-    <string name="wallet_notice_discontinued_title">Wallet Discontinued</string>
-    <string name="wallet_notice_discontinued_description">The custodial wallet service has been discontinued. To recover your funds, please contact us at support@primal.net.</string>
-    <string name="wallet_notice_discontinued_close_button">Close</string>
-
-    <!-- Wallet Notice: Detected (Case 3) -->
+    <!-- Wallet Notice: Detected -->
     <string name="wallet_notice_detected_title">Wallet Detected</string>
     <string name="wallet_notice_detected_description">We detected that you already have a non-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
     <string name="wallet_notice_detected_restore_button">Restore Existing Wallet</string>
     <string name="wallet_notice_detected_create_button">Create New Wallet</string>
-
-    <string name="wallet_upgrade_title">Wallet Upgrade</string>
-    <string name="wallet_upgrade_upgrading_title">Upgrading…</string>
-    <string name="wallet_upgrade_upgrading_support" tools:ignore="TypographyEllipsis">transferring your wallet\nbalance &amp; transaction history...</string>
-    <string name="wallet_upgrade_success_title">Success</string>
-    <string name="wallet_upgrade_success_headline">Wallet upgraded!</string>
-    <string name="wallet_upgrade_failed_title">Wallet Upgrade</string>
-    <string name="wallet_upgrade_failed_headline">We encountered an issue while upgrading your wallet.</string>
-    <string name="wallet_upgrade_done_button">Done</string>
-    <string name="wallet_upgrade_close_button">Close</string>
-    <string name="wallet_upgrade_retry_button">Retry</string>
-    <string name="wallet_upgrade_share_logs">Share error logs</string>
-    <string name="wallet_upgrade_ready_headline">Ready to Upgrade</string>
-    <string name="wallet_upgrade_ready_description">We\'ll transfer your existing wallet balance and transaction history to your new non-custodial wallet.\n\nPlease don\'t close the app during the upgrade.</string>
-    <string name="wallet_upgrade_start_button">Start Upgrade</string>
-    <string name="wallet_upgrade_step_creating_wallet">Creating your new wallet…</string>
-    <string name="wallet_upgrade_step_registering_wallet">Registering wallet…</string>
-    <string name="wallet_upgrade_step_checking_balance">Checking your balance…</string>
-    <string name="wallet_upgrade_step_creating_invoice">Preparing transfer…</string>
-    <string name="wallet_upgrade_step_transferring_funds">Transferring your funds…</string>
-    <string name="wallet_upgrade_step_awaiting_confirmation">Awaiting confirmation…</string>
-    <string name="wallet_upgrade_step_configuring_wallet">Configuring wallet…</string>
-    <string name="wallet_upgrade_step_importing_history">Importing transaction history…</string>
-    <string name="wallet_upgrade_step_activating_wallet">Activating wallet…</string>
-
-    <string name="wallet_upgrade_faq_title">Wallet Upgrade FAQ</string>
-    <string name="wallet_upgrade_faq_first_question">Do I have to upgrade my wallet?</string>
-    <string name="wallet_upgrade_faq_first_answer">Yes. Support for the old custodial wallet will be discontinued on April 30, 2026. All users need to upgrade prior to this date.</string>
-    <string name="wallet_upgrade_faq_second_question">Does the new Primal wallet support both lightning and on-chain transactions?</string>
-    <string name="wallet_upgrade_faq_second_answer">Yes. Just like with the old custodial wallet, the new Primal wallet enables users to send and receive lightning and on-chain bitcoin transactions.</string>
-    <string name="wallet_upgrade_faq_third_question">Can I keep my existing Primal lightning address?</string>
-    <string name="wallet_upgrade_faq_third_answer">Yes. Your Primal lightning address will not change after the wallet upgrade.</string>
-    <string name="wallet_upgrade_faq_fourth_question">Can I transfer my funds to a different wallet before I upgrade?</string>
-    <string name="wallet_upgrade_faq_fourth_answer">Yes. The old custodial wallet remains fully functional until April 30, 2026. You can send your funds to any other bitcoin wallet prior to upgrading.</string>
-    <string name="wallet_upgrade_faq_fifth_question">Will I be able to revert to the old custodial wallet after the upgrade?</string>
-    <string name="wallet_upgrade_faq_fifth_answer">No. After the wallet upgrade is completed, you will not be able to revert to the old custodial wallet, however your full transaction history will be transferred to the new wallet.</string>
-    <string name="wallet_upgrade_faq_sixth_question">What if I don\'t upgrade before support for the old wallet is discontinued?</string>
-    <string name="wallet_upgrade_faq_sixth_answer">After April 30, 2026 the old custodial wallet will no longer be functional. If you don\'t upgrade and still have some funds in that wallet, you will be able to recover them by contacting us at support@primal.net.</string>
-    <string name="wallet_upgrade_faq_seventh_question">Which technology is the new Primal wallet built on?</string>
-    <string name="wallet_upgrade_faq_seventh_answer">The new Primal wallet is built on the Spark network technology. For more information, you can visit: https://spark.money.</string>
-    <string name="wallet_upgrade_faq_eighth_question">Are there any transaction fees that I need to pay to upgrade?</string>
-    <string name="wallet_upgrade_faq_eighth_answer">No. Primal will cover all transaction fees required to upgrade all our users to their new non-custodial wallets.</string>
-    <string name="wallet_upgrade_faq_ninth_question">Does the new wallet support Nostr Wallet Connect?</string>
-    <string name="wallet_upgrade_faq_ninth_answer">Yes. The new Primal wallet does support Nostr Wallet Connect, however it works a bit differently than the old one. Since the new wallet is non-custodial, the Primal mobile app needs to be running in order to sign NWC events. The NWC feature is best used in conjunction with the Primal remote signer.</string>
-    <string name="wallet_upgrade_faq_tenth_question">I have existing NWC connections to the old Primal wallet. Will I have to re-create those with the new wallet?</string>
-    <string name="wallet_upgrade_faq_tenth_answer">Yes. Old NWC connections will stop working when the old wallet is deprecated on April 30, 2026.</string>
 
     <string name="wallet_restore_title">Restore Existing Wallet</string>
     <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
@@ -1621,7 +1534,6 @@
     <string name="accessibility_bookmark">Bookmark</string>
     <string name="accessibility_video_duration">Video duration %1$s</string>
     <string name="accessibility_close">Close</string>
-    <string name="accessibility_info">Info</string>
     <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>
     <string name="accessibility_take_photo">Take photo with camera</string>
     <string name="accessibility_tag_user">Tag user</string>
@@ -1809,24 +1721,6 @@
     <string name="signer_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable remote signer notifications.</string>
 
     <string name="local_app_unknown_app">Unknown App</string>
-
-    <string name="wallet_upgrade_ready_bullet_1">It will take less than a minute</string>
-    <string name="wallet_upgrade_ready_bullet_2">We\'ll transfer your wallet balance</string>
-    <string name="wallet_upgrade_ready_bullet_3">We\'ll copy your transaction history</string>
-    <string name="wallet_upgrade_ready_bullet_4">You\'ll keep your lightning address</string>
-    <string name="wallet_upgrade_keep_open">Please keep Primal open\nuntil the upgrade process is done.</string>
-    <string name="wallet_upgrade_faq_question">Questions? Check out our </string>
-    <string name="wallet_upgrade_faq_link">FAQs</string>
-    <string name="wallet_upgrade_button_now">Upgrade Wallet Now</string>
-    <string name="wallet_upgrade_creating_spark">Creating your new Spark wallet…</string>
-    <string name="wallet_upgrade_failed_subtitle_1">But no worries, your old wallet is still fully functional and you can safely try again.</string>
-    <string name="wallet_upgrade_failed_subtitle_2">If you have a larger wallet balance, you can try sending it to a different wallet first.</string>
-    <string name="wallet_upgrade_failed_support_1">If this issue persists please feel free to contact support at</string>
-    <string name="wallet_upgrade_failed_support_email">support@primal.net</string>
-    <string name="wallet_upgrade_failed_support_2">. Make sure you</string>
-    <string name="wallet_upgrade_failed_support_copy_log">copy the error log</string>
-    <string name="wallet_upgrade_failed_support_3">, and include that in your email.</string>
-    <string name="wallet_upgrade_try_again_button">Try Again</string>
 
     <plurals name="poll_votes_count">
         <item quantity="one">%1$d vote</item>

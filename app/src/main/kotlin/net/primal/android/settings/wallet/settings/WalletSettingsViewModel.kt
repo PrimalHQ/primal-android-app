@@ -31,16 +31,13 @@ import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
-import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.capabilities
 import net.primal.domain.wallet.nwc.NwcLogRepository
-import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
@@ -49,12 +46,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val nwcRepository: NwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
     private val nwcLogRepository: NwcLogRepository,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
-    private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -102,30 +97,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun fetchPrimalWalletConnections(wallet: Wallet.Primal): Job =
-        viewModelScope.launch {
-            if (wallet.kycLevel == WalletKycLevel.None) {
-                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
-                return@launch
-            }
-
-            setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
-            runCatching {
-                primalWalletNwcRepository.getConnections(userId = activeAccountStore.activeUserId())
-                    .map { it.asWalletNwcConnectionUi() }
-            }.onSuccess { connections ->
-                setState {
-                    copy(
-                        nwcConnectionsInfo = connections,
-                        connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
-                    )
-                }
-            }.onFailure { error ->
-                Napier.w(throwable = error) { "Failed to fetch wallet connections." }
-                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
-            }
-        }
-
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
@@ -143,13 +114,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         revokeNwcConnection(nwcPubkey = it.nwcPubkey)
                     }
 
-                    UiEvent.RequestFetchWalletConnections -> {
-                        val wallet = state.value.activeWallet?.wallet
-                        if (wallet is Wallet.Primal) {
-                            connectionsJob?.cancel()
-                            connectionsJob = fetchPrimalWalletConnections(wallet)
-                        }
-                    }
+                    UiEvent.RequestFetchWalletConnections -> Unit
 
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
@@ -174,19 +139,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         Napier.w(throwable = error) { "Failed to revoke NWC connection." }
                     }.onSuccess {
                         runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
-                    }
-                }
-
-                is Wallet.Primal -> {
-                    val nwcConnections = state.value.nwcConnectionsInfo
-                    val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
-                    setState { copy(nwcConnectionsInfo = updatedConnections) }
-
-                    runCatching {
-                        primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
-                    }.onFailure { error ->
-                        Napier.w(throwable = error) { "Failed to revoke NWC connection." }
-                        setState { copy(nwcConnectionsInfo = nwcConnections) }
                     }
                 }
 
@@ -227,7 +179,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         connectionsJob?.cancel()
                         connectionsJob = when (wallet) {
                             is Wallet.Spark -> observeSparkConnections()
-                            is Wallet.Primal -> fetchPrimalWalletConnections(wallet)
                             else -> null
                         }
                     }
@@ -311,7 +262,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             } else {
                 val lastUsedInternalWallet = walletAccountRepository.findLastUsedWallet(
                     userId = userId,
-                    type = setOf(WalletType.PRIMAL, WalletType.SPARK),
+                    type = setOf(WalletType.SPARK),
                 )
 
                 if (lastUsedInternalWallet != null) {
@@ -338,12 +289,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
             val activeWalletId = state.value.activeWallet?.wallet?.walletId ?: return@launch
             setState { copy(isExportingTransactions = true) }
             runCatching {
-                if (state.value.activeWallet?.wallet is Wallet.Spark) {
-                    migratePrimalTransactionsHandler.invoke(
-                        userId = activeAccountStore.activeUserId(),
-                        targetSparkWalletId = activeWalletId,
-                    ).getOrThrow()
-                }
                 walletRepository.syncAllTransactions(walletId = activeWalletId)
                 walletRepository.allTransactions(walletId = activeWalletId)
             }

@@ -28,22 +28,6 @@ sealed class Wallet(
         lastUpdatedAt = lastUpdatedAt,
     )
 
-    data class Primal(
-        override val walletId: String,
-        override val spamThresholdAmountInSats: Long,
-        override val balanceInBtc: Double?,
-        override val maxBalanceInBtc: Double?,
-        override val lastUpdatedAt: Long?,
-        val kycLevel: WalletKycLevel,
-    ) : Wallet(
-        walletId = walletId,
-        walletType = WalletType.PRIMAL,
-        spamThresholdAmountInSats = spamThresholdAmountInSats,
-        balanceInBtc = balanceInBtc,
-        maxBalanceInBtc = maxBalanceInBtc,
-        lastUpdatedAt = lastUpdatedAt,
-    )
-
     data class Spark(
         override val walletId: String,
         override val spamThresholdAmountInSats: Long,

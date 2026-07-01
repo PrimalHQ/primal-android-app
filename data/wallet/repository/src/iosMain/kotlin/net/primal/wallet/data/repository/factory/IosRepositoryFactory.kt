@@ -21,7 +21,11 @@ object IosRepositoryFactory : RepositoryFactory() {
         LocalDatabaseFactory.createDatabase<WalletDatabase>(
             databaseName = "wallet_database.db",
             fallbackToDestructiveMigration = true,
-            migrations = listOf(WalletDatabase.MIGRATION_2_3, WalletDatabase.MIGRATION_5_6),
+            migrations = listOf(
+                WalletDatabase.MIGRATION_2_3,
+                WalletDatabase.MIGRATION_5_6,
+                WalletDatabase.MIGRATION_6_7,
+            ),
         )
     }
 

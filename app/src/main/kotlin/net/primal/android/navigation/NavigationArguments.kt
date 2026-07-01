@@ -17,9 +17,6 @@ inline val SavedStateHandle.noteIdOrThrow: String
 const val PRIMAL_NAME = "primalName"
 inline val SavedStateHandle.primalName: String? get() = get(PRIMAL_NAME)
 
-const val PROMO_CODE = "promoCode"
-inline val SavedStateHandle.promoCode: String? get() = get(PROMO_CODE)
-
 const val PROFILE_NPUB = "profileNpub"
 inline val SavedStateHandle.npub: String? get() = get(PROFILE_NPUB)
 

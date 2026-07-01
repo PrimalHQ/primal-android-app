@@ -97,8 +97,6 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
 
         is UiError.PublishError -> context.getString(R.string.note_editor_nostr_publish_error)
 
-        is UiError.InvalidPromoCode -> context.getString(R.string.app_error_invalid_promo_code)
-
         is UiError.FailedToBookmarkNote -> context.getString(R.string.app_error_bookmark_note)
     }
 }

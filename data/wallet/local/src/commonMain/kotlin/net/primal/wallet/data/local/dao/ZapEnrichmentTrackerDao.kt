@@ -19,7 +19,6 @@ interface ZapEnrichmentTrackerDao {
         WHERE z.transactionId IS NULL
             AND t.txKind IN ('LIGHTNING', 'SPARK')
             AND t.invoice IS NOT NULL
-            AND t.walletType != 'PRIMAL'
             AND (t.createdAt >= :minCreatedAt OR t.walletType = 'NWC')
         ORDER BY t.createdAt DESC
         """,

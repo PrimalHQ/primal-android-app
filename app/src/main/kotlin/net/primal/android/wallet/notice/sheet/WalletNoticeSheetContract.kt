@@ -25,7 +25,5 @@ interface WalletNoticeSheetContract {
 }
 
 enum class WalletNoticeType {
-    UpgradeWallet,
-    WalletDiscontinued,
     WalletDetected,
 }

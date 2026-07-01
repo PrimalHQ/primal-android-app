@@ -2,20 +2,15 @@ package net.primal.wallet.data.zaps
 
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.NwcClientFactory
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.NostrZapperFactory
-import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
-import net.primal.wallet.data.remote.api.PrimalWalletApi
 
 internal class NostrZapperFactoryImpl(
-    private val dispatcherProvider: DispatcherProvider,
     private val walletRepository: WalletRepository,
-    private val primalWalletApi: PrimalWalletApi,
     private val lightningPayHelper: LightningPayHelper,
     private val eventRepository: EventRepository?,
 ) : NostrZapperFactory {
@@ -24,20 +19,8 @@ internal class NostrZapperFactoryImpl(
         val wallet = walletRepository.getWalletById(walletId = walletId).getOrNull() ?: return null
 
         return when (wallet) {
-            is Wallet.Primal -> wallet.createPrimalWalletNostrZapper()
             is Wallet.NWC -> wallet.createNwcNostrZapper()
-            else -> createDefaultNostrZapper()
-        }
-    }
-
-    private fun Wallet.Primal.createPrimalWalletNostrZapper(): NostrZapper? {
-        return if (isPrimalWalletAndActivated()) {
-            PrimalWalletNostrZapper(
-                dispatcherProvider = dispatcherProvider,
-                primalWalletApi = primalWalletApi,
-            )
-        } else {
-            null
+            is Wallet.Spark -> createDefaultNostrZapper()
         }
     }
 

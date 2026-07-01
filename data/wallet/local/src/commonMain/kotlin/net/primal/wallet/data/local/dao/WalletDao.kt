@@ -83,9 +83,6 @@ interface WalletDao {
     suspend fun upsertWalletInfo(info: WalletInfo)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertPrimalWalletData(data: PrimalWalletData)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertNostrWalletData(data: NostrWalletData)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -128,21 +125,6 @@ interface WalletDao {
 
     @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
     suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)
-
-    @Query("UPDATE SparkWalletData SET primalTxsMigrated = :migrated WHERE walletId = :walletId")
-    suspend fun updatePrimalTxsMigrated(walletId: String, migrated: Boolean)
-
-    @Query("UPDATE SparkWalletData SET primalTxsMigratedUntil = :until WHERE walletId = :walletId")
-    suspend fun updatePrimalTxsMigratedUntil(walletId: String, until: Long?)
-
-    @Query(
-        """
-        UPDATE SparkWalletData
-        SET primalTxsMigrated = NULL, primalTxsMigratedUntil = NULL
-        WHERE walletId = :walletId
-        """,
-    )
-    suspend fun clearPrimalTxsMigrationState(walletId: String)
 
     @Query(
         """
@@ -202,7 +184,6 @@ interface WalletDao {
     @Transaction
     suspend fun deleteWalletsByIds(walletIds: List<String>) {
         _deleteWalletInfosByIds(walletIds)
-        _deletePrimalWalletDataByIds(walletIds)
         _deleteNostrWalletDataByIds(walletIds)
         _deleteSparkWalletDataByIds(walletIds)
         _deleteWalletUserLinksByIds(walletIds)
@@ -212,10 +193,6 @@ interface WalletDao {
     @Suppress("FunctionName")
     @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")
     suspend fun _deleteWalletInfosByIds(walletIds: List<String>)
-
-    @Suppress("FunctionName")
-    @Query("DELETE FROM PrimalWalletData WHERE walletId IN (:walletIds)")
-    suspend fun _deletePrimalWalletDataByIds(walletIds: List<String>)
 
     @Suppress("FunctionName")
     @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")

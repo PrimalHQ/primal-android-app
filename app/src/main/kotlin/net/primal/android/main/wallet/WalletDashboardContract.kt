@@ -46,7 +46,6 @@ interface WalletDashboardContract {
         Loading,
         ActiveWallet,
         WalletDetected,
-        WalletDiscontinued,
         NoWallet,
         NoWalletNpubLogin,
     }
