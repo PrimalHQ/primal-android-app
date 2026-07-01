@@ -81,7 +81,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -245,7 +245,6 @@ class ArticleDetailsViewModel @Inject constructor(
                 .collect {
                     setState {
                         copy(
-                            activeAccountUserId = activeAccountStore.activeUserId(),
                             isAuthorFollowed = it.data.following.contains(naddr?.userId),
                         )
                     }

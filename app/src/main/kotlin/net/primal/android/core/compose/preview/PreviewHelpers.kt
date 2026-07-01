@@ -8,6 +8,7 @@ import androidx.compose.material3.RippleDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import net.primal.android.LocalQrCodeDecoder
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.activity.LocalZappingState
@@ -25,6 +26,7 @@ fun PrimalPreview(
     primalTheme: PrimalTheme,
     displaySettings: ContentDisplaySettings = ContentDisplaySettings(),
     zappingState: ZappingState = ZappingState(),
+    activeAccountId: String = "",
     content: @Composable () -> Unit,
 ) {
     val primalRippleConfiguration = RippleConfiguration(
@@ -36,6 +38,7 @@ fun PrimalPreview(
         LocalRippleConfiguration provides primalRippleConfiguration,
         LocalContentDisplaySettings provides displaySettings,
         LocalZappingState provides zappingState,
+        LocalActiveAccountId provides activeAccountId,
         LocalQrCodeDecoder provides EmptyQrCodeResultDecoder,
     ) {
         PrimalTheme(primalTheme = primalTheme, content = content)

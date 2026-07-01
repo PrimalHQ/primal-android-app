@@ -58,6 +58,7 @@ import java.text.NumberFormat
 import java.time.Instant
 import kotlinx.coroutines.delay
 import net.primal.android.R
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.IconText
@@ -406,7 +407,7 @@ private fun MediaFeedHeader(
             authorId = data.authorId,
             isBookmarked = data.isBookmarked,
             isThreadMuted = data.isThreadMuted,
-            isNoteAuthor = data.authorId == state.activeAccountUserId,
+            isNoteAuthor = data.authorId == LocalActiveAccountId.current,
             isPoll = data.poll != null,
             relayHints = state.relayHints,
             noteGraphicsLayer = graphicsLayer,

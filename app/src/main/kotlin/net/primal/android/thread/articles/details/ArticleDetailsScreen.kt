@@ -56,6 +56,7 @@ import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.ArticleDropdownMenu
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
@@ -494,7 +495,7 @@ private fun ArticleDetailsTopAppBar(
                     articleRawData = state.article.eventRawNostrEvent,
                     authorId = state.article.authorId,
                     isBookmarked = state.article.isBookmarked,
-                    isArticleAuthor = state.article.authorId == state.activeAccountUserId,
+                    isArticleAuthor = state.article.authorId == LocalActiveAccountId.current,
                     showHighlights = state.showHighlights,
                     onToggleHighlightsClick = onToggleHighlightsClick,
                     onBookmarkClick = onBookmarkClick,

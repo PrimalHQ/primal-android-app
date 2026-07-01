@@ -48,7 +48,6 @@ class ThreadViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         UiState(
             highlightPostId = highlightPostId,
-            activeAccountUserId = activeAccountStore.activeUserId(),
         ),
     )
     val state = _state.asStateFlow()
@@ -60,15 +59,7 @@ class ThreadViewModel @Inject constructor(
     init {
         observeEvents()
         observeConversationChanges()
-        observeActiveAccount()
     }
-
-    private fun observeActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState { copy(activeAccountUserId = activeAccountStore.activeUserId()) }
-            }
-        }
 
     private fun observeEvents() =
         viewModelScope.launch {

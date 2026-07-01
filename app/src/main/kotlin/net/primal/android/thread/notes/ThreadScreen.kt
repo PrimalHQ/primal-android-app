@@ -72,6 +72,7 @@ import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -433,7 +434,7 @@ private fun ThreadLazyColumn(
                         data = state.replyToArticle,
                         modifier = Modifier.padding(all = 16.dp),
                         onClick = noteCallbacks.onArticleClick,
-                        isArticleAuthor = state.replyToArticle.authorId == state.activeAccountUserId,
+                        isArticleAuthor = state.replyToArticle.authorId == LocalActiveAccountId.current,
                     )
                     PrimalDivider()
                 }
@@ -764,7 +765,6 @@ fun ThreadScreenPreview() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         ThreadScreen(
             state = ThreadContract.UiState(
-                activeAccountUserId = "",
                 highlightPostId = "",
                 conversation = listOf(
                     FeedPostUi(

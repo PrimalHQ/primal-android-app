@@ -74,6 +74,10 @@ abstract class PrimalActivity : FragmentActivity() {
             zappingStateStore.zappingState.collect { value = it }
         }
 
+        val activeAccountId = produceState(initialValue = "") {
+            activeAccountStore.activeUserId.collect { value = it }
+        }
+
         val primalRippleConfiguration = RippleConfiguration(
             color = AppTheme.colorScheme.outline,
             rippleAlpha = RippleDefaults.RippleAlpha,
@@ -85,6 +89,7 @@ abstract class PrimalActivity : FragmentActivity() {
                 LocalRippleConfiguration provides primalRippleConfiguration,
                 LocalContentDisplaySettings provides contentDisplaySettings.value,
                 LocalZappingState provides zappingState.value,
+                LocalActiveAccountId provides activeAccountId.value,
             ) {
                 ApplyEdgeToEdge()
                 val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
@@ -131,3 +136,5 @@ val LocalContentDisplaySettings = compositionLocalOf<ContentDisplaySettings> {
 }
 
 val LocalZappingState = compositionLocalOf<ZappingState> { error("No ZappingState provided.") }
+
+val LocalActiveAccountId = compositionLocalOf<String> { error("No active account id provided.") }

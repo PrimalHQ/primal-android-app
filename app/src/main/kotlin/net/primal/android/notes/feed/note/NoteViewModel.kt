@@ -72,7 +72,7 @@ class NoteViewModel @AssistedInject constructor(
         fun create(noteId: String? = null): NoteViewModel
     }
 
-    private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -87,7 +87,6 @@ class NoteViewModel @AssistedInject constructor(
         observeEvents()
         fetchExchangeRate()
         observeUsdExchangeRate()
-        subscribeToActiveAccount()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
         }
@@ -110,13 +109,6 @@ class NoteViewModel @AssistedInject constructor(
         viewModelScope.launch {
             exchangeRateHandler.usdExchangeRate.collect {
                 setState { copy(currentExchangeRate = it) }
-            }
-        }
-
-    private fun subscribeToActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState { copy(activeAccountUserId = activeAccountStore.activeUserId()) }
             }
         }
 
