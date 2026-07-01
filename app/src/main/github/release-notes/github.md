@@ -9,3 +9,4 @@
 - Fixed top zaps avatar flash on thread open (#1067)
 - Fixed the feed picker re-firing config requests on every feed switch
 - Fixed timeout doesn’t propagate to UI properly
+- Fixed socket connection gets blocked by server not responding
