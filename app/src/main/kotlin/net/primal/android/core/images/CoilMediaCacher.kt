@@ -10,8 +10,13 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
@@ -49,19 +54,24 @@ class CoilMediaCacher @Inject constructor(
         val uniqueUrls = urls.filter { it.isNotBlank() }.distinct()
         if (uniqueUrls.isEmpty()) return
 
-        uniqueUrls.forEach { url ->
-            targetScope.launch(dispatchers.io()) {
-                runCatching {
-                    withTimeout(PRE_CACHE_TIMEOUT) {
-                        feedImageLoader.execute(
-                            request = buildRequest(
-                                url = url,
-                                memoryCachePolicy = CachePolicy.ENABLED,
-                            )
-                        )
+        targetScope.launch(dispatchers.io()) {
+            uniqueUrls.asFlow()
+                .map { url ->
+                    async {
+                        runCatching {
+                            withTimeoutOrNull(PRE_CACHE_TIMEOUT) {
+                                feedImageLoader.execute(
+                                    request = buildRequest(
+                                        url = url,
+                                        memoryCachePolicy = CachePolicy.ENABLED,
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
-            }
+                .buffer(capacity = MAX_CONCURRENT_PRE_CACHE_FETCHES)
+                .collect { deferred -> deferred.await() }
         }
     }
 
@@ -75,5 +85,6 @@ class CoilMediaCacher @Inject constructor(
 
     private companion object {
         val PRE_CACHE_TIMEOUT = 20.seconds
+        const val MAX_CONCURRENT_PRE_CACHE_FETCHES = 5
     }
 }
