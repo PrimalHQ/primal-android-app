@@ -21,11 +21,9 @@ import net.primal.core.networking.sockets.NostrSocketClient
 import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.networking.sockets.SocketConnectionClosedCallback
 import net.primal.core.networking.sockets.SocketConnectionOpenedCallback
-import net.primal.core.networking.sockets.errors.NostrNoticeException
-import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
+import net.primal.core.networking.sockets.publishEventAndAwaitResponse
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.global.CachingImportRepository
@@ -156,9 +154,9 @@ class RelayPool(
             scope.launch {
                 with(nostrSocketClient) {
                     val sendEventResult = runCatching {
-                        ensureSocketConnectionOrThrow()
-                        sendEVENT(nostrEvent.toNostrJsonObject())
-                        collectPublishResponse(eventId = nostrEvent.id)
+                        publishEventAndAwaitResponse(eventId = nostrEvent.id, event = nostrEvent.toNostrJsonObject())
+                            .timeout(PUBLISH_TIMEOUT.milliseconds)
+                            .first()
                     }
                     sendEventResult.getOrNull()?.let {
                         responseFlow.emit(NostrPublishResult(result = it))
@@ -182,21 +180,6 @@ class RelayPool(
                 }
             }
             .first { it.isSuccessful() }
-    }
-
-    @FlowPreview
-    private suspend fun NostrSocketClient.collectPublishResponse(eventId: String): NostrIncomingMessage.OkMessage {
-        return incomingMessages
-            .filterByEventId(id = eventId)
-            .transform {
-                when (it) {
-                    is NostrIncomingMessage.OkMessage -> emit(it)
-                    is NostrIncomingMessage.NoticeMessage -> throw NostrNoticeException(reason = it.message)
-                    else -> error("$it is not allowed")
-                }
-            }
-            .timeout(PUBLISH_TIMEOUT.milliseconds)
-            .first()
     }
 
     private fun NostrPublishResult.isSuccessful(): Boolean {

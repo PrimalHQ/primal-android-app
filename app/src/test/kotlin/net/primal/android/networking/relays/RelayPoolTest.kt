@@ -8,11 +8,15 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.core.networking.sockets.NostrIncomingMessage
@@ -63,6 +67,7 @@ class RelayPoolTest {
                 scope = scope,
                 started = SharingStarted.Lazily,
             )
+            every { connectionGeneration } returns MutableStateFlow(0L)
         }
     }
 
@@ -77,6 +82,7 @@ class RelayPoolTest {
                 scope = scope,
                 started = SharingStarted.Lazily,
             )
+            every { connectionGeneration } returns MutableStateFlow(0L)
         }
     }
 
@@ -88,6 +94,7 @@ class RelayPoolTest {
                 scope = scope,
                 started = SharingStarted.Lazily,
             )
+            every { connectionGeneration } returns MutableStateFlow(0L)
         }
     }
 
@@ -97,6 +104,7 @@ class RelayPoolTest {
                 scope = scope,
                 started = SharingStarted.Lazily,
             )
+            every { connectionGeneration } returns MutableStateFlow(0L)
         }
     }
 
@@ -197,6 +205,40 @@ class RelayPoolTest {
             val endTime = testScheduler.currentTime
 
             endTime - startTime shouldBe RelayPool.PUBLISH_TIMEOUT
+        }
+
+    @Test
+    fun publishEvent_reSendsEventOnSocketRebuildAndSucceeds() =
+        runTest {
+            val relayPool = buildRelayPool()
+            val eventId = "rebuildReplayId"
+            val nostrEvent = buildNostrEvent(eventId = eventId)
+
+            val incoming = MutableSharedFlow<NostrIncomingMessage>(extraBufferCapacity = 64)
+            val generation = MutableStateFlow(1L)
+            val socketClient = mockk<NostrSocketClient>(relaxed = true) {
+                every { incomingMessages } returns incoming
+                every { connectionGeneration } returns generation
+            }
+            relayPool.socketClients = listOf(socketClient)
+
+            val publishJob = launch { relayPool.publishEvent(nostrEvent) }
+
+            // runCurrent (not advanceUntilIdle) so virtual time never reaches the publish timeout.
+            // First generation: the EVENT is sent once, the collector is attached, relay stays silent.
+            runCurrent()
+            coVerify(exactly = 1) { socketClient.sendEVENT(any()) }
+            publishJob.isActive shouldBe true
+
+            // A staleness rebuild bumps the generation; the EVENT must be re-sent on the fresh socket.
+            generation.value = 2L
+            runCurrent()
+            coVerify(exactly = 2) { socketClient.sendEVENT(any()) }
+
+            // The OK arrives on the rebuilt socket and the publish completes without throwing.
+            incoming.emit(NostrIncomingMessage.OkMessage(eventId = eventId, success = true))
+            runCurrent()
+            publishJob.isCompleted shouldBe true
         }
 
     @Test
