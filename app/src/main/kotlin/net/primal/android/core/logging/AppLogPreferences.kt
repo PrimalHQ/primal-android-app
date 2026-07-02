@@ -17,7 +17,7 @@ class AppLogPreferences @Inject constructor(
     )
 
     val isLoggingEnabled: Boolean
-        get() = prefs.getBoolean(KEY_IS_LOGGING_ENABLED, false)
+        get() = prefs.getBoolean(KEY_IS_LOGGING_ENABLED, true)
 
     val developerToolsEnabled: Boolean
         get() = prefs.getBoolean(KEY_DEVELOPER_TOOLS_ENABLED, false)
