@@ -9,6 +9,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import net.primal.android.migration.AppMigrationRunner
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.config.AppConfigHandler
@@ -22,6 +23,7 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 class SplashViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val appConfigHandler: AppConfigHandler,
+    private val appMigrationRunner: AppMigrationRunner,
     private val credentialsStore: CredentialsStore,
     private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
@@ -37,12 +39,13 @@ class SplashViewModel @Inject constructor(
     fun start(prefetchFeeds: Boolean) {
         if (started) return
         started = true
-        checkAuthState(prefetchFeeds = prefetchFeeds)
+        runStartupSequence(prefetchFeeds = prefetchFeeds)
         fetchLatestAppConfig()
     }
 
-    private fun checkAuthState(prefetchFeeds: Boolean) =
+    private fun runStartupSequence(prefetchFeeds: Boolean) =
         viewModelScope.launch {
+            appMigrationRunner.runPendingMigrations()
             val userId = activeAccountStore.activeUserId()
             _isLoggedIn.value = userId.isNotEmpty()
 

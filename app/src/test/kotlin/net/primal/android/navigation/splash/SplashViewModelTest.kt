@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import net.primal.android.migration.AppMigrationRunner
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.config.AppConfigHandler
@@ -36,10 +37,12 @@ class SplashViewModelTest {
         activeAccountStore: ActiveAccountStore = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         feedsRepository: FeedsRepository = mockk(relaxed = true),
+        appMigrationRunner: AppMigrationRunner = mockk(relaxed = true),
     ): SplashViewModel {
         return SplashViewModel(
             activeAccountStore = activeAccountStore,
             appConfigHandler = mockk<AppConfigHandler>(relaxed = true),
+            appMigrationRunner = appMigrationRunner,
             credentialsStore = credentialsStore,
             feedsRepository = feedsRepository,
         )
