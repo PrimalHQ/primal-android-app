@@ -42,6 +42,7 @@ import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.feed.note.translation.NoteTranslationControls
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
@@ -225,6 +226,15 @@ fun NoteContent(
                 overflow = overflow,
                 textSelectable = textSelectable,
                 onClick = clickHandler,
+            )
+
+            val translatableText = remember(contentText, seeMoreText) {
+                contentText.text.removeSuffix(" $seeMoreText")
+            }
+            NoteTranslationControls(
+                sourceText = translatableText,
+                contentColor = contentColor,
+                actionColor = highlightColor,
             )
         }
 
