@@ -31,6 +31,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
@@ -59,6 +60,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val streamRepository: StreamRepository,
     private val dispatcherProvider: DispatcherProvider,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -99,7 +101,13 @@ class NoteFeedViewModel @AssistedInject constructor(
         observeActiveAccount()
         observeMutedUsers()
         ensureNotesAreAlwaysCached()
+        fetchExchangeRate()
     }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(userId = activeAccountStore.activeUserId())
+        }
 
     private fun ensureNotesAreAlwaysCached() =
         viewModelScope.launch {

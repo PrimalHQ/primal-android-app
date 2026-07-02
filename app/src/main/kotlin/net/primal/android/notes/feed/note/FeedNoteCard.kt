@@ -54,6 +54,7 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalExchangeRate
 import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -203,7 +204,7 @@ private fun FeedNoteCard(
             optionId = zapPollSelectedOptionId ?: "",
             valueMinimum = zapPoll.valueMinimum,
             valueMaximum = zapPoll.valueMaximum,
-            exchangeRate = state.currentExchangeRate,
+            exchangeRate = LocalExchangeRate.current,
             defaultZapAmounts = zappingState.zapsConfig.map { it.amount },
             onDismissRequest = { zapPollSelectedOptionId = null },
             onVote = { optionId, amount, comment ->
