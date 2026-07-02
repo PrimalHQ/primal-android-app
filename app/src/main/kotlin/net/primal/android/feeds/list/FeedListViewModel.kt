@@ -57,22 +57,25 @@ class FeedListViewModel @AssistedInject constructor(
     private var defaultFeeds: List<PrimalFeed> = emptyList()
 
     private var dvmFeedsJob: Job? = null
+    private var dvmFeedsInitialized = false
 
     init {
         observeEvents()
         observeFeeds()
         fetchAndProcessDefaultFeeds()
-        fetchAndObserveLatestFeedMarketplace()
     }
 
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.ShowFeedMarketplace -> setState {
-                        copy(
-                            feedMarketplaceStage = FeedMarketplaceStage.FeedMarketplace,
-                        )
+                    UiEvent.ShowFeedMarketplace -> {
+                        fetchAndObserveLatestFeedMarketplace()
+                        setState {
+                            copy(
+                                feedMarketplaceStage = FeedMarketplaceStage.FeedMarketplace,
+                            )
+                        }
                     }
 
                     UiEvent.CloseFeedMarketplace -> setState {
@@ -221,6 +224,8 @@ class FeedListViewModel @AssistedInject constructor(
         }
 
     private fun fetchAndObserveLatestFeedMarketplace() {
+        if (dvmFeedsInitialized) return
+        dvmFeedsInitialized = true
         dvmFeedsJob?.cancel()
         dvmFeedsJob = viewModelScope.launch {
             setState { copy(fetchingDvmFeeds = true) }
