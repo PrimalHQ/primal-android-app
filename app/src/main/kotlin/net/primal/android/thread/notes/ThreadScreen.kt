@@ -470,7 +470,6 @@ private fun ThreadLazyColumn(
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
                     showReplyTo = false,
                     showNoteStatCounts = index != state.highlightPostIndex,
-                    showTimestamp = !highlighted,
                     couldAutoPlay = true,
                     noteCallbacks = noteCallbacks.copy(
                         onNoteClick = { noteId ->
