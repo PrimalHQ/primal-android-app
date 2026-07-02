@@ -545,7 +545,7 @@ private fun FeedNote(
                         .padding(top = if (isFeedLayout) 3.dp else 0.dp)
                         .padding(end = 4.dp)
                         .fillMaxWidth(),
-                    postTimestamp = data.timestamp,
+                    postTimestamp = if (headerSingleLine) data.timestamp else null,
                     singleLine = headerSingleLine,
                     verticalAlignment = headerVerticalAlignment,
                     authorAvatarVisible = fullWidthContent && !forceContentIndent,
