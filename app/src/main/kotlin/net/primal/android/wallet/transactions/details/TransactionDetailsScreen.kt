@@ -85,6 +85,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.feed.ui.generateNaddrString
+import net.primal.android.core.activity.LocalExchangeRate
 import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
@@ -202,7 +203,7 @@ fun TransactionDetailsScreen(
                     TransactionCard(
                         txData = txData,
                         onProfileClick = { profileId -> noteCallbacks.onProfileClick?.invoke(profileId) },
-                        currentExchangeRate = state.currentExchangeRate,
+                        currentExchangeRate = LocalExchangeRate.current,
                     )
                 }
 

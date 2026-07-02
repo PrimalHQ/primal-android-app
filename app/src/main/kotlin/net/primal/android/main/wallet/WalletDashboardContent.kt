@@ -49,6 +49,7 @@ import java.time.ZoneOffset
 import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.core.activity.LocalExchangeRate
 import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelAppBar
@@ -331,7 +332,7 @@ private fun WalletDashboardContent(
                             pagingItems = pagingItems,
                             isRefreshing = state.refreshing || state.syncingTransactions,
                             currencyMode = currencyMode,
-                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                            exchangeBtcUsdRate = LocalExchangeRate.current,
                             listState = listState,
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
@@ -469,7 +470,7 @@ private fun WalletDashboardSection(
                     },
                     currencyMode = currencyMode,
                     onSwitchCurrencyMode = onCurrencyModeToggle,
-                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                    exchangeBtcUsdRate = LocalExchangeRate.current,
                 )
 
                 false -> {
@@ -494,7 +495,7 @@ private fun WalletDashboardSection(
                             currencyMode = currencyMode,
                             enabled = state.wallet.isConfigured(),
                             onSwitchCurrencyMode = onCurrencyModeToggle,
-                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                            exchangeBtcUsdRate = LocalExchangeRate.current,
                         )
 
                         PrimalDivider()

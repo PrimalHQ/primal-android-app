@@ -11,6 +11,5 @@ interface TransactionDetailsContract {
         val feedPost: FeedPostUi? = null,
         val articlePost: FeedArticleUi? = null,
         val referencedStream: ReferencedStream? = null,
-        val currentExchangeRate: Double? = null,
     )
 }
