@@ -79,6 +79,20 @@ class NotificationsViewModel @Inject constructor(
     internal fun seenNotificationsForGroup(group: NotificationGroup): Flow<PagingData<NotificationUi>> =
         seenPagerCache.getValue(group)
 
+    private val keptLoadedGroups = mutableSetOf<NotificationGroup>()
+
+    /**
+     * Keeps the given group's seen-notifications pager presented for the ViewModel's lifetime, so
+     * returning to it replays cached items instantly instead of briefly showing a blank list. Called
+     * when a group first becomes visible (see [subscribeToEvents] handling of
+     * [UiEvent.NotificationsSeen]) — never on app start, since the screen isn't composed then. Each
+     * group is kept loaded at most once, and groups the user never opens are never loaded.
+     */
+    private fun keepSeenNotificationsLoaded(group: NotificationGroup) {
+        if (!keptLoadedGroups.add(group)) return
+        viewModelScope.launch { seenPagerCache.getValue(group).keepLoaded() }
+    }
+
     internal fun unseenNotificationsForGroup(group: NotificationGroup): Flow<List<List<NotificationUi>>> =
         unseenCache.getValue(group)
 
@@ -92,20 +106,16 @@ class NotificationsViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToBadgesUpdates()
-        ensureSeenNotificationsAreAlwaysCached()
-    }
-
-    private fun ensureSeenNotificationsAreAlwaysCached() {
-        seenPagerCache.values.forEach { seenNotifications ->
-            viewModelScope.launch { seenNotifications.keepLoaded() }
-        }
     }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.NotificationsSeen -> handleNotificationsSeen(it.group)
+                    is UiEvent.NotificationsSeen -> {
+                        keepSeenNotificationsLoaded(it.group)
+                        handleNotificationsSeen(it.group)
+                    }
                 }
             }
         }
