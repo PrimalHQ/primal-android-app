@@ -140,6 +140,8 @@ actual fun LocalAppSessionEventData.asDomain(): SessionEvent? {
         SignerMethodType.DecryptZapEvent,
         SignerMethodType.Connect,
         SignerMethodType.Ping,
+        SignerMethodType.SwitchRelays,
+        SignerMethodType.Logout,
         -> {
             null
         }
@@ -183,6 +185,8 @@ fun LocalAppSessionEventData.getRequestTypeId() =
         SignerMethodType.DecryptZapEvent -> PERM_ID_DECRYPT_ZAP_EVENT
         SignerMethodType.Connect,
         SignerMethodType.Ping,
+        SignerMethodType.SwitchRelays,
+        SignerMethodType.Logout,
         -> error("Unsupported request type: ${this.requestType}")
     }
 

@@ -8,6 +8,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -25,7 +26,7 @@ object RemoteSignerMethodResponseSerializer : KSerializer<RemoteSignerMethodResp
         val obj: JsonObject = when (value) {
             is RemoteSignerMethodResponse.Success -> buildJsonObject {
                 put("id", JsonPrimitive(value.id))
-                put("result", JsonPrimitive(value.result))
+                put("result", value.result?.let { JsonPrimitive(it) } ?: JsonNull)
             }
 
             is RemoteSignerMethodResponse.Error -> buildJsonObject {
@@ -45,7 +46,7 @@ object RemoteSignerMethodResponseSerializer : KSerializer<RemoteSignerMethodResp
             ?: throw SerializationException("Missing 'id'")
 
         val errorContent = obj["error"]?.jsonPrimitive?.content
-        val resultContent = obj["result"]?.jsonPrimitive?.content
+        val resultElement = obj["result"]
         return when {
             errorContent != null -> {
                 RemoteSignerMethodResponse.Error(
@@ -55,11 +56,11 @@ object RemoteSignerMethodResponseSerializer : KSerializer<RemoteSignerMethodResp
                 )
             }
 
-            resultContent != null -> {
+            resultElement != null -> {
                 RemoteSignerMethodResponse.Success(
                     id = id,
                     clientPubKey = "",
-                    result = resultContent,
+                    result = if (resultElement is JsonNull) null else resultElement.jsonPrimitive.content,
                 )
             }
 

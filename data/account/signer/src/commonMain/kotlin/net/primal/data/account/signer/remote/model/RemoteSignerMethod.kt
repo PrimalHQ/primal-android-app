@@ -3,12 +3,14 @@ package net.primal.data.account.signer.remote.model
 import kotlinx.serialization.Serializable
 import net.primal.data.account.signer.remote.utils.PERM_ID_CONNECT
 import net.primal.data.account.signer.remote.utils.PERM_ID_GET_PUBLIC_KEY
+import net.primal.data.account.signer.remote.utils.PERM_ID_LOGOUT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP04_DECRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP04_ENCRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP44_DECRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP44_ENCRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_PING
 import net.primal.data.account.signer.remote.utils.PERM_ID_PREFIX_SIGN_EVENT
+import net.primal.data.account.signer.remote.utils.PERM_ID_SWITCH_RELAYS
 
 @Serializable
 sealed class RemoteSignerMethod {
@@ -84,6 +86,20 @@ sealed class RemoteSignerMethod {
         val ciphertext: String,
     ) : RemoteSignerMethod()
 
+    @Serializable
+    data class SwitchRelays(
+        override val id: String,
+        override val clientPubKey: String,
+        override val requestedAt: Long,
+    ) : RemoteSignerMethod()
+
+    @Serializable
+    data class Logout(
+        override val id: String,
+        override val clientPubKey: String,
+        override val requestedAt: Long,
+    ) : RemoteSignerMethod()
+
     fun getPermissionId(): String =
         when (this) {
             is Connect -> PERM_ID_CONNECT
@@ -94,5 +110,7 @@ sealed class RemoteSignerMethod {
             is Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
             is Ping -> PERM_ID_PING
             is SignEvent -> "${PERM_ID_PREFIX_SIGN_EVENT}${this.unsignedEvent.kind}"
+            is SwitchRelays -> PERM_ID_SWITCH_RELAYS
+            is Logout -> PERM_ID_LOGOUT
         }
 }
