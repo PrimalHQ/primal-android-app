@@ -10,4 +10,6 @@ enum class SignerMethodType {
     Nip44Encrypt,
     Nip44Decrypt,
     DecryptZapEvent,
+    SwitchRelays,
+    Logout,
 }

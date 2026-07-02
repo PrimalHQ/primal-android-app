@@ -41,6 +41,7 @@ class RemoteSignerMethodParser(
             pubKey = this.pubKey,
         )
 
+    @Suppress("LongMethod")
     private fun NostrEvent.parseDecryptedContent(decryptedContent: String): Result<RemoteSignerMethod> {
         val request = decryptedContent.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()
             ?: return Result.failure(
@@ -121,6 +122,20 @@ class RemoteSignerMethodParser(
                         requestedAt = this.createdAt,
                         thirdPartyPubKey = request.params[0],
                         ciphertext = request.params[1],
+                    )
+
+                RemoteSignerMethodType.SwitchRelays ->
+                    RemoteSignerMethod.SwitchRelays(
+                        id = request.id,
+                        clientPubKey = this.pubKey,
+                        requestedAt = this.createdAt,
+                    )
+
+                RemoteSignerMethodType.Logout ->
+                    RemoteSignerMethod.Logout(
+                        id = request.id,
+                        clientPubKey = this.pubKey,
+                        requestedAt = this.createdAt,
                     )
             }
         }

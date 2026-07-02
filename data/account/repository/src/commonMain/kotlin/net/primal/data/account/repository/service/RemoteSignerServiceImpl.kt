@@ -311,10 +311,15 @@ internal class RemoteSignerServiceImpl internal constructor(
             Napier.d(tag = "Signer") { "Response $response" }
 
             if (response != null) {
-                sendResponseOrAddToFailedQueue(
-                    response = response,
-                    rebroadcast = method is RemoteSignerMethod.Connect,
-                )
+                if (method is RemoteSignerMethod.Logout) {
+                    sendResponse(response = response)
+                    connectionRepository.deleteConnectionAndData(clientPubKey = method.clientPubKey)
+                } else {
+                    sendResponseOrAddToFailedQueue(
+                        response = response,
+                        rebroadcast = method is RemoteSignerMethod.Connect,
+                    )
+                }
             }
         }
 

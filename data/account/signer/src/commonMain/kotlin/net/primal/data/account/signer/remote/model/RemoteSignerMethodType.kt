@@ -28,4 +28,10 @@ enum class RemoteSignerMethodType {
 
     @SerialName("nip44_decrypt")
     Nip44Decrypt,
+
+    @SerialName("switch_relays")
+    SwitchRelays,
+
+    @SerialName("logout")
+    Logout,
 }

@@ -36,6 +36,8 @@ internal class RemoteSignerMethodResponseBuilder(
             )
             is RemoteSignerMethod.Ping -> ping(method)
             is RemoteSignerMethod.SignEvent -> signEvent(method)
+            is RemoteSignerMethod.SwitchRelays -> switchRelays(method)
+            is RemoteSignerMethod.Logout -> logout(method)
         }
     }
 
@@ -46,6 +48,20 @@ internal class RemoteSignerMethodResponseBuilder(
             clientPubKey = method.clientPubKey,
         )
     }
+
+    private fun switchRelays(method: RemoteSignerMethod.SwitchRelays): RemoteSignerMethodResponse =
+        RemoteSignerMethodResponse.Success(
+            id = method.id,
+            result = null,
+            clientPubKey = method.clientPubKey,
+        )
+
+    private fun logout(method: RemoteSignerMethod.Logout): RemoteSignerMethodResponse =
+        RemoteSignerMethodResponse.Success(
+            id = method.id,
+            result = "ack",
+            clientPubKey = method.clientPubKey,
+        )
 
     private suspend fun connect(method: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
         connectionRepository.getConnectionByClientPubKey(clientPubKey = method.clientPubKey)

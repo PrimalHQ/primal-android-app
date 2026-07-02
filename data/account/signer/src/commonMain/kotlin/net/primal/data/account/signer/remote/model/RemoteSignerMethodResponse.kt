@@ -12,7 +12,7 @@ sealed class RemoteSignerMethodResponse {
     data class Success(
         override val id: String,
         override val clientPubKey: String,
-        val result: String,
+        val result: String?,
     ) : RemoteSignerMethodResponse()
 
     @Serializable

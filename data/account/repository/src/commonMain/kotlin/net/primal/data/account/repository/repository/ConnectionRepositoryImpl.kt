@@ -17,7 +17,9 @@ import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.data.account.signer.remote.api.WellKnownApi
 import net.primal.data.account.signer.remote.utils.PERM_ID_CONNECT
+import net.primal.data.account.signer.remote.utils.PERM_ID_LOGOUT
 import net.primal.data.account.signer.remote.utils.PERM_ID_PING
+import net.primal.data.account.signer.remote.utils.PERM_ID_SWITCH_RELAYS
 import net.primal.domain.account.model.RemoteAppConnection
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
@@ -94,10 +96,7 @@ class ConnectionRepositoryImpl(
             val connection = getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
                 ?: return@withContext false
 
-            if (permissionId in Regex(PERM_ID_CONNECT) || permissionId in Regex(
-                    PERM_ID_PING,
-                )
-            ) {
+            if (permissionId.isAlwaysAllowedPermission()) {
                 return@withContext true
             }
 
@@ -191,5 +190,17 @@ class ConnectionRepositoryImpl(
         database.remoteAppConnections().deleteConnection(clientPubKey = clientPubKey)
         database.remoteAppSessionEvents().deleteEvents(clientPubKey = clientPubKey)
         database.remoteAppPendingNostrEvents().deleteByClientPubKey(clientPubKey = clientPubKey)
+    }
+
+    private fun String.isAlwaysAllowedPermission(): Boolean =
+        ALWAYS_ALLOWED_PERMISSION_PATTERNS.any { pattern -> this in Regex(pattern) }
+
+    private companion object {
+        val ALWAYS_ALLOWED_PERMISSION_PATTERNS = listOf(
+            PERM_ID_CONNECT,
+            PERM_ID_PING,
+            PERM_ID_SWITCH_RELAYS,
+            PERM_ID_LOGOUT,
+        )
     }
 }
