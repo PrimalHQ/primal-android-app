@@ -10,3 +10,5 @@
 - Fixed the feed picker re-firing config requests on every feed switch
 - Fixed timeout doesn’t propagate to UI properly
 - Fixed socket connection gets blocked by server not responding
+- Optimized user data updates sync operations on app start
+- Fixed to fetch DVM feed marketplace lazily in feed picker
