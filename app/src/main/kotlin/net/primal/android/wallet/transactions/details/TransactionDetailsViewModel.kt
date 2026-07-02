@@ -62,7 +62,7 @@ class TransactionDetailsViewModel @Inject constructor(
 
     init {
         loadTransaction()
-        observeUsdExchangeRate()
+        fetchExchangeRate()
     }
 
     private fun loadTransaction() =
@@ -174,15 +174,6 @@ class TransactionDetailsViewModel @Inject constructor(
                 setState { copy(loading = false) }
             }
         }
-
-    private fun observeUsdExchangeRate() {
-        viewModelScope.launch {
-            fetchExchangeRate()
-            exchangeRateHandler.usdExchangeRate.collect {
-                setState { copy(currentExchangeRate = it) }
-            }
-        }
-    }
 
     private fun fetchExchangeRate() =
         viewModelScope.launch {

@@ -94,7 +94,7 @@ class WalletDashboardViewModel @Inject constructor(
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        observeUsdExchangeRate()
+        fetchExchangeRate()
         subscribeToEvents()
         subscribeToActiveWalletData()
         ensureTransactionsAreAlwaysCached()
@@ -280,15 +280,6 @@ class WalletDashboardViewModel @Inject constructor(
             runCatching { walletRepository.enrichUnenrichedTransactions() }
                 .onFailure { Napier.w(throwable = it) { "Failed to enrich transactions." } }
         }
-
-    private fun observeUsdExchangeRate() {
-        viewModelScope.launch {
-            fetchExchangeRate()
-            exchangeRateHandler.usdExchangeRate.collect {
-                setState { copy(exchangeBtcUsdRate = it) }
-            }
-        }
-    }
 
     private fun fetchExchangeRate() =
         viewModelScope.launch {
