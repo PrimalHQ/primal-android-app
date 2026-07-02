@@ -17,9 +17,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.core.logging.AppLogPreferences
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.main.wallet.WalletDashboardContract.UiEvent
@@ -38,7 +41,6 @@ import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
-import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.PrimalWalletAccountRepository
@@ -95,6 +97,7 @@ class WalletDashboardViewModel @Inject constructor(
         observeUsdExchangeRate()
         subscribeToEvents()
         subscribeToActiveWalletData()
+        ensureTransactionsAreAlwaysCached()
         subscribeToActiveAccount()
         subscribeToPurchases()
         checkForPersistedSparkWallet()
@@ -201,6 +204,14 @@ class WalletDashboardViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+
+    private fun ensureTransactionsAreAlwaysCached() =
+        viewModelScope.launch {
+            state
+                .map { it.transactions }
+                .distinctUntilChanged()
+                .collectLatest { it.keepLoaded() }
         }
 
     private fun subscribeToActiveAccount() =

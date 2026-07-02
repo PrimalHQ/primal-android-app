@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
+import net.primal.android.core.ext.keepLoaded
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
 import net.primal.android.messages.chat.model.ChatMessageUi
@@ -60,7 +62,8 @@ class ChatViewModel @Inject constructor(
             participantId = participantId,
             messages = chatRepository
                 .newestMessages(userId = userId, participantId = participantId)
-                .mapAsPagingDataOfChatMessageUi(),
+                .mapAsPagingDataOfChatMessageUi()
+                .cachedIn(viewModelScope),
         ),
     )
     val state = _state.asStateFlow()
@@ -74,7 +77,13 @@ class ChatViewModel @Inject constructor(
         observeMessagesSeenEvents()
         observeParticipant()
         subscribeToTotalUnreadCountChanges()
+        ensureMessagesAreAlwaysCached()
     }
+
+    private fun ensureMessagesAreAlwaysCached() =
+        viewModelScope.launch {
+            _state.value.messages.keepLoaded()
+        }
 
     private fun observeEvents() =
         viewModelScope.launch {
