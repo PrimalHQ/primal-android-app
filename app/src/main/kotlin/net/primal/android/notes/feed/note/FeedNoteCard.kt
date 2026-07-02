@@ -103,6 +103,7 @@ fun FeedNoteCard(
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
+    showTimestamp: Boolean = true,
     couldAutoPlay: Boolean = false,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onNoteDeleted: (() -> Unit)? = null,
@@ -148,6 +149,7 @@ fun FeedNoteCard(
         textSelectable = textSelectable,
         showReplyTo = showReplyTo,
         showNoteStatCounts = showNoteStatCounts,
+        showTimestamp = showTimestamp,
         noteOptionsMenuEnabled = noteOptionsMenuEnabled,
         couldAutoPlay = couldAutoPlay,
         noteCallbacks = noteCallbacks,
@@ -178,6 +180,7 @@ private fun FeedNoteCard(
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
+    showTimestamp: Boolean = true,
     couldAutoPlay: Boolean = false,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onGoToWallet: (() -> Unit)? = null,
@@ -360,6 +363,7 @@ private fun FeedNoteCard(
                         expanded = expanded,
                         textSelectable = textSelectable,
                         showNoteStatCounts = showNoteStatCounts,
+                        showTimestamp = showTimestamp,
                         couldAutoPlay = couldAutoPlay,
                         noteCallbacks = noteCallbacks,
                         onPostAction = { postAction ->
@@ -502,6 +506,7 @@ private fun FeedNote(
     expanded: Boolean,
     textSelectable: Boolean,
     showNoteStatCounts: Boolean,
+    showTimestamp: Boolean,
     couldAutoPlay: Boolean,
     noteCallbacks: NoteCallbacks,
     nestingCutOffLimit: Int = Int.MAX_VALUE,
@@ -545,7 +550,7 @@ private fun FeedNote(
                         .padding(top = if (isFeedLayout) 3.dp else 0.dp)
                         .padding(end = 4.dp)
                         .fillMaxWidth(),
-                    postTimestamp = data.timestamp,
+                    postTimestamp = if (showTimestamp) data.timestamp else null,
                     singleLine = headerSingleLine,
                     verticalAlignment = headerVerticalAlignment,
                     authorAvatarVisible = fullWidthContent && !forceContentIndent,

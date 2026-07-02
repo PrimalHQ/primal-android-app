@@ -68,11 +68,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -470,6 +470,7 @@ private fun ThreadLazyColumn(
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
                     showReplyTo = false,
                     showNoteStatCounts = index != state.highlightPostIndex,
+                    showTimestamp = !highlighted,
                     couldAutoPlay = true,
                     noteCallbacks = noteCallbacks.copy(
                         onNoteClick = { noteId ->
