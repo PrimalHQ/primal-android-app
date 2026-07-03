@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +42,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.request.ImageRequest
 import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
@@ -54,6 +56,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
+import net.primal.android.core.images.seedMemoryCache
 import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.findNearestOrNull
@@ -249,7 +252,10 @@ private fun ListItemContent(data: FeedArticleUi, modifier: Modifier = Modifier) 
 
         val imageSource = data.resolveImageUrl()
         PrimalImage(
-            model = imageSource,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageSource)
+                .seedMemoryCache(imageSource)
+                .build(),
             modifier = Modifier
                 .padding(vertical = 4.dp)
                 .size(width = imageWidth, height = imageHeight)

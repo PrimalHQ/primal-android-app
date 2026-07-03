@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import coil3.imageLoader
+import coil3.memory.MemoryCache
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -218,6 +219,7 @@ fun MediaItemContent(
         imageLoader = imageLoader,
         model = ImageRequest.Builder(LocalContext.current)
             .data(mediaUrl)
+            .placeholderMemoryCacheKey(MemoryCache.Key(mediaUrl))
             .listener(loadingImageListener)
             .crossfade(durationMillis = 300)
             .build(),

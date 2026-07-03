@@ -35,12 +35,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -53,6 +55,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.images.seedMemoryCache
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
@@ -161,6 +164,7 @@ fun ProfileTopCoverBar(
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
+@Suppress("LongMethod")
 @Composable
 private fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
@@ -196,7 +200,10 @@ private fun ProfileTopCoverBar(
                         drawRect(color = coverBlur)
                     }
                 },
-            model = imageSource,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageSource)
+                .seedMemoryCache(imageSource)
+                .build(),
             loading = { CoverLoading() },
             error = { CoverUnavailable() },
             contentDescription = "Cover",
