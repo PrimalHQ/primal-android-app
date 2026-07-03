@@ -306,7 +306,7 @@ class NotePublishHandler @Inject constructor(
             add(article.asRootPubkeyTag())
             if (replyTo != null) {
                 add(replyTo.asCommentEventTag())
-                add(NostrEventKind.Comment.asKindTag())
+                add((replyTo.kind?.let { NostrEventKind.valueOf(it) } ?: NostrEventKind.Comment).asKindTag())
             } else {
                 add(article.asReplaceableEventTag())
                 articleEventId?.let {
