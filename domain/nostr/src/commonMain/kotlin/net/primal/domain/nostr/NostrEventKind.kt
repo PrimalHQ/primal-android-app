@@ -23,6 +23,7 @@ enum class NostrEventKind(val value: Int) {
     PollResponse(value = 1018),
     FileMetadata(value = 1063),
     Poll(value = 1068),
+    Comment(value = 1111),
     ChatMessage(value = 1311),
     Reporting(value = 1984),
     ZapPoll(value = 6969),

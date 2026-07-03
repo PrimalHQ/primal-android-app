@@ -39,6 +39,7 @@ import net.primal.domain.nostr.asClientTag
 import net.primal.domain.nostr.asEventIdTag
 import net.primal.domain.nostr.asEventTag
 import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asQuoteTag
 import net.primal.domain.nostr.asReplaceableEventTag
 import net.primal.domain.nostr.isATag
 import net.primal.domain.nostr.isEventIdTag
@@ -775,33 +776,186 @@ class NotePublishHandlerTest {
         }
 
     @Test
-    fun publishShortTextNote_createsRootTagForArticle_evenIfRootNoteIsPresent() =
+    fun publishShortTextNote_createsCommentEvent_forTopLevelArticleComment() =
         runTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
 
             val articleNaddr = buildArticleNaddr()
-            val noteNevent = buildNoteNevent()
+            val articleEventId = "articleEventId"
 
             notePublishHandler.publishShortTextNote(
                 userId = expectedUserId,
-                content = "I'm replying to a comment on article.",
+                content = "I'm commenting on an article.",
                 rootHighlightNevent = null,
                 rootArticleNaddr = articleNaddr,
-                rootNoteNevent = noteNevent,
+                rootArticleEventId = articleEventId,
+                rootNoteNevent = buildNoteNevent(),
             )
 
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { event ->
-                        val replaceableEventsTags = event.tags.filter { tag -> tag.isATag() }
-                        val rootTagCount = replaceableEventsTags.count { tag -> tag[3].jsonPrimitive.content == "root" }
-                        rootTagCount shouldBe 1
+                        event.kind shouldBe NostrEventKind.Comment.value
 
-                        val rootTag = replaceableEventsTags.find { tag -> tag[3].jsonPrimitive.content == "root" }
-                        rootTag.shouldNotBeNull()
-                        rootTag[0].jsonPrimitive.content shouldBe "a"
-                        rootTag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
+                        val tagValues = event.tags.map { tag -> tag.map { it.jsonPrimitive.content } }
+                        tagValues.none { it.contains("root") || it.contains("reply") } shouldBe true
+
+                        val rootATag = event.tags.find { it[0].jsonPrimitive.content == "A" }
+                        rootATag.shouldNotBeNull()
+                        rootATag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
+
+                        val rootKindTag = event.tags.find { it[0].jsonPrimitive.content == "K" }
+                        rootKindTag.shouldNotBeNull()
+                        rootKindTag[1].jsonPrimitive.content shouldBe "30023"
+
+                        val rootPubkeyTag = event.tags.find { it[0].jsonPrimitive.content == "P" }
+                        rootPubkeyTag.shouldNotBeNull()
+                        rootPubkeyTag[1].jsonPrimitive.content shouldBe articleNaddr.userId
+
+                        val parentATag = event.tags.find { it.isATag() }
+                        parentATag.shouldNotBeNull()
+                        parentATag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
+
+                        val parentEventTag = event.tags.find { it.isEventIdTag() }
+                        parentEventTag.shouldNotBeNull()
+                        parentEventTag[1].jsonPrimitive.content shouldBe articleEventId
+                        parentEventTag[3].jsonPrimitive.content shouldBe articleNaddr.userId
+
+                        val parentKindTag = event.tags.find { it[0].jsonPrimitive.content == "k" }
+                        parentKindTag.shouldNotBeNull()
+                        parentKindTag[1].jsonPrimitive.content shouldBe "30023"
+
+                        val pubkeyTagValues = event.tags.filter { it.isPubKeyTag() }
+                            .map { it[1].jsonPrimitive.content }
+                        pubkeyTagValues shouldContain articleNaddr.userId
+                    },
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_createsCommentEvent_whenReplyingToArticleComment() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val articleNaddr = buildArticleNaddr()
+            val parentCommentNevent = Nevent(
+                kind = NostrEventKind.Comment.value,
+                userId = "commentAuthorId",
+                eventId = "commentEventId",
+            )
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a comment on an article.",
+                rootArticleNaddr = articleNaddr,
+                rootArticleEventId = "articleEventId",
+                replyToNoteNevent = parentCommentNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { event ->
+                        event.kind shouldBe NostrEventKind.Comment.value
+
+                        val rootATag = event.tags.find { it[0].jsonPrimitive.content == "A" }
+                        rootATag.shouldNotBeNull()
+                        rootATag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
+
+                        val rootKindTag = event.tags.find { it[0].jsonPrimitive.content == "K" }
+                        rootKindTag.shouldNotBeNull()
+                        rootKindTag[1].jsonPrimitive.content shouldBe "30023"
+
+                        val parentATag = event.tags.find { it.isATag() }
+                        parentATag.shouldBeNull()
+
+                        val parentEventTag = event.tags.find { it.isEventIdTag() }
+                        parentEventTag.shouldNotBeNull()
+                        parentEventTag[1].jsonPrimitive.content shouldBe parentCommentNevent.eventId
+                        parentEventTag[3].jsonPrimitive.content shouldBe parentCommentNevent.userId
+
+                        val parentKindTag = event.tags.find { it[0].jsonPrimitive.content == "k" }
+                        parentKindTag.shouldNotBeNull()
+                        parentKindTag[1].jsonPrimitive.content shouldBe "1111"
+                    },
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_keepsShortTextNoteKind_whenReplyingToLegacyNoteCommentOnArticle() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val articleNaddr = buildArticleNaddr()
+            val legacyCommentNevent = buildNoteNevent(eventId = "legacyCommentEventId")
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = "I'm replying to a legacy kind-1 comment on an article.",
+                rootArticleNaddr = articleNaddr,
+                replyToNoteNevent = legacyCommentNevent,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { event ->
+                        event.kind shouldBe NostrEventKind.ShortTextNote.value
+
+                        val rootATag = event.tags.filter { it.isATag() }
+                            .find { tag -> tag[3].jsonPrimitive.content == "root" }
+                        rootATag.shouldNotBeNull()
+                        rootATag[1].jsonPrimitive.content shouldBe articleNaddr.asATagValue()
+
+                        val replyTag = event.tags.filter { it.isEventIdTag() }
+                            .find { tag -> tag[3].jsonPrimitive.content == "reply" }
+                        replyTag.shouldNotBeNull()
+                        replyTag[1].jsonPrimitive.content shouldBe legacyCommentNevent.eventId
+                    },
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun publishShortTextNote_convertsMentionTagsToQuoteTags_whenPublishingComment() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
+
+            val articleNaddr = buildArticleNaddr()
+            val quotedNevent = Nevent(
+                kind = NostrEventKind.ShortTextNote.value,
+                userId = "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
+                eventId = "33c4ce1a423a65d403f0871e8fd2619f61af57d45830080c50a6896569544c7b",
+                relays = listOf("wss://relay.primal.net"),
+            )
+            val expectedContent = "check this out ${quotedNevent.toNeventString()}"
+
+            notePublishHandler.publishShortTextNote(
+                userId = expectedUserId,
+                content = expectedContent,
+                rootArticleNaddr = articleNaddr,
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { event ->
+                        event.kind shouldBe NostrEventKind.Comment.value
+
+                        event.tags shouldContain quotedNevent.eventId.asQuoteTag(
+                            relayHint = "wss://relay.primal.net",
+                            authorPubkey = quotedNevent.userId,
+                        )
+
+                        event.tags.none { tag ->
+                            tag.isEventIdTag() && tag[1].jsonPrimitive.content == quotedNevent.eventId
+                        } shouldBe true
                     },
                     any(),
                 )

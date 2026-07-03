@@ -48,6 +48,103 @@ class TagsTest {
     }
 
     @Test
+    fun `asRootKindTag returns proper JsonArray tag`() {
+        val nostrKind = NostrEventKind.LongFormContent
+
+        val actual = nostrKind.asRootKindTag()
+
+        actual shouldBe instanceOf(JsonArray::class)
+        actual[0].jsonPrimitive.content shouldBe "K"
+        actual[1].jsonPrimitive.content shouldBe nostrKind.value.toString()
+    }
+
+    @Test
+    fun `asRootPubkeyTag returns proper JsonArray tag`() {
+        val pubkey = "pubkey"
+        val relayHint = "wss://relay.primal.net"
+
+        val actual = pubkey.asRootPubkeyTag(relayHint = relayHint)
+
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 3
+        actual[0].jsonPrimitive.content shouldBe "P"
+        actual[1].jsonPrimitive.content shouldBe pubkey
+        actual[2].jsonPrimitive.content shouldBe relayHint
+    }
+
+    @Test
+    fun `asRootPubkeyTag trims trailing empty relay hint`() {
+        val actual = "pubkey".asRootPubkeyTag(relayHint = null)
+
+        actual.size shouldBe 2
+        actual[0].jsonPrimitive.content shouldBe "P"
+    }
+
+    @Test
+    fun `asRootReplaceableEventTag returns proper JsonArray tag`() {
+        val naddr = Naddr(
+            kind = NostrEventKind.LongFormContent.value,
+            userId = "authorId",
+            identifier = "articleIdentifier",
+            relays = listOf("wss://relay.primal.net"),
+        )
+
+        val actual = naddr.asRootReplaceableEventTag()
+
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 3
+        actual[0].jsonPrimitive.content shouldBe "A"
+        actual[1].jsonPrimitive.content shouldBe naddr.asATagValue()
+        actual[2].jsonPrimitive.content shouldBe "wss://relay.primal.net"
+    }
+
+    @Test
+    fun `asCommentEventIdTag puts author pubkey at index three`() {
+        val actual = "eventId".asCommentEventIdTag(
+            relayHint = "wss://relay.primal.net",
+            authorPubkey = "authorId",
+        )
+
+        actual.size shouldBe 4
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe "eventId"
+        actual[2].jsonPrimitive.content shouldBe "wss://relay.primal.net"
+        actual[3].jsonPrimitive.content shouldBe "authorId"
+    }
+
+    @Test
+    fun `asCommentEventIdTag keeps empty relay hint when author pubkey present`() {
+        val actual = "eventId".asCommentEventIdTag(relayHint = null, authorPubkey = "authorId")
+
+        actual.size shouldBe 4
+        actual[2].jsonPrimitive.content shouldBe ""
+        actual[3].jsonPrimitive.content shouldBe "authorId"
+    }
+
+    @Test
+    fun `asCommentEventIdTag trims trailing empty strings`() {
+        val actual = "eventId".asCommentEventIdTag(relayHint = null, authorPubkey = null)
+
+        actual.size shouldBe 2
+        actual[0].jsonPrimitive.content shouldBe "e"
+        actual[1].jsonPrimitive.content shouldBe "eventId"
+    }
+
+    @Test
+    fun `asQuoteTag returns proper JsonArray tag`() {
+        val actual = "eventId".asQuoteTag(
+            relayHint = "wss://relay.primal.net",
+            authorPubkey = "authorId",
+        )
+
+        actual.size shouldBe 4
+        actual[0].jsonPrimitive.content shouldBe "q"
+        actual[1].jsonPrimitive.content shouldBe "eventId"
+        actual[2].jsonPrimitive.content shouldBe "wss://relay.primal.net"
+        actual[3].jsonPrimitive.content shouldBe "authorId"
+    }
+
+    @Test
     fun `asEventIdTag returns proper JsonArray tag if optional args are null`() {
         val eventId = "eventId"
         val actual = eventId.asEventIdTag(
