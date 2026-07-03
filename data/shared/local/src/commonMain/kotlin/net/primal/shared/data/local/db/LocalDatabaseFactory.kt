@@ -12,6 +12,8 @@ import androidx.room.migration.Migration
  * Destructive migration on downgrade is always enabled (all tables are dropped). [migrations] are
  * registered when provided, and [fallbackToDestructiveMigration] governs destructive fallback for
  * the remaining (non-downgrade) migration cases.
+ * Every database gets a [DatabaseSpaceReclaimCallback] so destructive migrations VACUUM the file
+ * and WAL journals stay bounded via `PRAGMA journal_size_limit`.
  *
  * @param T the [RoomDatabase] subtype to build.
  * @param fallbackToDestructiveMigration when true, recreate the database (dropping its data) if a
@@ -33,6 +35,7 @@ fun <T : RoomDatabase> buildLocalDatabase(
     return createDatabaseBuilder()
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
         .fallbackToDestructiveMigration(fallbackToDestructiveMigration)
+        .addCallback(DatabaseSpaceReclaimCallback())
         .run { if (logEngineDiagnostics) addCallback(PragmaDiagnosticsCallback) else this }
         .run {
             if (migrations.isNotEmpty()) {
