@@ -17,7 +17,8 @@ import androidx.room.migration.Migration
  *
  * @param T the [RoomDatabase] subtype to build.
  * @param fallbackToDestructiveMigration when true, recreate the database (dropping its data) if a
- * required migration is missing. Downgrades are destructive regardless of this flag.
+ * required migration is missing. When false, a missing migration throws on first database access.
+ * Downgrades are destructive regardless of this flag.
  * @param logEngineDiagnostics when true, attaches [PragmaDiagnosticsCallback] to log the live SQLite
  * engine settings on every opened connection. Intended for debug builds only; keep it false in
  * release so production opens no diagnostic logging.
@@ -34,7 +35,7 @@ fun <T : RoomDatabase> buildLocalDatabase(
 ): T {
     return createDatabaseBuilder()
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
-        .fallbackToDestructiveMigration(fallbackToDestructiveMigration)
+        .run { if (fallbackToDestructiveMigration) fallbackToDestructiveMigration(dropAllTables = true) else this }
         .addCallback(DatabaseSpaceReclaimCallback())
         .run { if (logEngineDiagnostics) addCallback(PragmaDiagnosticsCallback) else this }
         .run {
