@@ -18,6 +18,7 @@ object AndroidRepositoryFactory : RepositoryFactory() {
             context = appContext,
             databaseName = "account_database.db",
             fallbackToDestructiveMigration = false,
+            fallbackToDestructiveMigrationOnDowngrade = false,
             callback = AccountDatabase.provideDatabaseCallback(),
         )
     }

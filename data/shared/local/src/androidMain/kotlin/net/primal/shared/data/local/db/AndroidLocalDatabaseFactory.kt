@@ -16,6 +16,7 @@ object AndroidLocalDatabaseFactory {
         context: Context,
         databaseName: String,
         fallbackToDestructiveMigration: Boolean,
+        fallbackToDestructiveMigrationOnDowngrade: Boolean = true,
         callback: RoomDatabase.Callback? = null,
         migrations: List<Migration> = emptyList(),
     ): T {
@@ -24,6 +25,7 @@ object AndroidLocalDatabaseFactory {
         val debugDiagnostics = (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         return buildLocalDatabase(
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            fallbackToDestructiveMigrationOnDowngrade = fallbackToDestructiveMigrationOnDowngrade,
             logEngineDiagnostics = debugDiagnostics,
             migrations = migrations,
         ) {

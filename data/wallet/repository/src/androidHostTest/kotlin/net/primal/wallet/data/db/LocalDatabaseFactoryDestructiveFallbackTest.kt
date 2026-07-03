@@ -41,18 +41,53 @@ class LocalDatabaseFactoryDestructiveFallbackTest {
      * Creates a database file at user_version 1. Opening it with the current WalletDatabase
      * schema and no registered migrations means Room has a missing migration path.
      */
-    private fun createStaleDatabase() {
+    private fun createStaleDatabase() = createMarkerDatabaseAtVersion(userVersion = 1)
+
+    /**
+     * Creates a database file whose user_version is higher than the current WalletDatabase schema
+     * version, so opening it with that schema forces Room down the destructive-downgrade path.
+     */
+    private fun createFutureVersionDatabase() = createMarkerDatabaseAtVersion(userVersion = 999)
+
+    private fun createMarkerDatabaseAtVersion(userVersion: Int) {
         val dbFile = context.getDatabasePath(dbName)
         dbFile.parentFile?.mkdirs()
         val connection = AndroidSQLiteDriver().open(dbFile.absolutePath)
-        connection.execSQL("PRAGMA user_version = 1")
+        connection.execSQL("PRAGMA user_version = $userVersion")
         connection.execSQL("CREATE TABLE Marker (id INTEGER PRIMARY KEY)")
         connection.execSQL("INSERT INTO Marker (id) VALUES (1)")
         connection.close()
     }
 
-    private fun openDatabase(fallbackToDestructiveMigration: Boolean): WalletDatabase =
-        buildLocalDatabase(fallbackToDestructiveMigration = fallbackToDestructiveMigration) {
+    /**
+     * Reads the pre-existing Marker table straight from the file. Survives only if Room did not
+     * drop all tables — i.e. it proves no destructive fallback wiped the database.
+     */
+    private fun markerTablePreserved(): Boolean {
+        val connection = AndroidSQLiteDriver().open(context.getDatabasePath(dbName).absolutePath)
+        return try {
+            val statement = connection.prepare(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'Marker'",
+            )
+            try {
+                statement.step()
+                statement.getLong(0) > 0
+            } finally {
+                statement.close()
+            }
+        } finally {
+            connection.close()
+        }
+    }
+
+    private fun openDatabase(
+        fallbackToDestructiveMigration: Boolean,
+        fallbackToDestructiveMigrationOnDowngrade: Boolean = true,
+    ): WalletDatabase =
+        buildLocalDatabase(
+            fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            fallbackToDestructiveMigrationOnDowngrade = fallbackToDestructiveMigrationOnDowngrade,
+        ) {
             Room.databaseBuilder<WalletDatabase>(
                 context = context,
                 name = context.getDatabasePath(dbName).absolutePath,
@@ -89,5 +124,42 @@ class LocalDatabaseFactoryDestructiveFallbackTest {
             database.close()
 
             result.isSuccess shouldBe true
+        }
+
+    @Test
+    fun `downgrade throws and preserves data when destructive downgrade fallback is disabled`() =
+        runTest {
+            createFutureVersionDatabase()
+            val database = openDatabase(
+                fallbackToDestructiveMigration = false,
+                fallbackToDestructiveMigrationOnDowngrade = false,
+            )
+
+            val result = runCatching {
+                database.userWalletPreferences().isNwcAutoStartEnabled("__trigger__")
+            }
+            database.close()
+
+            result.isFailure shouldBe true
+            (result.exceptionOrNull() is IllegalStateException) shouldBe true
+            markerTablePreserved() shouldBe true
+        }
+
+    @Test
+    fun `downgrade recreates database when destructive downgrade fallback is enabled`() =
+        runTest {
+            createFutureVersionDatabase()
+            val database = openDatabase(
+                fallbackToDestructiveMigration = false,
+                fallbackToDestructiveMigrationOnDowngrade = true,
+            )
+
+            val result = runCatching {
+                database.userWalletPreferences().isNwcAutoStartEnabled("__trigger__")
+            }
+            database.close()
+
+            result.isSuccess shouldBe true
+            markerTablePreserved() shouldBe false
         }
 }

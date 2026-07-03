@@ -17,12 +17,14 @@ object IosLocalDatabaseFactory {
     inline fun <reified T : RoomDatabase> createDatabase(
         databaseName: String,
         fallbackToDestructiveMigration: Boolean,
+        fallbackToDestructiveMigrationOnDowngrade: Boolean = true,
         callback: RoomDatabase.Callback? = null,
         migrations: List<Migration> = emptyList(),
     ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
         return buildLocalDatabase(
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            fallbackToDestructiveMigrationOnDowngrade = fallbackToDestructiveMigrationOnDowngrade,
             migrations = migrations,
         ) {
             Room.databaseBuilder<T>(name = dbFilePath)

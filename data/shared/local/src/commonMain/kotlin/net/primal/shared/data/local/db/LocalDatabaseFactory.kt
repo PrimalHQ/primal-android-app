@@ -9,16 +9,19 @@ import androidx.room.migration.Migration
  * [createDatabaseBuilder]; this function layers the cross-platform policy on top of that builder
  * and calls [RoomDatabase.Builder.build].
  *
- * Destructive migration on downgrade is always enabled (all tables are dropped). [migrations] are
- * registered when provided, and [fallbackToDestructiveMigration] governs destructive fallback for
- * the remaining (non-downgrade) migration cases.
+ * [fallbackToDestructiveMigration] governs destructive fallback for missing (non-downgrade)
+ * migrations, and [fallbackToDestructiveMigrationOnDowngrade] governs it for downgrades. Both drop
+ * all tables when they fire; disable them for databases whose data must never be silently wiped
+ * (e.g. the account database, which holds session and permission data).
  * Every database gets a [DatabaseSpaceReclaimCallback] so destructive migrations VACUUM the file
  * and WAL journals stay bounded via `PRAGMA journal_size_limit`.
  *
  * @param T the [RoomDatabase] subtype to build.
  * @param fallbackToDestructiveMigration when true, recreate the database (dropping its data) if a
  * required migration is missing. When false, a missing migration throws on first database access.
- * Downgrades are destructive regardless of this flag.
+ * @param fallbackToDestructiveMigrationOnDowngrade when true, recreate the database (dropping its
+ * data) on a downgrade — i.e. the on-disk version is newer than the current schema. When false, a
+ * downgrade throws instead of wiping. Defaults to true.
  * @param logEngineDiagnostics when true, attaches [PragmaDiagnosticsCallback] to log the live SQLite
  * engine settings on every opened connection. Intended for debug builds only; keep it false in
  * release so production opens no diagnostic logging.
@@ -29,12 +32,19 @@ import androidx.room.migration.Migration
  */
 fun <T : RoomDatabase> buildLocalDatabase(
     fallbackToDestructiveMigration: Boolean,
+    fallbackToDestructiveMigrationOnDowngrade: Boolean = true,
     logEngineDiagnostics: Boolean = false,
     migrations: List<Migration> = emptyList(),
     createDatabaseBuilder: () -> RoomDatabase.Builder<T>,
 ): T {
     return createDatabaseBuilder()
-        .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
+        .run {
+            if (fallbackToDestructiveMigrationOnDowngrade) {
+                fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
+            } else {
+                this
+            }
+        }
         .run { if (fallbackToDestructiveMigration) fallbackToDestructiveMigration(dropAllTables = true) else this }
         .addCallback(DatabaseSpaceReclaimCallback())
         .run { if (logEngineDiagnostics) addCallback(PragmaDiagnosticsCallback) else this }
