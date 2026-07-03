@@ -576,12 +576,13 @@ private fun FeedMediaUrlPreLoader(
         snapshotFlow { listState.firstVisibleItemIndex / SCROLL_PRELOAD_COUNT }
             .distinctUntilChanged()
             .debounce(150.milliseconds)
-            .collect { firstVisible ->
+            .collect {
                 val itemCount = pagingItems.itemCount
                 if (itemCount == 0) return@collect
 
-                val start = (firstVisible + 1).coerceAtMost(itemCount - 1)
-                val end = (firstVisible + 1 + SCROLL_PRELOAD_COUNT).coerceAtMost(itemCount)
+                val firstVisibleIndex = listState.firstVisibleItemIndex
+                val start = (firstVisibleIndex + 1).coerceAtMost(itemCount - 1)
+                val end = (firstVisibleIndex + 1 + SCROLL_PRELOAD_COUNT).coerceAtMost(itemCount)
 
                 if (start < end) {
                     withContext(Dispatchers.Default) {
