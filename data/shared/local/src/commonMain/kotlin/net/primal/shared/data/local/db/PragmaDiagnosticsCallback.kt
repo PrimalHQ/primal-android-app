@@ -26,6 +26,7 @@ internal object PragmaDiagnosticsCallback : RoomDatabase.Callback() {
         Napier.i(tag = "DbPragma") {
             "onOpen conn=${connection.hashCode().toString(radix = 16)} db=$dbFile " +
                 "journal_mode=${connection.readPragma("journal_mode")} " +
+                "journal_size_limit=${connection.readPragma("journal_size_limit")} " +
                 "synchronous=${connection.readPragma("synchronous")} " +
                 "busy_timeout=${connection.readPragma("busy_timeout")} " +
                 "cache_size=${connection.readPragma("cache_size")} " +
