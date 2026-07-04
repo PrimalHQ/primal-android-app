@@ -1,8 +1,8 @@
 package net.primal.shared.data.local.db
 
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
 import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
 import net.primal.core.utils.coroutines.IOSDispatcherProvider

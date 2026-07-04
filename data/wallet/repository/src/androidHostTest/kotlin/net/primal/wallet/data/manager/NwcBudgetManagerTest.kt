@@ -1,7 +1,7 @@
 package net.primal.wallet.data.manager
 
 import android.content.Context
-import androidx.room.Room
+import androidx.room3.Room
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import io.kotest.assertions.throwables.shouldThrow

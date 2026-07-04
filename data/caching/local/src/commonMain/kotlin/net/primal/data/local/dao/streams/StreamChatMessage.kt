@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.streams
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.local.dao.profiles.ProfileData
 
 data class StreamChatMessage(
@@ -9,8 +9,8 @@ data class StreamChatMessage(
     val data: StreamChatMessageData,
 
     @Relation(
-        parentColumn = "authorId",
-        entityColumn = "ownerId",
+        parentColumns = ["authorId"],
+        entityColumns = ["ownerId"],
     )
     val author: ProfileData? = null,
 )

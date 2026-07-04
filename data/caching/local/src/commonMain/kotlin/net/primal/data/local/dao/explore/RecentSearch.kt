@@ -1,6 +1,6 @@
 package net.primal.data.local.dao.explore
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(primaryKeys = ["ownerId", "query"])
 data class RecentSearch(

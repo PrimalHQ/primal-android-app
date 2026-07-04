@@ -1,8 +1,8 @@
 package net.primal.data.account.local.dao.apps.remote
 
-import androidx.room.Entity
-import androidx.room.Index
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.Index
+import androidx.room3.PrimaryKey
 import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.shared.data.local.encryption.Encryptable
 

@@ -1,7 +1,7 @@
 package net.primal.wallet.data.local.dao
 
-import androidx.room.Entity
-import androidx.room.Index
+import androidx.room3.Entity
+import androidx.room3.Index
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity(

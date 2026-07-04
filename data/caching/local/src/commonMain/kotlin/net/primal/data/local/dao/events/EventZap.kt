@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.events
 
-import androidx.room.Entity
-import androidx.room.Index
+import androidx.room3.Entity
+import androidx.room3.Index
 import net.primal.domain.events.ZapKind
 import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.PrimalLegendProfile

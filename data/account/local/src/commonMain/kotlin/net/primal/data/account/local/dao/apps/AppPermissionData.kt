@@ -1,6 +1,6 @@
 package net.primal.data.account.local.dao.apps
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(primaryKeys = ["permissionId", "appIdentifier"])
 data class AppPermissionData(

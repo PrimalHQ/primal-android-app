@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.polls
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.local.dao.profiles.ProfileData
 
 data class PollVoteWithProfile(
@@ -9,8 +9,8 @@ data class PollVoteWithProfile(
     val vote: PollVoteData,
 
     @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "voterId",
+        entityColumns = ["ownerId"],
+        parentColumns = ["voterId"],
     )
     val profile: ProfileData? = null,
 )

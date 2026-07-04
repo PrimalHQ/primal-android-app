@@ -1,7 +1,7 @@
 package net.primal.data.account.local.dao.apps.local
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.account.local.dao.apps.AppPermissionData
 
 data class LocalApp(
@@ -9,8 +9,8 @@ data class LocalApp(
     val data: LocalAppData,
 
     @Relation(
-        parentColumn = "identifier",
-        entityColumn = "appIdentifier",
+        parentColumns = ["identifier"],
+        entityColumns = ["appIdentifier"],
     )
     val permissions: List<AppPermissionData>,
 )

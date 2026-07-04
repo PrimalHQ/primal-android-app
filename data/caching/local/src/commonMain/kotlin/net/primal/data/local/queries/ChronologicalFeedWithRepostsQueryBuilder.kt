@@ -1,6 +1,6 @@
 package net.primal.data.local.queries
 
-import androidx.room.RoomRawQuery
+import androidx.room3.RoomRawQuery
 
 class ChronologicalFeedWithRepostsQueryBuilder(
     private val feedSpec: String,

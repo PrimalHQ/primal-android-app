@@ -1,7 +1,7 @@
 package net.primal.data.account.local.dao.apps.local
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import net.primal.data.account.local.dao.apps.TrustLevel
 
 @Entity

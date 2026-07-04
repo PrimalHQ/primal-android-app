@@ -1,7 +1,7 @@
 package net.primal.shared.data.local.db
 
-import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
+import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
 
 /**
  * Applies the Room configuration shared by every local database (caching, wallet, account) and

@@ -1,11 +1,11 @@
 package net.primal.data.local.dao.notes
 
 import androidx.paging.PagingSource
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.RawQuery
-import androidx.room.RoomRawQuery
-import androidx.room.Transaction
+import androidx.room3.Dao
+import androidx.room3.Query
+import androidx.room3.RawQuery
+import androidx.room3.RoomRawQuery
+import androidx.room3.Transaction
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.mutes.MutedItemData
 import net.primal.data.local.db.chunkedQuery

@@ -1,6 +1,6 @@
 package net.primal.wallet.data.local.dao
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(
     primaryKeys = ["walletId", "transactionId"],

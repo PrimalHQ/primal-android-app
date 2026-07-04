@@ -1,9 +1,9 @@
 package net.primal.shared.data.local.db
 
-import androidx.room.RoomDatabase
-import androidx.room.deferredTransaction
-import androidx.room.useReaderConnection
-import androidx.room.useWriterConnection
+import androidx.room3.RoomDatabase
+import androidx.room3.deferredTransaction
+import androidx.room3.useReaderConnection
+import androidx.room3.useWriterConnection
 
 suspend fun <T> RoomDatabase.withTransaction(block: suspend () -> T): T {
     return this.useWriterConnection { writeConnection ->

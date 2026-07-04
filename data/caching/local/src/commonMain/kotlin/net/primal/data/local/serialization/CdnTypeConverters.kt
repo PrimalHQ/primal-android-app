@@ -1,6 +1,6 @@
 package net.primal.data.local.serialization
 
-import androidx.room.TypeConverter
+import androidx.room3.ColumnTypeConverter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.links.CdnImage
@@ -8,12 +8,12 @@ import net.primal.domain.links.CdnResourceVariant
 
 class CdnTypeConverters {
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun stringToCdnImage(value: String?): CdnImage? {
         return value.decodeFromJsonStringOrNull<CdnImage>()
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun cdnImageToString(data: CdnImage?): String? {
         return when (data) {
             null -> null
@@ -21,12 +21,12 @@ class CdnTypeConverters {
         }
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun stringToListOfCdnResourceVariant(value: String?): List<CdnResourceVariant>? {
         return value.decodeFromJsonStringOrNull<List<CdnResourceVariant>>()
     }
 
-    @TypeConverter
+    @ColumnTypeConverter
     fun listOfCdnResourceVariantToString(list: List<CdnResourceVariant>?): String? {
         return when (list) {
             null -> null

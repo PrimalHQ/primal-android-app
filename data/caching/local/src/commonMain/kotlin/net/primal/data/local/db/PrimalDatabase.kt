@@ -1,10 +1,12 @@
 package net.primal.data.local.db
 
-import androidx.room.ConstructedBy
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.RoomDatabaseConstructor
-import androidx.room.TypeConverters
+import androidx.room3.ColumnTypeConverters
+import androidx.room3.ConstructedBy
+import androidx.room3.DaoReturnTypeConverters
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.RoomDatabaseConstructor
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import net.primal.data.local.dao.bookmarks.PublicBookmark
 import net.primal.data.local.dao.bookmarks.PublicBookmarkDao
 import net.primal.data.local.dao.events.EventRelayHints
@@ -141,7 +143,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
-@TypeConverters(
+@ColumnTypeConverters(
     ListsTypeConverters::class,
     JsonTypeConverters::class,
     CdnTypeConverters::class,
@@ -152,6 +154,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     Nip05TypeConverters::class,
     EncryptableTypeConverters::class,
 )
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 abstract class PrimalDatabase : RoomDatabase() {
 
     abstract fun profiles(): ProfileDataDao
