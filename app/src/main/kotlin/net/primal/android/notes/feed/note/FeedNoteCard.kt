@@ -582,7 +582,7 @@ private fun FeedNote(
                         .padding(
                             top = if ((fullWidthContent && !forceContentIndent) || !headerSingleLine) 10.dp else 5.dp,
                         ),
-                    data = data.toNoteContentUi(),
+                    data = remember(data, expanded) { data.toNoteContentUi(useFullContent = expanded) },
                     expanded = expanded,
                     textSelectable = textSelectable,
                     nestingCutOffLimit = nestingCutOffLimit,

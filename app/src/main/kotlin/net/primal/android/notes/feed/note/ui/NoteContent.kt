@@ -141,7 +141,7 @@ private fun String.limitLineBreaks(maxBreaks: Int = 2): String {
     return this.replace(maxBreakPattern, "\n".repeat(maxBreaks))
 }
 
-private const val ELLIPSIZE_THRESHOLD = 300
+internal const val ELLIPSIZE_THRESHOLD = 300
 
 private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
     val shouldEllipsize = length > ELLIPSIZE_THRESHOLD

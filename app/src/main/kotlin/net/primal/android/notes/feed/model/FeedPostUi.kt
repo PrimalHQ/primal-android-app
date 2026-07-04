@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.model
 
+import androidx.compose.runtime.Immutable
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
@@ -18,6 +19,7 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
 
+@Immutable
 data class FeedPostUi(
     val postId: String,
     val authorId: String,
@@ -25,6 +27,7 @@ data class FeedPostUi(
     val authorHandle: String,
     val timestamp: Instant,
     val content: String,
+    val feedContent: String = content,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
     val rawKind: Int? = rawNostrEventJson.decodeFromJsonStringOrNull<NostrEvent>()?.kind,
@@ -49,6 +52,8 @@ data class FeedPostUi(
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
     val repost = this.reposts.firstOrNull()
+    val uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position }
+    val nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position }
     return FeedPostUi(
         postId = this.eventId,
         repostId = repost?.repostId,
@@ -62,8 +67,9 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorBlossoms = this.author.blossomServers,
         timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
         content = this.content,
-        uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position },
-        nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position },
+        feedContent = computeFeedContent(content = this.content, uris = uris, nostrUris = nostrUris),
+        uris = uris,
+        nostrUris = nostrUris,
         stats = this.stats?.let { stats ->
             EventStatsUi(
                 repliesCount = stats.repliesCount,
