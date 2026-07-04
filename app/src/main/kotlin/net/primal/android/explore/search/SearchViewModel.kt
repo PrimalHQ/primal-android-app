@@ -71,7 +71,7 @@ class SearchViewModel @Inject constructor(
         if (query.isBlank()) return
         viewModelScope.launch {
             runCatching {
-                exploreRepository.saveRecentSearch(
+                userRepository.saveRecentSearch(
                     ownerId = activeAccountStore.activeUserId(),
                     query = query.trim(),
                 )

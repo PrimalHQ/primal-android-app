@@ -29,8 +29,6 @@ import net.primal.data.local.dao.explore.FollowPackListCrossRefDao
 import net.primal.data.local.dao.explore.FollowPackProfileCrossRef
 import net.primal.data.local.dao.explore.FollowPackRemoteKey
 import net.primal.data.local.dao.explore.FollowPackRemoteKeyDao
-import net.primal.data.local.dao.explore.RecentSearch
-import net.primal.data.local.dao.explore.RecentSearchDao
 import net.primal.data.local.dao.explore.TrendingTopic
 import net.primal.data.local.dao.explore.TrendingTopicDao
 import net.primal.data.local.dao.feeds.DvmFeedDao
@@ -137,9 +135,8 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         DvmFeedData::class,
         RecommendedDvmFeedCrossRef::class,
         DvmFeedFeaturedUserCrossRef::class,
-        RecentSearch::class,
     ],
-    version = 36,
+    version = 37,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -228,8 +225,6 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun explorePopularUsers(): ExplorePopularUserDao
 
     abstract fun dvmFeeds(): DvmFeedDao
-
-    abstract fun recentSearches(): RecentSearchDao
 }
 
 // The Room compiler generates the `actual` implementations.
