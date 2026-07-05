@@ -30,6 +30,7 @@ private fun NostrEvent.asHighlightComment(highlights: List<HighlightData>): Post
         postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,
+        kind = this.kind,
         tags = this.tags,
         content = this.content,
         uris = this.content.detectUrls() + this.content.parseNostrUris(),

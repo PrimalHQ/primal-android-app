@@ -78,6 +78,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.ContentAppearance
 import net.primal.domain.links.CdnImage
+import net.primal.domain.nostr.NostrEventKind
 
 @Composable
 fun AppearanceSettingsScreen(viewModel: AppearanceSettingsViewModel, onClose: () -> Unit) {
@@ -532,6 +533,7 @@ private val NotePreviewTemplate = FeedPostUi(
     ),
     timestamp = Instant.now().minusSeconds(18.minutes.inWholeSeconds),
     rawNostrEventJson = "",
+    kind = NostrEventKind.ShortTextNote.value,
 )
 
 class AppearanceSettingsUiStateProvider :

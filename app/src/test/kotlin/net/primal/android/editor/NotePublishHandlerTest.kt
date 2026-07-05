@@ -87,6 +87,7 @@ class NotePublishHandlerTest {
     ) = FeedPost(
         eventId = postId,
         author = FeedPostAuthor(authorId = authorId, handle = "", displayName = ""),
+        kind = NostrEventKind.ShortTextNote.value,
         content = content,
         tags = tags,
         timestamp = kotlinx.datetime.Instant.fromEpochSeconds(0),

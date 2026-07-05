@@ -12,6 +12,7 @@ import net.primal.domain.polls.PollInfo
 data class FeedPost(
     val eventId: String,
     val author: FeedPostAuthor,
+    val kind: Int,
     val content: String,
     val tags: List<JsonArray>,
     val timestamp: Instant,

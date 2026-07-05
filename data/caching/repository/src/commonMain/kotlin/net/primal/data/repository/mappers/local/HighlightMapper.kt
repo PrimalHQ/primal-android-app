@@ -34,6 +34,7 @@ fun HighlightPO.asHighlightDO(): HighlightDO {
                     legendProfile = it.author?.primalPremiumInfo?.legendProfile,
                     blossomServers = it.author?.blossoms ?: emptyList(),
                 ),
+                kind = it.post.kind,
                 content = it.post.content,
                 tags = it.post.tags,
                 timestamp = Instant.fromEpochSeconds(it.post.createdAt),

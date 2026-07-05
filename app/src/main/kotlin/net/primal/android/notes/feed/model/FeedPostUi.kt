@@ -9,13 +9,10 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
 
@@ -30,7 +27,7 @@ data class FeedPostUi(
     val feedContent: String = content,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
-    val rawKind: Int? = rawNostrEventJson.decodeFromJsonStringOrNull<NostrEvent>()?.kind,
+    val kind: Int,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
     val repostAuthorName: String? = null,
@@ -85,6 +82,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         } ?: EventStatsUi(),
         hashtags = this.hashtags,
         rawNostrEventJson = this.rawNostrEvent,
+        kind = this.kind,
         replyToAuthorHandle = this.replyToAuthor?.handle ?: this.replyToAuthor?.authorId?.asEllipsizedNpub(),
         isBookmarked = this.bookmark != null,
         isThreadMuted = this.isThreadMuted,
@@ -101,7 +99,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
 fun FeedPostUi.asNeventString(): String {
     return Nevent(
         eventId = this.postId,
-        kind = this.rawKind ?: NostrEventKind.ShortTextNote.value,
+        kind = this.kind,
         userId = this.authorId,
         relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
     ).toNeventString()

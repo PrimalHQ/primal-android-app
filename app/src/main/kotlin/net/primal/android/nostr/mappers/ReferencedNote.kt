@@ -17,6 +17,7 @@ fun ReferencedNote.asFeedPostUi() =
         repostAuthorId = null,
         repostAuthorName = null,
         authorId = this.authorId,
+        kind = this.kind,
         authorName = this.authorName,
         authorHandle = this.authorName,
         authorInternetIdentifier = this.authorInternetIdentifier,

@@ -6,6 +6,7 @@ data class FeedPostData(
     val postId: String,
     val authorId: String,
     val createdAt: Long,
+    val kind: Int,
     val content: String,
     val tags: List<JsonArray>,
     val raw: String,

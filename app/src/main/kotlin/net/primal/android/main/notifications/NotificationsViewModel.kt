@@ -216,6 +216,7 @@ class NotificationsViewModel @Inject constructor(
                 authorAvatarCdnImage = this.actionByUser?.avatarCdnImage,
                 timestamp = actionOnPost.timestamp.toJavaInstant(),
                 content = actionOnPost.content,
+                kind = actionOnPost.kind,
                 uris = actionOnPost.links.map { it.asEventUriUiModel() },
                 nostrUris = actionOnPost.nostrUris.map { it.asNoteNostrUriUi() },
                 stats = EventStatsUi.from(actionOnPost.stats),

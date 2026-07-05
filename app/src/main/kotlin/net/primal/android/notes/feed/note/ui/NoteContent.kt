@@ -51,6 +51,7 @@ import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.EventUriType
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.links.ReferencedUser
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 
 private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
@@ -788,6 +789,7 @@ fun PreviewPostContentWithReferencedPost() {
                             type = EventUriNostrType.Note,
                             referencedNote = ReferencedNote(
                                 postId = "postId",
+                                kind = NostrEventKind.ShortTextNote.value,
                                 createdAt = 0,
                                 content = "This is referenced post.",
                                 authorId = "authorId",
@@ -813,6 +815,7 @@ fun PreviewPostContentWithReferencedPost() {
                             type = EventUriNostrType.Note,
                             referencedNote = ReferencedNote(
                                 postId = "postId",
+                                kind = NostrEventKind.ShortTextNote.value,
                                 createdAt = 0,
                                 content = "This is referenced post #2.",
                                 authorId = "authorId",

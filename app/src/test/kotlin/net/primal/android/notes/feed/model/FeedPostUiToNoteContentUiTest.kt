@@ -2,6 +2,7 @@ package net.primal.android.notes.feed.model
 
 import io.kotest.matchers.shouldBe
 import java.time.Instant
+import net.primal.domain.nostr.NostrEventKind
 import org.junit.Test
 
 class FeedPostUiToNoteContentUiTest {
@@ -17,6 +18,7 @@ class FeedPostUiToNoteContentUiTest {
             feedContent = feedContent,
             stats = EventStatsUi(),
             rawNostrEventJson = "",
+            kind = NostrEventKind.ShortTextNote.value,
         )
 
     @Test

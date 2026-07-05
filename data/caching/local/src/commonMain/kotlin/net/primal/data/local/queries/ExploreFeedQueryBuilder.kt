@@ -14,6 +14,7 @@ class ExploreFeedQueryBuilder(
                 PostData.postId,
                 PostData.authorId,
                 PostData.createdAt,
+                PostData.kind,
                 PostData.content,
                 PostData.tags,
                 PostData.raw,

@@ -49,7 +49,7 @@ fun ReferencedNoteCard(
         modifier = modifier
             .wrapContentHeight()
             .clickable(
-                enabled = noteCallbacks.onNoteClick != null && data.rawKind in clickableNoteKinds,
+                enabled = noteCallbacks.onNoteClick != null && data.kind in clickableNoteKinds,
                 onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
         colors = if (hasBorder) {
@@ -141,6 +141,7 @@ fun PreviewReferencedPostListItemLight() {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 replyToAuthorHandle = "alex",
             ),
             noteCallbacks = NoteCallbacks(),
@@ -182,6 +183,7 @@ fun PreviewReferencedPostListItemDark() {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 replyToAuthorHandle = null,
             ),
             noteCallbacks = NoteCallbacks(),
