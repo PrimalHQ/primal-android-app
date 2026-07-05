@@ -30,7 +30,7 @@ data class LocalDatabasePragmaConfig(
          */
         val CACHING = LocalDatabasePragmaConfig(
             // 8 MiB. SQLite default: -1 (no limit — the -wal file is never size-capped).
-//            journalSizeLimitBytes = 8L * 1024 * 1024,
+            journalSizeLimitBytes = 8L * 1024 * 1024,
             // 4 MiB per connection. SQLite default: -2000 (~2 MiB per connection).
 //            cacheSizeKib = 4 * 1024,
             // 128 MiB. SQLite default: 0 (memory-mapping disabled).
