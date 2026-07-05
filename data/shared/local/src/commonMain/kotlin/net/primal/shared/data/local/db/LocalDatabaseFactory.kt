@@ -19,6 +19,8 @@ import androidx.room3.migration.Migration
  * @param logEngineDiagnostics when true, attaches [PragmaDiagnosticsCallback] to log the live SQLite
  * engine settings on every opened connection. Intended for debug builds only; keep it false in
  * release so production opens no diagnostic logging.
+ * @param pragmaConfig per-connection `PRAGMA` tuning applied via [PragmaConfigCallback]; `null`
+ * applies none. Each database may supply its own profile.
  * @param migrations the [Migration]s to register; an empty list registers none.
  * @param createDatabaseBuilder supplies the platform-specific [RoomDatabase.Builder] (driver, file
  * path, query coroutine context) that this function finishes configuring and builds.
@@ -27,6 +29,7 @@ import androidx.room3.migration.Migration
 fun <T : RoomDatabase> buildLocalDatabase(
     fallbackToDestructiveMigration: Boolean,
     logEngineDiagnostics: Boolean = false,
+    pragmaConfig: LocalDatabasePragmaConfig? = null,
     migrations: List<Migration> = emptyList(),
     createDatabaseBuilder: () -> RoomDatabase.Builder<T>,
 ): T {
@@ -34,6 +37,7 @@ fun <T : RoomDatabase> buildLocalDatabase(
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
         .fallbackToDestructiveMigration(fallbackToDestructiveMigration)
         .run { if (logEngineDiagnostics) addCallback(PragmaDiagnosticsCallback) else this }
+        .run { if (pragmaConfig != null) addCallback(PragmaConfigCallback(pragmaConfig)) else this }
         .run {
             if (migrations.isNotEmpty()) {
                 addMigrations(*migrations.toTypedArray())

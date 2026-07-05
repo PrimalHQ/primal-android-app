@@ -13,10 +13,12 @@ object JvmLocalDatabaseFactory {
 
     inline fun <reified T : RoomDatabase> createDatabase(
         databaseName: String,
+        pragmaConfig: LocalDatabasePragmaConfig? = null,
         migrations: List<Migration> = emptyList(),
     ): T {
         return buildLocalDatabase(
             fallbackToDestructiveMigration = false,
+            pragmaConfig = pragmaConfig,
             migrations = migrations,
         ) {
             val dbFile = File(System.getProperty("java.io.tmpdir"), databaseName)

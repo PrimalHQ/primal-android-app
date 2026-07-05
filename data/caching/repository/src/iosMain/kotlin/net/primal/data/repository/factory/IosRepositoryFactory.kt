@@ -3,6 +3,7 @@ package net.primal.data.repository.factory
 import kotlin.experimental.ExperimentalObjCName
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
+import net.primal.shared.data.local.db.LocalDatabasePragmaConfig
 
 typealias PrimalRepositoryFactory = IosRepositoryFactory
 
@@ -14,6 +15,7 @@ object IosRepositoryFactory : CommonRepositoryFactory() {
         LocalDatabaseFactory.createDatabase(
             databaseName = "primal_database.db",
             fallbackToDestructiveMigration = true,
+            pragmaConfig = LocalDatabasePragmaConfig.CACHING,
         )
     }
 

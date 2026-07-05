@@ -4,6 +4,7 @@ import android.content.Context
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
+import net.primal.shared.data.local.db.LocalDatabasePragmaConfig
 import net.primal.shared.data.local.encryption.AndroidPlatformKeyStore
 
 typealias PrimalRepositoryFactory = AndroidRepositoryFactory
@@ -18,6 +19,7 @@ object AndroidRepositoryFactory : CommonRepositoryFactory() {
             context = appContext,
             fallbackToDestructiveMigration = true,
             databaseName = "primal_database.db",
+            pragmaConfig = LocalDatabasePragmaConfig.CACHING,
         )
     }
 

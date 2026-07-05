@@ -17,6 +17,7 @@ object AndroidLocalDatabaseFactory {
         databaseName: String,
         fallbackToDestructiveMigration: Boolean,
         callback: RoomDatabase.Callback? = null,
+        pragmaConfig: LocalDatabasePragmaConfig? = null,
         migrations: List<Migration> = emptyList(),
     ): T {
         val appContext = context.applicationContext
@@ -25,6 +26,7 @@ object AndroidLocalDatabaseFactory {
         return buildLocalDatabase(
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
             logEngineDiagnostics = debugDiagnostics,
+            pragmaConfig = pragmaConfig,
             migrations = migrations,
         ) {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)

@@ -18,11 +18,13 @@ object IosLocalDatabaseFactory {
         databaseName: String,
         fallbackToDestructiveMigration: Boolean,
         callback: RoomDatabase.Callback? = null,
+        pragmaConfig: LocalDatabasePragmaConfig? = null,
         migrations: List<Migration> = emptyList(),
     ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
         return buildLocalDatabase(
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            pragmaConfig = pragmaConfig,
             migrations = migrations,
         ) {
             Room.databaseBuilder<T>(name = dbFilePath)
