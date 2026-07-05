@@ -13,7 +13,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification
 import net.primal.data.local.dao.notifications.NotificationData
 import net.primal.data.local.dao.notifications.NotificationGroupCrossRef
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
@@ -33,7 +33,7 @@ class NotificationsRemoteMediator(
     private val group: NotificationGroup,
     private val dispatcherProvider: DispatcherProvider,
     private val notificationsApi: NotificationsApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, Notification>() {
 

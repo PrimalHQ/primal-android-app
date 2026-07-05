@@ -40,6 +40,32 @@ object IosLocalDatabaseFactory {
         }
     }
 
+    /**
+     * Deletes obsolete database files by name (each with its `-wal`/`-shm`/`-journal` and `.lck`
+     * sidecars) from the Documents directory. Missing files are a no-op, so this is safe to call
+     * unconditionally on every startup.
+     */
+    fun deleteDatabases(names: List<String>) {
+        names.forEach { deleteDatabaseFiles(it) }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    private fun deleteDatabaseFiles(databaseName: String) {
+        val basePath = documentDirectory() + "/$databaseName"
+        val fileManager = NSFileManager.defaultManager
+        listOf(
+            basePath,
+            "$basePath-wal",
+            "$basePath-shm",
+            "$basePath-journal",
+            "$basePath.lck",
+        ).forEach { path ->
+            if (fileManager.fileExistsAtPath(path = path)) {
+                fileManager.removeItemAtPath(path = path, error = null)
+            }
+        }
+    }
+
     @OptIn(ExperimentalForeignApi::class)
     fun documentDirectory(): String {
         val documentDirectory = NSFileManager.defaultManager.URLForDirectory(

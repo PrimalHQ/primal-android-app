@@ -8,7 +8,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
 import net.primal.data.local.dao.bookmarks.PublicBookmark as PublicBookmarkPO
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
@@ -22,7 +22,7 @@ import net.primal.shared.data.local.db.withTransaction
 
 class PublicBookmarksRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val primalPublisher: PrimalPublisher,
     private val usersApi: UsersApi,
 ) : PublicBookmarksRepository {

@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.messages.DirectMessage
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.MessagesRequestBody
 import net.primal.data.repository.messages.processors.MessagesProcessor
@@ -22,7 +22,7 @@ internal class MessagesRemoteMediator(
     private val userId: String,
     private val participantId: String,
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
     private val mediaCacher: MediaCacher? = null,

@@ -5,7 +5,7 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
@@ -38,13 +38,13 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findReplyTargetId
 import net.primal.shared.data.local.db.withTransaction
 
-internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
+internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: CachingDatabase) {
     database.withTransaction {
         persistToDatabase(userId = userId, database = database)
     }
 }
 
-internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: PrimalDatabase) {
+internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: CachingDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
@@ -169,7 +169,7 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
 
 internal suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(
     noteId: String,
-    database: PrimalDatabase,
+    database: CachingDatabase,
 ) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)

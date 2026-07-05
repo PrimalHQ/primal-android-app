@@ -19,7 +19,7 @@ import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.explore.ExplorePopularUserCrossRef
 import net.primal.data.local.dao.explore.FollowPack
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.ExploreRequestBody
 import net.primal.data.remote.api.explore.model.FollowListsRequestBody
@@ -59,7 +59,7 @@ import net.primal.shared.data.local.db.withTransaction
 class ExploreRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val exploreApi: ExploreApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : ExploreRepository {
 

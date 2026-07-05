@@ -17,7 +17,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.dao.reads.ArticleFeedCrossRef
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
 import net.primal.data.remote.api.articles.model.ArticleResponse
@@ -33,7 +33,7 @@ internal class ArticleFeedMediator(
     private val userId: String,
     private val feedSpec: String,
     private val articlesApi: ArticlesApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val dispatcherProvider: DispatcherProvider,
     private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, ArticlePO>() {

@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.events.EventZap
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
 import net.primal.data.repository.events.processors.persistToDatabaseAsTransaction
@@ -22,7 +22,7 @@ class EventZapsMediator(
     private val userId: String,
     private val dispatcherProvider: DispatcherProvider,
     private val eventStatsApi: EventStatsApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, EventZap>() {
 

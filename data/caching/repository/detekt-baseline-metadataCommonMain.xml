@@ -7,7 +7,7 @@
     <ID>CyclomaticComplexMethod:NotificationEvents.kt$private fun ContentPrimalNotification.parseActionPostId(type: NotificationType): String?</ID>
     <ID>CyclomaticComplexMethod:NotificationEvents.kt$private fun ContentPrimalNotification.parseActionUserId(type: NotificationType): String?</ID>
     <ID>CyclomaticComplexMethod:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
-    <ID>LongMethod:FeedResponseProcessor.kt$internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: PrimalDatabase)</ID>
+    <ID>LongMethod:FeedResponseProcessor.kt$internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: CachingDatabase)</ID>
     <ID>LongMethod:FeedsRepositoryImpl.kt$FeedsRepositoryImpl$override suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind?): List&lt;DvmFeed&gt;</ID>
     <ID>LongMethod:NotificationsRemoteMediator.kt$NotificationsRemoteMediator$override suspend fun load(loadType: LoadType, state: PagingState&lt;Int, Notification&gt;): MediatorResult</ID>
     <ID>LongParameterList:MessagesProcessor.kt$MessagesProcessor$( userId: String, messages: List&lt;NostrEvent&gt;, profileMetadata: List&lt;NostrEvent&gt;, mediaResources: List&lt;PrimalEvent&gt;, primalUserNames: PrimalEvent?, primalPremiumInfo: PrimalEvent?, primalLegendProfiles: PrimalEvent?, blossomServerEvents: List&lt;NostrEvent&gt;?, )</ID>

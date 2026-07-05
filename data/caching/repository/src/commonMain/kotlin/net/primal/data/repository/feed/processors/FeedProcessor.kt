@@ -4,7 +4,7 @@ import kotlin.time.Clock
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.mappers.remote.asFeedResponse
 import net.primal.domain.common.ContentPrimalPaging
@@ -14,7 +14,7 @@ import net.primal.shared.data.local.db.withTransaction
 
 internal class FeedProcessor(
     val feedSpec: String,
-    val database: PrimalDatabase,
+    val database: CachingDatabase,
 ) {
 
     suspend fun processAndPersistToDatabase(

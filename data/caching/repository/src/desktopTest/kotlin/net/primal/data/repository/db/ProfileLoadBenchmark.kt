@@ -5,7 +5,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 
 /**
@@ -75,7 +75,7 @@ class ProfileLoadBenchmark {
     }
 
     /** Copies the snapshot (and its -wal/-shm siblings) to a temp file and opens it through Room. */
-    private fun openDatabase(snapshot: File): PrimalDatabase {
+    private fun openDatabase(snapshot: File): CachingDatabase {
         val dbName = "$DB_NAME_PREFIX.db"
         val tmp = File(System.getProperty("java.io.tmpdir"), dbName)
         snapshot.copyTo(tmp, overwrite = true)
@@ -83,7 +83,7 @@ class ProfileLoadBenchmark {
             val sib = File(snapshot.parentFile, snapshot.name + ext)
             if (sib.exists()) sib.copyTo(File(tmp.parentFile, dbName + ext), overwrite = true)
         }
-        return LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = dbName)
+        return LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = dbName)
     }
 
     /** The most-followed profile that exists in both ProfileData and ProfileStats. */

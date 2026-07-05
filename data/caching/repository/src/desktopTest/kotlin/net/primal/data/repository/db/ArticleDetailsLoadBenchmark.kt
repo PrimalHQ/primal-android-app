@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import net.primal.data.local.dao.reads.Article
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 
 /**
@@ -62,7 +62,7 @@ class ArticleDetailsLoadBenchmark {
         }
     }
 
-    private suspend fun loadArticle(db: PrimalDatabase, target: Target): Article? =
+    private suspend fun loadArticle(db: CachingDatabase, target: Target): Article? =
         db.articles().observeArticle(articleId = target.articleId, authorId = target.authorId).first()
 
     private data class Stats(val minMs: Double, val medianMs: Double, val p90Ms: Double) {
@@ -83,7 +83,7 @@ class ArticleDetailsLoadBenchmark {
     }
 
     /** Copies the snapshot (and its -wal/-shm siblings) to a temp file and opens it through Room. */
-    private fun openDatabase(snapshot: File): PrimalDatabase {
+    private fun openDatabase(snapshot: File): CachingDatabase {
         val dbName = "$DB_NAME_PREFIX.db"
         val tmp = File(System.getProperty("java.io.tmpdir"), dbName)
         snapshot.copyTo(tmp, overwrite = true)
@@ -91,7 +91,7 @@ class ArticleDetailsLoadBenchmark {
             val sib = File(snapshot.parentFile, snapshot.name + ext)
             if (sib.exists()) sib.copyTo(File(tmp.parentFile, dbName + ext), overwrite = true)
         }
-        return LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = dbName)
+        return LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = dbName)
     }
 
     /** The most-highlighted article (heaviest fan-out); falls back to the longest by content. */

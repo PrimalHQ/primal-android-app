@@ -9,7 +9,7 @@ import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.mutes.ListType
 import net.primal.data.local.dao.mutes.MutedItemData
 import net.primal.data.local.dao.mutes.MutedItemType
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -38,7 +38,7 @@ import net.primal.shared.data.local.db.withTransaction
 
 class MutedItemRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val settingsApi: SettingsApi,
     private val primalPublisher: PrimalPublisher,
 ) : MutedItemRepository {

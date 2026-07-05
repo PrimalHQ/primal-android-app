@@ -27,4 +27,18 @@ object JvmLocalDatabaseFactory {
                 .setQueryCoroutineContext(JvmDispatcherProvider().io())
         }
     }
+
+    /**
+     * Deletes obsolete database files by name (each with its `-wal`/`-shm`/`-journal` sidecars)
+     * (each with its `-wal`/`-shm`/`-journal` and `.lck` sidecars) from the tmp directory.
+     * Missing files are a no-op, so this is safe to call unconditionally.
+     */
+    fun deleteDatabases(names: List<String>) {
+        val tmpDir = System.getProperty("java.io.tmpdir")
+        names.forEach { name ->
+            listOf(name, "$name-wal", "$name-shm", "$name-journal", "$name.lck").forEach { fileName ->
+                File(tmpDir, fileName).delete()
+            }
+        }
+    }
 }

@@ -9,7 +9,7 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
@@ -49,7 +49,7 @@ import net.primal.shared.data.local.db.LocalDatabaseFactory
  * first-paint (~340-770 ms/page; the read/paint path is cheap).
  *
  * Runs against a fat fixture of REAL captured events (`feed_persist_fixture.json`, reconstructed verbatim
- * from device socket frames) and a FRESH Room [PrimalDatabase] rebuilt every iteration (cold first-load,
+ * from device socket frames) and a FRESH Room [CachingDatabase] rebuilt every iteration (cold first-load,
  * no upsert short-circuiting or DB-growth skew).
  *
  * Two views, both opt-in via `-PpersistBench`:
@@ -116,7 +116,7 @@ class FeedPersistMappingBenchmark {
 
         val name = "primal_persist_breakdown.db"
         deleteDbFiles(name)
-        val database = LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = name)
+        val database = LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = name)
         val steps = mutableListOf<Step>()
         try {
             runMappingMirror(response, database, steps)
@@ -155,7 +155,7 @@ class FeedPersistMappingBenchmark {
     @Suppress("LongMethod") // intentional: faithful mirror of the production mapping phase, one timed group per step.
     private fun runMappingMirror(
         response: FeedResponse,
-        database: PrimalDatabase,
+        database: CachingDatabase,
         steps: MutableList<Step>,
     ) {
         fun <T> timed(
@@ -326,7 +326,7 @@ class FeedPersistMappingBenchmark {
     private fun runFreshPersist(response: FeedResponse): Double {
         val name = "primal_persist_bench_${counter++}.db"
         deleteDbFiles(name)
-        val db = LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = name)
+        val db = LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = name)
         return try {
             val start = System.nanoTime()
             runBlocking { response.persistToDatabaseAsTransaction(userId = USER_ID, database = db) }

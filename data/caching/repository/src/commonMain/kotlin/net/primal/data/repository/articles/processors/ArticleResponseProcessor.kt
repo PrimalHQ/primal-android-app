@@ -3,7 +3,7 @@ package net.primal.data.repository.articles.processors
 import net.primal.core.utils.asMapByKey
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
@@ -25,13 +25,13 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.shared.data.local.db.withTransaction
 
-suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
+suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, database: CachingDatabase) {
     database.withTransaction {
         persistToDatabase(userId = userId, database = database)
     }
 }
 
-suspend inline fun ArticleResponse.persistToDatabase(userId: String, database: PrimalDatabase) {
+suspend inline fun ArticleResponse.persistToDatabase(userId: String, database: CachingDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
     val wordsCountMap = this.primalLongFormWords.flatMapAsWordCount()
@@ -99,7 +99,7 @@ suspend inline fun ArticleResponse.persistToDatabase(userId: String, database: P
 suspend fun ArticleResponse.persistArticleCommentsToDatabase(
     articleId: String,
     articleAuthorId: String,
-    database: PrimalDatabase,
+    database: CachingDatabase,
 ) {
     val referencedNotes = this.referencedEvents.mapNotNullAsPostDataPO()
     val comments = this.notes.mapAsPostDataPO(referencedPosts = referencedNotes, emptyList(), emptyList())

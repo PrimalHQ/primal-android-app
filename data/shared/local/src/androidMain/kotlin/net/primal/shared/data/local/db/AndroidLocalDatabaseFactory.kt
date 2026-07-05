@@ -35,4 +35,19 @@ object AndroidLocalDatabaseFactory {
                 .run { if (callback != null) addCallback(callback) else this }
         }
     }
+
+    /**
+     * Deletes obsolete database files by name (each with its `-wal`/`-shm`/`-journal` and
+     * `.lck` sidecars). Missing files are a no-op, so this is safe to call unconditionally on
+     * every startup.
+     */
+    fun deleteDatabases(context: Context, names: List<String>) {
+        val appContext = context.applicationContext
+        names.forEach { name ->
+            // Removes the db plus its -journal/-wal/-shm/-mj sidecars.
+            appContext.deleteDatabase(name)
+            // BundledSQLiteDriver keeps a "<name>.lck" lock file that deleteDatabase() misses.
+            appContext.getDatabasePath("$name.lck").delete()
+        }
+    }
 }

@@ -4,7 +4,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import java.io.File
 import kotlin.test.Test
 import kotlinx.coroutines.runBlocking
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
@@ -100,7 +100,7 @@ class FeedPageLoadBenchmark {
     }
 
     /** Copies the snapshot (and its -wal/-shm siblings) to a temp file and opens it through Room. */
-    private fun openDatabase(snapshot: File): PrimalDatabase {
+    private fun openDatabase(snapshot: File): CachingDatabase {
         val dbName = "$DB_NAME_PREFIX.db"
         val tmp = File(System.getProperty("java.io.tmpdir"), dbName)
         snapshot.copyTo(tmp, overwrite = true)
@@ -108,7 +108,7 @@ class FeedPageLoadBenchmark {
             val sib = File(snapshot.parentFile, snapshot.name + ext)
             if (sib.exists()) sib.copyTo(File(tmp.parentFile, dbName + ext), overwrite = true)
         }
-        return LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = dbName)
+        return LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = dbName)
     }
 
     /** Most populated (owner, feedSpec) pairs, highest first. */

@@ -1,11 +1,11 @@
 package net.primal.data.repository
 
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.shared.data.local.db.withTransaction
 
 class UserDataCleanupRepositoryImpl(
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
 ) : UserDataCleanupRepository {
     override suspend fun clearUserData(userId: String) {
         database.withTransaction {

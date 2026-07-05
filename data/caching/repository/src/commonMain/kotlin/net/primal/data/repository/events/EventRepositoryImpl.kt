@@ -26,7 +26,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventZap as EventZapPO
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
@@ -71,7 +71,7 @@ import net.primal.shared.data.local.db.withTransaction
 class EventRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val eventStatsApi: EventStatsApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : EventRepository {
 

@@ -16,7 +16,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.explore.FollowPack as FollowPackPO
 import net.primal.data.local.dao.explore.FollowPackListCrossRef
 import net.primal.data.local.dao.explore.FollowPackRemoteKey
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.explore.ExploreApi
 import net.primal.data.remote.api.explore.model.FollowListsRequestBody
 import net.primal.data.remote.api.explore.model.FollowListsResponse
@@ -30,7 +30,7 @@ import net.primal.shared.data.local.db.withTransaction
 @ExperimentalPagingApi
 internal class FollowPackMediator(
     private val exploreApi: ExploreApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val dispatcherProvider: DispatcherProvider,
     private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, FollowPackPO>() {

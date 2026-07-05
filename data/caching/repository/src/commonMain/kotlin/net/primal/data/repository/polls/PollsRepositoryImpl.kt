@@ -22,7 +22,7 @@ import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollType
 import net.primal.data.local.dao.polls.PollVoteData
 import net.primal.data.local.dao.polls.asDO
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.polls.PollsApi
 import net.primal.data.remote.api.polls.model.PollVotesRequestBody
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
@@ -62,7 +62,7 @@ class PollsRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val pollsApi: PollsApi,
     private val primalPublisher: PrimalPublisher,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : PollsRepository {
 

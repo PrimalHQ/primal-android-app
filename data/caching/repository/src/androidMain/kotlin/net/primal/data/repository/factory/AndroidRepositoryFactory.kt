@@ -2,7 +2,7 @@ package net.primal.data.repository.factory
 
 import android.content.Context
 import net.primal.core.config.store.AppConfigInitializer
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 import net.primal.shared.data.local.db.LocalDatabasePragmaConfig
 import net.primal.shared.data.local.encryption.AndroidPlatformKeyStore
@@ -13,12 +13,16 @@ object AndroidRepositoryFactory : CommonRepositoryFactory() {
 
     private var appContext: Context? = null
 
-    private val cachingDatabase: PrimalDatabase by lazy {
+    private val cachingDatabase: CachingDatabase by lazy {
         val appContext = appContext ?: error("You need to call init(ApplicationContext) first.")
-        LocalDatabaseFactory.createDatabase<PrimalDatabase>(
+        LocalDatabaseFactory.deleteDatabases(
+            context = appContext,
+            names = CachingDatabase.OBSOLETE_FILE_NAMES,
+        )
+        LocalDatabaseFactory.createDatabase<CachingDatabase>(
             context = appContext,
             fallbackToDestructiveMigration = true,
-            databaseName = "primal_database.db",
+            databaseName = "caching_database.db",
             pragmaConfig = LocalDatabasePragmaConfig.CACHING,
         )
     }
@@ -29,5 +33,5 @@ object AndroidRepositoryFactory : CommonRepositoryFactory() {
         AppConfigInitializer.init(context)
     }
 
-    override fun resolveCachingDatabase(): PrimalDatabase = cachingDatabase
+    override fun resolveCachingDatabase(): CachingDatabase = cachingDatabase
 }

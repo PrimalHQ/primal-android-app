@@ -22,7 +22,7 @@ import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventUserStatsDao
 import net.primal.data.local.dao.events.EventZapDao
 import net.primal.data.local.dao.profiles.ProfileDataDao
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -59,7 +59,7 @@ class EventInteractionRepositoryImplTest {
     private lateinit var mockEventStatsDao: EventStatsDao
     private lateinit var mockEventUserStatsDao: EventUserStatsDao
     private lateinit var mockEventZapDao: EventZapDao
-    private lateinit var mockDatabase: PrimalDatabase
+    private lateinit var mockDatabase: CachingDatabase
     private lateinit var dispatcherProvider: DispatcherProvider
 
     @BeforeTest
@@ -82,7 +82,7 @@ class EventInteractionRepositoryImplTest {
             coEvery { find(eventId = any(), userId = any()) } returns EventUserStats(eventId = eventId, userId = userId)
         }
         mockEventZapDao = mockk<EventZapDao>(relaxUnitFun = true)
-        mockDatabase = mockk<PrimalDatabase> {
+        mockDatabase = mockk<CachingDatabase> {
             coEvery { eventStats() } returns mockEventStatsDao
             coEvery { eventUserStats() } returns mockEventUserStatsDao
             coEvery { eventZaps() } returns mockEventZapDao

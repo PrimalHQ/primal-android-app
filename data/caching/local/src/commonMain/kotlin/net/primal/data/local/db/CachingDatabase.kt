@@ -136,7 +136,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         RecommendedDvmFeedCrossRef::class,
         DvmFeedFeaturedUserCrossRef::class,
     ],
-    version = 37,
+    version = 1,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -152,7 +152,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     EncryptableTypeConverters::class,
 )
 @DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
-abstract class PrimalDatabase : RoomDatabase() {
+abstract class CachingDatabase : RoomDatabase() {
 
     abstract fun profiles(): ProfileDataDao
 
@@ -225,10 +225,24 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun explorePopularUsers(): ExplorePopularUserDao
 
     abstract fun dvmFeeds(): DvmFeedDao
+
+    companion object {
+        /**
+         * Legacy caching-database filenames left behind by earlier app versions, deleted on
+         * startup during/after the rename to [CachingDatabase] (`caching_database.db`). The
+         * lineage is `primal.db` → `primal_v2.db` → `primal_database.db`; add any further stray
+         * names here.
+         */
+        val OBSOLETE_FILE_NAMES = listOf(
+            "primal.db",
+            "primal_v2.db",
+            "primal_database.db",
+        )
+    }
 }
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("KotlinNoActualForExpect", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING", "RedundantSuppression")
-internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<PrimalDatabase> {
-    override fun initialize(): PrimalDatabase
+internal expect object AppDatabaseConstructor : RoomDatabaseConstructor<CachingDatabase> {
+    override fun initialize(): CachingDatabase
 }
