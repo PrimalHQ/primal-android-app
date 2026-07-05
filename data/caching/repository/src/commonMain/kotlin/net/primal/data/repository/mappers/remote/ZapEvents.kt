@@ -39,7 +39,8 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
             ?: zapRequest.tags.findFirstEventId()
             ?: return@mapNotNull null
 
-        val amountInSats = (zapReceipt.tags.findFirstBolt11() ?: zapRequest.tags.findFirstZapAmount())
+        val bolt11 = zapReceipt.tags.findFirstBolt11()
+        val amountInSats = (bolt11 ?: zapRequest.tags.findFirstZapAmount())
             ?.let(LnInvoiceUtils::getAmountInSatsOrNull)
             ?: return@mapNotNull null
 
@@ -58,7 +59,7 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
             zapReceiptAt = zapReceipt.createdAt,
             amountInBtc = amountInSats.toBtc().toDouble(),
             message = zapRequest.content,
-            invoice = zapReceipt.tags.findFirstBolt11(),
+            invoice = bolt11,
             rawNostrEvent = zapReceipt.encodeToJsonString(),
             zapKind = zapKind,
         )
