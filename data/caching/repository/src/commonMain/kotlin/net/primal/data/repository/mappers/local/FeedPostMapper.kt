@@ -57,7 +57,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
         ),
         kind = this.data.kind,
         content = this.data.content,
-        tags = this.data.tags,
+        tags = this.data.tags ?: emptyList(),
         timestamp = Instant.fromEpochSeconds(this.data.createdAt),
         rawNostrEvent = this.data.raw,
         hashtags = this.data.hashtags,
