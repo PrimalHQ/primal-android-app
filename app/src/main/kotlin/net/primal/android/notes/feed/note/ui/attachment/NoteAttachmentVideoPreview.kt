@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -41,6 +42,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
@@ -283,7 +286,10 @@ private fun VideoThumbnailImagePreview(
         contentAlignment = Alignment.Center,
     ) {
         PrimalAsyncImage(
-            model = eventUri.thumbnailUrl,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(eventUri.thumbnailUrl)
+                .placeholderMemoryCacheKey(eventUri.thumbnailUrl?.let { MemoryCache.Key(it) })
+                .build(),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
             errorColor = AppTheme.extraColorScheme.surfaceVariantAlt3,

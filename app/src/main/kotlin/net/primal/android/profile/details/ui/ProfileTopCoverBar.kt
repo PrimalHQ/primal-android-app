@@ -42,6 +42,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
+import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -55,7 +56,6 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Search
-import net.primal.android.core.images.seedMemoryCache
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.theme.AppTheme
@@ -164,7 +164,7 @@ fun ProfileTopCoverBar(
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
-@Suppress("LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
@@ -202,7 +202,7 @@ private fun ProfileTopCoverBar(
                 },
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageSource)
-                .seedMemoryCache(imageSource)
+                .placeholderMemoryCacheKey(imageSource?.let { MemoryCache.Key(it) })
                 .build(),
             loading = { CoverLoading() },
             error = { CoverUnavailable() },

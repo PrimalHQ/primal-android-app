@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import java.text.NumberFormat
 import java.time.Instant
@@ -84,7 +85,6 @@ import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.core.images.seedMemoryCache
 import net.primal.android.core.utils.TextMatcher
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.model.EventStatsUi
@@ -476,7 +476,7 @@ private fun MediaFeedPager(
                     PrimalAsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(variantUrl)
-                            .seedMemoryCache(variantUrl)
+                            .placeholderMemoryCacheKey(MemoryCache.Key(variantUrl))
                             .build(),
                         modifier = Modifier
                             .fillMaxSize()

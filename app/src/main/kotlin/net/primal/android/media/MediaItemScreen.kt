@@ -44,6 +44,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.immersive.rememberImmersiveModeState
+import net.primal.android.core.images.AvatarCoilImageLoader
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.events.gallery.GalleryDropdownMenu
@@ -207,7 +208,14 @@ fun MediaItemContent(
             }
         }
     }
-    val imageLoader = LocalContext.current.imageLoader
+    val context = LocalContext.current
+    val imageLoader = context.imageLoader
+    val avatarCachedImage = remember(mediaUrl) {
+        AvatarCoilImageLoader.provideImageLoader(context)
+            .memoryCache
+            ?.get(MemoryCache.Key(mediaUrl))
+            ?.image
+    }
 
     LaunchedEffect(loadedBitmap) {
         loadedBitmap?.let { onMediaLoaded(it) }
@@ -217,9 +225,10 @@ fun MediaItemContent(
         onTap = { onToggleImmersiveMode() },
         modifier = modifier.fillMaxSize(),
         imageLoader = imageLoader,
-        model = ImageRequest.Builder(LocalContext.current)
+        model = ImageRequest.Builder(context)
             .data(mediaUrl)
             .placeholderMemoryCacheKey(MemoryCache.Key(mediaUrl))
+            .placeholder(avatarCachedImage)
             .listener(loadingImageListener)
             .crossfade(durationMillis = 300)
             .build(),

@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import java.time.Instant
 import net.primal.android.R
@@ -56,7 +57,6 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
-import net.primal.android.core.images.seedMemoryCache
 import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.findNearestOrNull
@@ -254,7 +254,7 @@ private fun ListItemContent(data: FeedArticleUi, modifier: Modifier = Modifier) 
         PrimalImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageSource)
-                .seedMemoryCache(imageSource)
+                .placeholderMemoryCacheKey(imageSource?.let { MemoryCache.Key(it) })
                 .build(),
             modifier = Modifier
                 .padding(vertical = 4.dp)

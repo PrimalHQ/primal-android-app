@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import coil3.compose.SubcomposeAsyncImage
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -752,7 +754,10 @@ private fun ArticleContentWithComments(
                                         }
                                     }
                                 },
-                            model = part.imageUrl,
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(part.imageUrl)
+                                .placeholderMemoryCacheKey(MemoryCache.Key(part.imageUrl))
+                                .build(),
                             contentScale = ContentScale.FillWidth,
                             contentDescription = null,
                         )
