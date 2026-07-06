@@ -23,14 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import kotlin.math.absoluteValue
+import androidx.compose.ui.window.PopupPositionProvider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.theme.AppTheme
@@ -42,12 +44,18 @@ fun Modifier.anchor(handle: AnchorHandle) =
         handle.anchorSize = it.size
     }
 
+enum class BubblePlacement {
+    Below,
+    Above,
+}
+
 @Composable
 fun AnchoredBubble(
     anchor: AnchorHandle,
     text: String,
     visible: Boolean,
     onDismiss: () -> Unit,
+    placement: BubblePlacement = BubblePlacement.Below,
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -58,34 +66,25 @@ fun AnchoredBubble(
         var bubbleSize by remember { mutableStateOf(IntSize.Zero) }
         val rootPadding = with(density) { 8.dp.toPx() }
 
-        val parentW = with(LocalDensity.current) { (LocalConfiguration.current.screenWidthDp.dp).toPx() }
+        val parentW = LocalWindowInfo.current.containerSize.width.toFloat()
         val bubbleW = bubbleSize.width.toFloat().coerceAtLeast(1f)
 
         val targetCx = anchor.rectInRoot?.center?.x ?: 0f
-        val minLeft = rootPadding
-        val maxLeft = parentW - bubbleW - rootPadding
+        val maxLeft = (parentW - rootPadding - bubbleW).coerceAtLeast(rootPadding)
+        val bubbleLeft = (targetCx - bubbleW / 2f).coerceIn(rootPadding, maxLeft)
 
-        val bubbleLeft = when {
-            maxLeft < minLeft -> (parentW - bubbleW) / 2f
-            else -> (targetCx - bubbleW / 2f).coerceIn(minLeft, maxLeft)
-        }
-
+        val pointerWidth = 20.dp
         val pointerHeight = 8.dp
-        val pointerOffsetPx = (targetCx - bubbleLeft)
         val shape = BubbleWithPointerShape(
             cornerRadius = 8.dp,
-            pointerWidth = 20.dp,
+            pointerWidth = pointerWidth,
             pointerHeight = pointerHeight,
-            pointerOffset = with(density) { (pointerOffsetPx).toDp() - 20.dp - (-rootPadding).toDp() },
+            pointerOffset = with(density) { (targetCx - bubbleLeft).toDp() - pointerWidth / 2 },
+            placement = placement,
         )
 
         Popup(
-            alignment = Alignment.TopEnd,
-            offset = IntOffset(
-                y = ((anchor.rectInParent?.top?.absoluteValue ?: 0f) + (anchor.anchorSize?.height ?: 0) - 16f)
-                    .coerceAtLeast(0f).toInt(),
-                x = -rootPadding.toInt(),
-            ),
+            popupPositionProvider = bubblePositionProvider(anchor, placement, bubbleLeft.toInt()),
             onDismissRequest = onDismiss,
         ) {
             Surface(
@@ -96,7 +95,10 @@ fun AnchoredBubble(
                 Row(
                     modifier = Modifier
                         .wrapContentSize()
-                        .padding(top = pointerHeight)
+                        .padding(
+                            top = if (placement == BubblePlacement.Above) 0.dp else pointerHeight,
+                            bottom = if (placement == BubblePlacement.Above) pointerHeight else 0.dp,
+                        )
                         .padding(start = 2.dp)
                         .padding(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
@@ -125,3 +127,27 @@ fun AnchoredBubble(
         }
     }
 }
+
+private const val ANCHOR_OVERLAP_PX = 16f
+private const val ABOVE_LIFT_PX = 8f
+
+private fun bubblePositionProvider(
+    anchor: AnchorHandle,
+    placement: BubblePlacement,
+    bubbleLeft: Int,
+): PopupPositionProvider =
+    object : PopupPositionProvider {
+        override fun calculatePosition(
+            anchorBounds: IntRect,
+            windowSize: IntSize,
+            layoutDirection: LayoutDirection,
+            popupContentSize: IntSize,
+        ): IntOffset {
+            val target = anchor.rectInRoot ?: return IntOffset.Zero
+            val y = when (placement) {
+                BubblePlacement.Below -> target.bottom - ANCHOR_OVERLAP_PX
+                BubblePlacement.Above -> target.top - popupContentSize.height + ANCHOR_OVERLAP_PX - ABOVE_LIFT_PX
+            }
+            return IntOffset(x = bubbleLeft, y = y.toInt())
+        }
+    }

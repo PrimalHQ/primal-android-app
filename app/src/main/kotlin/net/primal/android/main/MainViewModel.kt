@@ -53,6 +53,7 @@ class MainViewModel @Inject constructor(
                 when (it) {
                     UiEvent.RequestUserDataUpdate -> dataUpdater.updateData()
                     UiEvent.SwitchToNextAccount -> switchToNextAccount()
+                    UiEvent.DismissExploreHint -> dismissExploreHint()
                 }
             }
         }
@@ -65,8 +66,16 @@ class MainViewModel @Inject constructor(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                         activeAccountBlossoms = it.blossomServers,
+                        showExploreHint = it.shouldShowExploreHint,
                     )
                 }
+            }
+        }
+
+    private fun dismissExploreHint() =
+        viewModelScope.launch {
+            accountsStore.getAndUpdateAccount(userId = activeAccountStore.activeUserId()) {
+                copy(shouldShowExploreHint = false)
             }
         }
 

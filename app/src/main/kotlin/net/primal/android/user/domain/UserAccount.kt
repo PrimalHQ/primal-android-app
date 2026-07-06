@@ -53,6 +53,7 @@ data class UserAccount(
     val shouldShowStreamControlPopup: Boolean = true,
     val shouldShowWalletDetectedNotice: Boolean = true,
     val shouldShowWalletDiscontinuedNotice: Boolean = true,
+    val shouldShowExploreHint: Boolean = true,
 ) {
     companion object {
         val EMPTY = UserAccount(

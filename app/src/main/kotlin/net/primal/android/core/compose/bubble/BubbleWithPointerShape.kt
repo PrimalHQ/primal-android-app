@@ -19,6 +19,7 @@ class BubbleWithPointerShape(
     private val pointerWidth: Dp = 12.dp,
     private val pointerHeight: Dp = 8.dp,
     private val pointerOffset: Dp = 24.dp,
+    private val placement: BubblePlacement = BubblePlacement.Below,
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -31,20 +32,27 @@ class BubbleWithPointerShape(
             val ph = pointerHeight.toPx()
             val po = pointerOffset.toPx().coerceIn(r, size.width - r - pw)
 
-            val body = RoundRect(
-                left = 0f,
-                top = ph,
-                right = size.width,
-                bottom = size.height,
-                cornerRadius = CornerRadius(r, r),
-            )
+            val body = when (placement) {
+                BubblePlacement.Below -> RoundRect(0f, ph, size.width, size.height, CornerRadius(r, r))
+                BubblePlacement.Above -> RoundRect(0f, 0f, size.width, size.height - ph, CornerRadius(r, r))
+            }
 
             val path = Path().apply {
                 addRoundRect(body)
 
-                moveTo(po, ph)
-                lineTo(po + pw, ph)
-                lineTo(po + pw / 2f, 0f)
+                when (placement) {
+                    BubblePlacement.Below -> {
+                        moveTo(po, ph)
+                        lineTo(po + pw, ph)
+                        lineTo(po + pw / 2f, 0f)
+                    }
+
+                    BubblePlacement.Above -> {
+                        moveTo(po, size.height - ph)
+                        lineTo(po + pw, size.height - ph)
+                        lineTo(po + pw / 2f, size.height)
+                    }
+                }
                 close()
             }
 
