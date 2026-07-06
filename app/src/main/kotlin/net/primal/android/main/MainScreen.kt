@@ -41,6 +41,9 @@ import net.primal.android.core.compose.AppBarPage
 import net.primal.android.core.compose.PrimalOverlay
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.bubble.AnchorHandle
+import net.primal.android.core.compose.bubble.AnchoredBubble
+import net.primal.android.core.compose.bubble.BubblePlacement
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -537,6 +540,7 @@ private fun MainScreenScaffold(
     navController: NavController,
 ) {
     val saveableStateHolder = rememberSaveableStateHolder()
+    val exploreAnchor = remember { AnchorHandle() }
     var activeOverlay by rememberSaveable { mutableStateOf<ActiveOverlay?>(null) }
     val feedPickerVisible = activeOverlay == ActiveOverlay.FeedPicker
     val readPickerVisible = activeOverlay == ActiveOverlay.ReadPicker
@@ -565,6 +569,7 @@ private fun MainScreenScaffold(
         onPrimaryDestinationChanged = onTabChanged,
         badges = mainState.badges,
         focusModeEnabled = focusModeEnabled,
+        exploreAnchorHandle = exploreAnchor,
         topAppBarState = currentTopAppBarState,
         topAppBar = { scrollBehavior ->
             ScaffoldTopAppBar(
@@ -623,6 +628,14 @@ private fun MainScreenScaffold(
                 accountSwitcherCallbacks = accountSwitcherCallbacks,
                 navController = navController,
                 onTabChanged = onTabChanged,
+            )
+
+            AnchoredBubble(
+                anchor = exploreAnchor,
+                text = stringResource(id = R.string.explore_double_tap_hint_text),
+                visible = activeTab == PrimalTopLevelDestination.Explore && mainState.showExploreHint,
+                onDismiss = { mainEventPublisher(MainContract.UiEvent.DismissExploreHint) },
+                placement = BubblePlacement.Above,
             )
         },
         floatingActionButton = { MainScreenFab(activeTab = activeTab, navController = navController) },

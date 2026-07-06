@@ -12,11 +12,13 @@ interface MainContract {
         val activeAccountBlossoms: List<String> = emptyList(),
         val badges: Badges = Badges(),
         val hasMultipleAccounts: Boolean = false,
+        val showExploreHint: Boolean = false,
     )
 
     sealed class UiEvent {
         data object RequestUserDataUpdate : UiEvent()
         data object SwitchToNextAccount : UiEvent()
+        data object DismissExploreHint : UiEvent()
     }
 
     sealed class SideEffect {

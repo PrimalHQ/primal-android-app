@@ -42,6 +42,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.bubble.AnchorHandle
+import net.primal.android.core.compose.bubble.anchor
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ExploreFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedPickerFilled
@@ -61,6 +63,7 @@ fun PrimalNavigationBar(
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onActiveDestinationClick: (() -> Unit)? = null,
     badges: Badges = Badges(),
+    exploreAnchorHandle: AnchorHandle? = null,
 ) {
     val badgesMap = mapOf(
         Pair(PrimalTopLevelDestination.Alerts, badges.unreadNotificationsCount),
@@ -116,7 +119,9 @@ fun PrimalNavigationBar(
                 ) {
                     PrimalTopLevelDestination.entries.forEach { destination ->
                         PrimalNavigationBarItem(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .anchorIfExplore(destination, exploreAnchorHandle),
                             destination = destination,
                             selected = destination == activeDestination,
                             badge = badgesMap.getOrDefault(destination, 0),
@@ -194,6 +199,9 @@ private fun PrimalNavigationBarItem(
         )
     }
 }
+
+private fun Modifier.anchorIfExplore(destination: PrimalTopLevelDestination, handle: AnchorHandle?): Modifier =
+    if (destination == PrimalTopLevelDestination.Explore && handle != null) anchor(handle = handle) else this
 
 enum class PrimalTopLevelDestination {
     Feeds,

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.NavigationBarFullHeightDp
+import net.primal.android.core.compose.bubble.AnchorHandle
 import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopLevelDestination
@@ -62,6 +63,7 @@ fun PrimalMainScaffold(
     snackbarHost: @Composable () -> Unit = {},
     overlay: @Composable () -> Unit = {},
     focusModeEnabled: Boolean = true,
+    exploreAnchorHandle: AnchorHandle? = null,
 ) {
     val localDensity = LocalDensity.current
     val streamState = LocalStreamState.current
@@ -103,6 +105,7 @@ fun PrimalMainScaffold(
                     onPrimaryDestinationChanged = onPrimaryDestinationChanged,
                     onActiveDestinationClick = onActiveDestinationClick,
                     badges = badges,
+                    exploreAnchorHandle = exploreAnchorHandle,
                 )
             },
             floatingActionButton = {
@@ -168,6 +171,7 @@ private fun ScaffoldBottomBar(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onActiveDestinationClick: () -> Unit,
     badges: Badges,
+    exploreAnchorHandle: AnchorHandle? = null,
 ) {
     AnimatedVisibility(
         visible = isBottomBarVisible,
@@ -194,6 +198,7 @@ private fun ScaffoldBottomBar(
             onTopLevelDestinationChanged = onPrimaryDestinationChanged,
             onActiveDestinationClick = onActiveDestinationClick,
             badges = badges,
+            exploreAnchorHandle = exploreAnchorHandle,
         )
     }
 }
