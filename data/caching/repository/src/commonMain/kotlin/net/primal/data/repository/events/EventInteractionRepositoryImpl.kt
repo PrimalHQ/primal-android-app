@@ -5,7 +5,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -28,7 +28,7 @@ class EventInteractionRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalPublisher: PrimalPublisher,
     private val nostrZapperFactory: NostrZapperFactory,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
 ) : EventInteractionRepository {
 
     private val appBuildHelper = createAppBuildHelper()

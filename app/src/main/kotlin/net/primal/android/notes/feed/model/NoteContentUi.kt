@@ -1,11 +1,13 @@
 package net.primal.android.notes.feed.model
 
+import androidx.compose.runtime.Immutable
 import fr.acinq.lightning.payment.Bolt11Invoice
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.messages.chat.model.ChatMessageUi
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.posts.FeedPost
 
+@Immutable
 data class NoteContentUi(
     val noteId: String,
     val content: String,
@@ -17,12 +19,13 @@ data class NoteContentUi(
     val poll: PollUi? = null,
 )
 
-fun FeedPostUi.toNoteContentUi(): NoteContentUi {
+fun FeedPostUi.toNoteContentUi(useFullContent: Boolean = true): NoteContentUi {
+    val content = if (useFullContent) this.content else this.feedContent
     val invoices = mutableListOf<String>()
-    this.content.extractValidInvoiceOrNull()?.let { lnbc -> invoices.add(lnbc) }
+    content.extractValidInvoiceOrNull()?.let { lnbc -> invoices.add(lnbc) }
     return NoteContentUi(
         noteId = this.postId,
-        content = this.content,
+        content = content,
         uris = this.uris.sortedBy { it.position },
         nostrUris = this.nostrUris.sortedBy { it.position },
         hashtags = this.hashtags,

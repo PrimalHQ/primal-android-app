@@ -1,6 +1,6 @@
 package net.primal.shared.data.local.db
 
-import androidx.room.RoomDatabase
+import androidx.room3.RoomDatabase
 import androidx.sqlite.SQLiteConnection
 import io.github.aakira.napier.Napier
 
@@ -21,11 +21,12 @@ import io.github.aakira.napier.Napier
  */
 internal object PragmaDiagnosticsCallback : RoomDatabase.Callback() {
 
-    override fun onOpen(connection: SQLiteConnection) {
+    override suspend fun onOpen(connection: SQLiteConnection) {
         val dbFile = connection.readPragma(pragma = "database_list", columnIndex = 2)
         Napier.i(tag = "DbPragma") {
             "onOpen conn=${connection.hashCode().toString(radix = 16)} db=$dbFile " +
                 "journal_mode=${connection.readPragma("journal_mode")} " +
+                "journal_size_limit=${connection.readPragma("journal_size_limit")} " +
                 "synchronous=${connection.readPragma("synchronous")} " +
                 "busy_timeout=${connection.readPragma("busy_timeout")} " +
                 "cache_size=${connection.readPragma("cache_size")} " +

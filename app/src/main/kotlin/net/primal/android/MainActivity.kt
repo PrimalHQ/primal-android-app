@@ -40,6 +40,9 @@ import net.primal.domain.profile.Nip05VerificationStatus
 
 @AndroidEntryPoint
 class MainActivity : PrimalActivity() {
+
+    override val prefetchFeedsOnSplash: Boolean = true
+
     @Inject
     lateinit var nostrNotary: NostrNotary
 

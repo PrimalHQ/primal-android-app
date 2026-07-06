@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.messages.chat.ChatContract.UiEvent
 import net.primal.android.messages.chat.ChatContract.UiState
 import net.primal.android.messages.chat.model.ChatMessageUi
@@ -77,13 +76,7 @@ class ChatViewModel @Inject constructor(
         observeMessagesSeenEvents()
         observeParticipant()
         subscribeToTotalUnreadCountChanges()
-        ensureMessagesAreAlwaysCached()
     }
-
-    private fun ensureMessagesAreAlwaysCached() =
-        viewModelScope.launch {
-            _state.value.messages.keepLoaded()
-        }
 
     private fun observeEvents() =
         viewModelScope.launch {

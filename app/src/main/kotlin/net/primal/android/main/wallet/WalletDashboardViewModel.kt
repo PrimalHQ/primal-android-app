@@ -17,12 +17,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.core.logging.AppLogPreferences
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.main.wallet.WalletDashboardContract.UiEvent
@@ -94,10 +91,9 @@ class WalletDashboardViewModel @Inject constructor(
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        observeUsdExchangeRate()
+        fetchExchangeRate()
         subscribeToEvents()
         subscribeToActiveWalletData()
-        ensureTransactionsAreAlwaysCached()
         subscribeToActiveAccount()
         subscribeToPurchases()
         checkForPersistedSparkWallet()
@@ -206,14 +202,6 @@ class WalletDashboardViewModel @Inject constructor(
                 }
         }
 
-    private fun ensureTransactionsAreAlwaysCached() =
-        viewModelScope.launch {
-            state
-                .map { it.transactions }
-                .distinctUntilChanged()
-                .collectLatest { it.keepLoaded() }
-        }
-
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
@@ -280,15 +268,6 @@ class WalletDashboardViewModel @Inject constructor(
             runCatching { walletRepository.enrichUnenrichedTransactions() }
                 .onFailure { Napier.w(throwable = it) { "Failed to enrich transactions." } }
         }
-
-    private fun observeUsdExchangeRate() {
-        viewModelScope.launch {
-            fetchExchangeRate()
-            exchangeRateHandler.usdExchangeRate.collect {
-                setState { copy(exchangeBtcUsdRate = it) }
-            }
-        }
-    }
 
     private fun fetchExchangeRate() =
         viewModelScope.launch {

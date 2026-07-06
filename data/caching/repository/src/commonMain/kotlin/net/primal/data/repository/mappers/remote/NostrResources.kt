@@ -256,6 +256,7 @@ private fun takeAsReferencedNoteOrNull(
 ) = if (refNote != null && refPostAuthor != null) {
     ReferencedNote(
         postId = refNote.postId,
+        kind = refNote.kind,
         createdAt = refNote.createdAt,
         content = refNote.content,
         authorId = refNote.authorId,

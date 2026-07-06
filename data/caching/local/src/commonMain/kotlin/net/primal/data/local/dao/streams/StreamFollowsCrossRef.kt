@@ -1,6 +1,6 @@
 package net.primal.data.local.dao.streams
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(primaryKeys = ["streamATag", "ownerId"])
 data class StreamFollowsCrossRef(

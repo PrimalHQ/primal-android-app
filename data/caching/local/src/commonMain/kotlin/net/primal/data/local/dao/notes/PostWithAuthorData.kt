@@ -1,13 +1,13 @@
 package net.primal.data.local.dao.notes
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.local.dao.profiles.ProfileData
 
 data class PostWithAuthorData(
     @Embedded
     val post: PostData,
 
-    @Relation(entityColumn = "ownerId", parentColumn = "authorId")
+    @Relation(entityColumns = ["ownerId"], parentColumns = ["authorId"])
     val author: ProfileData?,
 )

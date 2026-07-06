@@ -1,6 +1,6 @@
 package net.primal.data.local.dao.polls
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(primaryKeys = ["postId", "optionId", "eventId"])
 data class PollVoterRemoteKey(

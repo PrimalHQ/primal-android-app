@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.explore
 
-import androidx.room.Entity
-import androidx.room.Index
+import androidx.room3.Entity
+import androidx.room3.Index
 
 @Entity(
     primaryKeys = ["followPackATag", "profileId"],

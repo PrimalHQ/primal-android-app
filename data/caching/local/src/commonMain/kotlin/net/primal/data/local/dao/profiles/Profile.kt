@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.profiles
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 
 data class Profile(
 
@@ -9,8 +9,8 @@ data class Profile(
     val metadata: ProfileData? = null,
 
     @Relation(
-        entityColumn = "profileId",
-        parentColumn = "ownerId",
+        entityColumns = ["profileId"],
+        parentColumns = ["ownerId"],
     )
     val stats: ProfileStats? = null,
 )

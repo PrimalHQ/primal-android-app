@@ -15,7 +15,7 @@ import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
@@ -41,7 +41,7 @@ import net.primal.shared.data.local.db.withTransaction
 
 internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val dispatcherProvider: DispatcherProvider,
     private val mediaCacher: MediaCacher? = null,
 ) : FeedRepository {

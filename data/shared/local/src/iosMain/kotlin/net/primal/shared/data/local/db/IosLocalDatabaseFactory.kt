@@ -1,8 +1,8 @@
 package net.primal.shared.data.local.db
 
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.room3.migration.Migration
 import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
 import net.primal.core.utils.coroutines.IOSDispatcherProvider
@@ -18,11 +18,13 @@ object IosLocalDatabaseFactory {
         databaseName: String,
         fallbackToDestructiveMigration: Boolean,
         callback: RoomDatabase.Callback? = null,
+        pragmaConfig: LocalDatabasePragmaConfig? = null,
         migrations: List<Migration> = emptyList(),
     ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
         return buildLocalDatabase(
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            pragmaConfig = pragmaConfig,
             migrations = migrations,
         ) {
             Room.databaseBuilder<T>(name = dbFilePath)
@@ -35,6 +37,32 @@ object IosLocalDatabaseFactory {
                         this
                     }
                 }
+        }
+    }
+
+    /**
+     * Deletes obsolete database files by name (each with its `-wal`/`-shm`/`-journal` and `.lck`
+     * sidecars) from the Documents directory. Missing files are a no-op, so this is safe to call
+     * unconditionally on every startup.
+     */
+    fun deleteDatabases(names: List<String>) {
+        names.forEach { deleteDatabaseFiles(it) }
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    private fun deleteDatabaseFiles(databaseName: String) {
+        val basePath = documentDirectory() + "/$databaseName"
+        val fileManager = NSFileManager.defaultManager
+        listOf(
+            basePath,
+            "$basePath-wal",
+            "$basePath-shm",
+            "$basePath-journal",
+            "$basePath.lck",
+        ).forEach { path ->
+            if (fileManager.fileExistsAtPath(path = path)) {
+                fileManager.removeItemAtPath(path = path, error = null)
+            }
         }
     }
 

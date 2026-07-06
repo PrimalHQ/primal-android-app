@@ -29,6 +29,7 @@ fun NotificationPO.asNotificationDO(): NotificationDO {
                     handle = post.authorId.asEllipsizedNpub(),
                     displayName = post.authorId.asEllipsizedNpub(),
                 ),
+                kind = post.kind,
                 content = post.content,
                 tags = post.tags,
                 timestamp = Instant.fromEpochSeconds(post.createdAt),

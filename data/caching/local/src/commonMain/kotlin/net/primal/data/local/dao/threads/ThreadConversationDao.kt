@@ -1,11 +1,11 @@
 package net.primal.data.local.dao.threads
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
-import androidx.room.Transaction
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.RewriteQueriesToDropUnusedColumns
+import androidx.room3.Transaction
 import kotlinx.coroutines.flow.Flow
 import net.primal.data.local.dao.notes.FeedPost
 
@@ -26,6 +26,7 @@ interface ThreadConversationDao {
                 FPD2.postId,
                 FPD2.authorId,
                 FPD2.createdAt,
+                FPD2.kind,
                 FPD2.content,
                 FPD2.tags,
                 FPD2.raw,
@@ -63,6 +64,7 @@ interface ThreadConversationDao {
                 PostData.postId,
                 PostData.authorId,
                 PostData.createdAt,
+                PostData.kind,
                 PostData.content,
                 PostData.tags,
                 PostData.raw,

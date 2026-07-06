@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.articles.feed.ArticleFeedContract.UiState
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.feeds.isPremiumFeedSpec
@@ -44,13 +43,7 @@ class ArticleFeedViewModel @AssistedInject constructor(
 
     init {
         observeActiveAccount()
-        ensureArticlesAreAlwaysCached()
     }
-
-    private fun ensureArticlesAreAlwaysCached() =
-        viewModelScope.launch {
-            _state.value.articles.keepLoaded()
-        }
 
     private fun observeActiveAccount() {
         viewModelScope.launch {

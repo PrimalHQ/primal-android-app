@@ -7,6 +7,7 @@ import net.primal.domain.polls.PollInfo
 @Serializable
 data class ReferencedNote(
     val postId: String,
+    val kind: Int,
     val createdAt: Long,
     val content: String,
     val authorId: String,

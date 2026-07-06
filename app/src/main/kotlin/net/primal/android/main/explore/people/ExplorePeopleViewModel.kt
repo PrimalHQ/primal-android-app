@@ -9,8 +9,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.main.explore.people.ExplorePeopleContract.UiState
 import net.primal.android.main.explore.people.model.asFollowPackUi
 import net.primal.domain.explore.ExploreRepository
@@ -21,16 +19,6 @@ class ExplorePeopleViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(UiState(followPacks = buildFollowPacksPager()))
     val state = _state.asStateFlow()
-
-    init {
-        ensureFollowPacksAreAlwaysCached()
-    }
-
-    private fun ensureFollowPacksAreAlwaysCached() {
-        viewModelScope.launch {
-            _state.value.followPacks.keepLoaded()
-        }
-    }
 
     private fun buildFollowPacksPager() =
         exploreRepository.getFollowLists()

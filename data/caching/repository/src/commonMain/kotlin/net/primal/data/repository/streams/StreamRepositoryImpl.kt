@@ -15,7 +15,7 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.streams.StreamFollowsCrossRef
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.stream.LiveStreamApi
 import net.primal.data.remote.api.stream.model.FindLiveStreamRequestBody
 import net.primal.data.remote.api.stream.model.LiveFeedResponse
@@ -37,7 +37,7 @@ import net.primal.shared.data.local.db.withTransaction
 
 class StreamRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val profileRepository: ProfileRepository,
     private val liveStreamApi: LiveStreamApi,
 ) : StreamRepository {

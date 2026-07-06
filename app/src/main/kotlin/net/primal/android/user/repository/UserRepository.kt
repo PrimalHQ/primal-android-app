@@ -23,6 +23,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.db.RecentSearch
 import net.primal.android.user.db.UserProfileInteraction
 import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.ContentDisplaySettings
@@ -139,6 +140,7 @@ class UserRepository @Inject constructor(
             userDataCleanupRepository.clearUserData(userId)
             usersDatabase.withTransaction {
                 usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
+                usersDatabase.recentSearches().deleteAllByOwnerId(ownerId = userId)
                 usersDatabase.relays().deleteAll(userId = userId)
             }
         }
@@ -357,6 +359,23 @@ class UserRepository @Inject constructor(
                 ),
             )
         }
+
+    suspend fun saveRecentSearch(ownerId: String, query: String) =
+        withContext(dispatchers.io()) {
+            usersDatabase.recentSearches().upsert(
+                RecentSearch(
+                    ownerId = ownerId,
+                    query = query,
+                    lastSearchedAt = Instant.now().epochSecond,
+                ),
+            )
+        }
+
+    fun observeRecentSearches(ownerId: String, limit: Int): Flow<List<String>> =
+        usersDatabase.recentSearches()
+            .observeRecentSearches(ownerId = ownerId, limit = limit)
+            .map { rows -> rows.map { it.query } }
+            .distinctUntilChanged()
 
     fun observeRecentUsers(ownerId: String): Flow<List<UserProfileItemUi>> =
         usersDatabase.userProfileInteractions()

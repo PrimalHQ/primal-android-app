@@ -6,7 +6,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlinx.coroutines.runBlocking
 import net.primal.data.local.dao.reads.Article
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 
 /**
@@ -60,7 +60,7 @@ class ArticleFeedPageLoadBenchmark {
     }
 
     /** Drives one Refresh page like Paging does: a fresh PagingSource, loadSize = initial load. */
-    private suspend fun loadPage(db: PrimalDatabase, feed: Feed): List<Article> {
+    private suspend fun loadPage(db: CachingDatabase, feed: Feed): List<Article> {
         val source = db.articles().feed(spec = feed.spec, userId = feed.owner)
         val params = PagingSource.LoadParams.Refresh<Int>(
             key = null,
@@ -88,7 +88,7 @@ class ArticleFeedPageLoadBenchmark {
     }
 
     /** Copies the snapshot (and its -wal/-shm siblings) to a temp file and opens it through Room. */
-    private fun openDatabase(snapshot: File): PrimalDatabase {
+    private fun openDatabase(snapshot: File): CachingDatabase {
         val dbName = "$DB_NAME_PREFIX.db"
         val tmp = File(System.getProperty("java.io.tmpdir"), dbName)
         snapshot.copyTo(tmp, overwrite = true)
@@ -96,7 +96,7 @@ class ArticleFeedPageLoadBenchmark {
             val sib = File(snapshot.parentFile, snapshot.name + ext)
             if (sib.exists()) sib.copyTo(File(tmp.parentFile, dbName + ext), overwrite = true)
         }
-        return LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = dbName)
+        return LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = dbName)
     }
 
     /** The most populated (owner, spec) article feed in the snapshot. The column is `spec`. */

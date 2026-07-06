@@ -1,8 +1,8 @@
 package net.primal.data.local.dao.explore
 
-import androidx.room.Embedded
-import androidx.room.Junction
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Junction
+import androidx.room3.Relation
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.profiles.ProfileStats
 
@@ -11,35 +11,35 @@ data class FollowPack(
     val data: FollowPackData,
 
     @Relation(
-        parentColumn = "authorId",
-        entityColumn = "ownerId",
+        parentColumns = ["authorId"],
+        entityColumns = ["ownerId"],
     )
     val author: ProfileData? = null,
 
     @Relation(
-        parentColumn = "authorId",
-        entityColumn = "profileId",
+        parentColumns = ["authorId"],
+        entityColumns = ["profileId"],
     )
     val authorStats: ProfileStats?,
 
     @Relation(
-        parentColumn = "aTag",
-        entityColumn = "ownerId",
+        parentColumns = ["aTag"],
+        entityColumns = ["ownerId"],
         associateBy = Junction(
             value = FollowPackProfileCrossRef::class,
-            parentColumn = "followPackATag",
-            entityColumn = "profileId",
+            parentColumns = ["followPackATag"],
+            entityColumns = ["profileId"],
         ),
     )
     val people: List<ProfileData> = emptyList(),
 
     @Relation(
-        parentColumn = "aTag",
-        entityColumn = "profileId",
+        parentColumns = ["aTag"],
+        entityColumns = ["profileId"],
         associateBy = Junction(
             value = FollowPackProfileCrossRef::class,
-            parentColumn = "followPackATag",
-            entityColumn = "profileId",
+            parentColumns = ["followPackATag"],
+            entityColumns = ["profileId"],
         ),
     )
     val stats: List<ProfileStats> = emptyList(),

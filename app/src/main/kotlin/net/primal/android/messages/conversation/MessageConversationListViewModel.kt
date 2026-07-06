@@ -13,13 +13,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.core.utils.usernameUiFriendly
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiState
@@ -65,16 +63,7 @@ class MessageConversationListViewModel @Inject constructor(
         observeEvents()
         subscribeToTotalUnreadCountChanges()
         fetchConversations()
-        ensureConversationsAreAlwaysCached()
     }
-
-    private fun ensureConversationsAreAlwaysCached() =
-        viewModelScope.launch {
-            state
-                .map { it.conversations }
-                .distinctUntilChanged()
-                .collectLatest { it.keepLoaded() }
-        }
 
     private fun observeEvents() =
         viewModelScope.launch {
@@ -127,8 +116,7 @@ class MessageConversationListViewModel @Inject constructor(
                 activeRelation = relation,
                 conversations = chatRepository
                     .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
-                    .mapAsPagingDataOfMessageConversationUi()
-                    .cachedIn(viewModelScope),
+                    .mapAsPagingDataOfMessageConversationUi(),
             )
         }
     }

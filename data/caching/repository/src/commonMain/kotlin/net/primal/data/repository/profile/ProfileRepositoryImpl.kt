@@ -9,7 +9,7 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
@@ -42,7 +42,7 @@ import net.primal.shared.data.local.db.withTransaction
 
 class ProfileRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val usersApi: UsersApi,
     private val wellKnownApi: UserWellKnownApi,
     private val primalPublisher: PrimalPublisher,

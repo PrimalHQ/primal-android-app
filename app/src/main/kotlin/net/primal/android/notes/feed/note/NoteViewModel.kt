@@ -25,7 +25,6 @@ import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
@@ -57,7 +56,6 @@ class NoteViewModel @AssistedInject constructor(
     @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
-    private val exchangeRateHandler: ExchangeRateHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
     private val feedRepository: FeedRepository,
@@ -87,8 +85,6 @@ class NoteViewModel @AssistedInject constructor(
 
     init {
         observeEvents()
-        fetchExchangeRate()
-        observeUsdExchangeRate()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
         }
@@ -99,18 +95,6 @@ class NoteViewModel @AssistedInject constructor(
             val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
             hints.firstOrNull()?.let { relayHints ->
                 setState { copy(relayHints = relayHints.relays.take(n = 2)) }
-            }
-        }
-
-    private fun fetchExchangeRate() =
-        viewModelScope.launch {
-            exchangeRateHandler.updateExchangeRate(userId = activeAccountStore.activeUserId())
-        }
-
-    private fun observeUsdExchangeRate() =
-        viewModelScope.launch {
-            exchangeRateHandler.usdExchangeRate.collect {
-                setState { copy(currentExchangeRate = it) }
             }
         }
 

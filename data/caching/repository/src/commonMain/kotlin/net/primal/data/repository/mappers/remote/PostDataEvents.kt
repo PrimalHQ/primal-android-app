@@ -23,17 +23,24 @@ import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
 
+private val postDataKinds = setOf(
+    NostrEventKind.ShortTextNote.value,
+    NostrEventKind.Comment.value,
+    NostrEventKind.Poll.value,
+    NostrEventKind.ZapPoll.value,
+)
+
 fun List<NostrEvent>.mapAsPostDataPO(
     referencedPosts: List<PostData>,
     referencedArticles: List<ArticleData>,
     referencedHighlights: List<HighlightData>,
 ): List<PostData> {
-    val referencedPostsMap = referencedPosts.associateBy { it.postId }
+    val referencedPostAuthorsById = referencedPosts.associate { it.postId to it.authorId }
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
     return map { event ->
         event.nostrEventAsPost(
-            referencedPostsMap = referencedPostsMap,
+            referencedPostAuthorsById = referencedPostAuthorsById,
             referencedArticlesMap = referencedArticlesMap,
             referencedHighlightsMap = referencedHighlightsMap,
         )
@@ -41,36 +48,27 @@ fun List<NostrEvent>.mapAsPostDataPO(
 }
 
 fun List<PrimalEvent>.mapNotNullAsPostDataPO(
-    referencedPosts: List<PostData> = emptyList(),
     referencedArticles: List<ArticleData> = emptyList(),
     referencedHighlights: List<HighlightData> = emptyList(),
 ): List<PostData> {
-    val referencedPostsMap = referencedPosts.associateBy { it.postId }
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
 
-    val postKinds = setOf(
-        NostrEventKind.ShortTextNote.value,
-        NostrEventKind.Comment.value,
-        NostrEventKind.Poll.value,
-        NostrEventKind.ZapPoll.value,
-    )
-
     val events = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
 
-    val posts = events
-        .filter { event -> event.kind in postKinds }
-        .map {
-            it.nostrEventAsPost(
-                referencedPostsMap = referencedPostsMap,
-                referencedArticlesMap = referencedArticlesMap,
-                referencedHighlightsMap = referencedHighlightsMap,
-            )
-        }
+    val postEvents = events.filter { event -> event.kind in postDataKinds }
+    val pictureEvents = events.filter { event -> event.kind == NostrEventKind.PictureNote.value }
+    val referencedPostAuthorsById = (postEvents + pictureEvents).associate { it.id to it.pubKey }
 
-    val pictures = events
-        .filter { event -> event.kind == NostrEventKind.PictureNote.value }
-        .map { it.pictureNoteAsPost() }
+    val posts = postEvents.map {
+        it.nostrEventAsPost(
+            referencedPostAuthorsById = referencedPostAuthorsById,
+            referencedArticlesMap = referencedArticlesMap,
+            referencedHighlightsMap = referencedHighlightsMap,
+        )
+    }
+
+    val pictures = pictureEvents.map { it.pictureNoteAsPost() }
 
     return posts + pictures
 }
@@ -81,22 +79,22 @@ private data class ReplyReference(
 )
 
 private fun NostrEvent.resolveReplyReference(
-    referencedPostsMap: Map<String, PostData> = emptyMap(),
+    referencedPostAuthorsById: Map<String, String> = emptyMap(),
     referencedArticlesMap: Map<String, ArticleData> = emptyMap(),
     referencedHighlightsMap: Map<String, HighlightData> = emptyMap(),
 ): ReplyReference =
     if (this.kind == NostrEventKind.Comment.value) {
-        resolveCommentReplyReference(referencedPostsMap = referencedPostsMap)
+        resolveCommentReplyReference(referencedPostAuthorsById = referencedPostAuthorsById)
     } else {
         resolveNoteReplyReference(
-            referencedPostsMap = referencedPostsMap,
+            referencedPostAuthorsById = referencedPostAuthorsById,
             referencedArticlesMap = referencedArticlesMap,
             referencedHighlightsMap = referencedHighlightsMap,
         )
     }
 
 private fun NostrEvent.resolveNoteReplyReference(
-    referencedPostsMap: Map<String, PostData>,
+    referencedPostAuthorsById: Map<String, String>,
     referencedArticlesMap: Map<String, ArticleData>,
     referencedHighlightsMap: Map<String, HighlightData>,
 ): ReplyReference {
@@ -105,14 +103,14 @@ private fun NostrEvent.resolveNoteReplyReference(
 
     val referencedNoteAuthorId = this.tags.find { it.hasReplyMarker() }?.getPubkeyFromReplyOrRootTag()
         ?: this.tags.find { it.hasRootMarker() }?.getPubkeyFromReplyOrRootTag()
-        ?: referencedPostsMap[referencedNoteId]?.authorId
+        ?: referencedPostAuthorsById[referencedNoteId]
         ?: referencedArticlesMap[referencedNoteId]?.authorId
         ?: referencedHighlightsMap[referencedNoteId]?.authorId
 
     return ReplyReference(replyToPostId = referencedNoteId, replyToAuthorId = referencedNoteAuthorId)
 }
 
-private fun NostrEvent.resolveCommentReplyReference(referencedPostsMap: Map<String, PostData>): ReplyReference {
+private fun NostrEvent.resolveCommentReplyReference(referencedPostAuthorsById: Map<String, String>): ReplyReference {
     val parentKind = this.tags.findFirstKindTag()?.toIntOrNull()
     val parentEventTag = this.tags.lastOrNull { it.isEventIdTag() }
     val parentEventId = parentEventTag?.getTagValueOrNull()
@@ -122,18 +120,18 @@ private fun NostrEvent.resolveCommentReplyReference(referencedPostsMap: Map<Stri
     }
 
     val parentAuthorId = parentEventTag.getPubkeyFromCommentEventTag()?.takeIf { it.isNotEmpty() }
-        ?: referencedPostsMap[parentEventId]?.authorId
+        ?: referencedPostAuthorsById[parentEventId]
 
     return ReplyReference(replyToPostId = parentEventId, replyToAuthorId = parentAuthorId)
 }
 
 private fun NostrEvent.nostrEventAsPost(
-    referencedPostsMap: Map<String, PostData> = emptyMap(),
+    referencedPostAuthorsById: Map<String, String> = emptyMap(),
     referencedArticlesMap: Map<String, ArticleData> = emptyMap(),
     referencedHighlightsMap: Map<String, HighlightData> = emptyMap(),
 ): PostData {
     val reply = resolveReplyReference(
-        referencedPostsMap = referencedPostsMap,
+        referencedPostAuthorsById = referencedPostAuthorsById,
         referencedArticlesMap = referencedArticlesMap,
         referencedHighlightsMap = referencedHighlightsMap,
     )

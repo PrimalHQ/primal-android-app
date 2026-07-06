@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.polls
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 
 data class Poll(
 
@@ -9,8 +9,8 @@ data class Poll(
     val data: PollData,
 
     @Relation(
-        entityColumn = "postId",
-        parentColumn = "postId",
+        entityColumns = ["postId"],
+        parentColumns = ["postId"],
     )
     val votes: List<PollVoteData> = emptyList(),
 )

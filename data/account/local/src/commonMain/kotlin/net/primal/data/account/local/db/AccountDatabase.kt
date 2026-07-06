@@ -1,11 +1,11 @@
 package net.primal.data.account.local.db
 
-import androidx.room.AutoMigration
-import androidx.room.ConstructedBy
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.RoomDatabaseConstructor
-import androidx.room.TypeConverters
+import androidx.room3.AutoMigration
+import androidx.room3.ColumnTypeConverters
+import androidx.room3.ConstructedBy
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.RoomDatabaseConstructor
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import io.github.aakira.napier.Napier
@@ -45,7 +45,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AutoMigration(from = 17, to = 18),
     ],
 )
-@TypeConverters(
+@ColumnTypeConverters(
     ListsTypeConverters::class,
     EncryptableTypeConverters::class,
 )
@@ -63,7 +63,7 @@ abstract class AccountDatabase : RoomDatabase() {
     companion object {
         fun provideDatabaseCallback() =
             object : Callback() {
-                override fun onOpen(connection: SQLiteConnection) {
+                override suspend fun onOpen(connection: SQLiteConnection) {
                     runCatching {
                         connection.execSQL(
                             """

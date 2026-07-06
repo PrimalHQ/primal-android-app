@@ -11,8 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
 import io.github.fornewid.placeholder.foundation.fade
 import io.github.fornewid.placeholder.material3.placeholder
@@ -50,7 +53,10 @@ fun NoteAttachmentImagePreview(
 
     if (currentUrl != null) {
         PrimalAsyncImage(
-            model = currentUrl,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(currentUrl)
+                .placeholderMemoryCacheKey(MemoryCache.Key(currentUrl))
+                .build(),
             modifier = modifier.zoomablePeekOverlay(state = rememberZoomablePeekOverlayState()),
             contentScale = contentScale,
             onError = { currentUrlIndex += 1 },

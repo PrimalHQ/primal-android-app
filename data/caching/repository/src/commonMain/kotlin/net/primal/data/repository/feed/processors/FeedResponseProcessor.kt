@@ -5,11 +5,11 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResourcesAndThumbnails
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
-import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.remote.applyPollStats
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
@@ -38,15 +38,16 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findReplyTargetId
 import net.primal.shared.data.local.db.withTransaction
 
-internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
+internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: CachingDatabase) {
     database.withTransaction {
         persistToDatabase(userId = userId, database = database)
     }
 }
 
-internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: PrimalDatabase) {
-    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-    val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
+internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: CachingDatabase) {
+    val cdnResourcesAndThumbnails = this.cdnResources.flatMapNotNullAsCdnResourcesAndThumbnails()
+    val cdnResources = cdnResourcesAndThumbnails.cdnResources.asMapByKey { it.url }
+    val videoThumbnails = cdnResourcesAndThumbnails.videoThumbnails
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
 
@@ -55,14 +56,12 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
     val allArticles = articles + referencedArticles
 
-    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
-    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
-        referencedPosts = referencedPostsWithoutReplyTo,
+    val referencedPosts = referencedEvents.mapNotNullAsPostDataPO(
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
     val feedPosts = (notes + polls).mapAsPostDataPO(
-        referencedPosts = referencedPostsWithReplyTo,
+        referencedPosts = referencedPosts,
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
@@ -87,7 +86,7 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
     val eventIdMap = profileIdToProfileDataMap.mapValues { it.value.eventId }
 
-    val allPosts = (referencedPostsWithReplyTo + feedPosts).map { postData ->
+    val allPosts = (referencedPosts + feedPosts).map { postData ->
         postData.copy(authorMetadataId = eventIdMap[postData.authorId])
     }
 
@@ -169,7 +168,7 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
 
 internal suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase(
     noteId: String,
-    database: PrimalDatabase,
+    database: CachingDatabase,
 ) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)

@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.notes
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.local.dao.bookmarks.PublicBookmark
 import net.primal.data.local.dao.events.EventRelayHints
 import net.primal.data.local.dao.events.EventStats
@@ -18,26 +18,27 @@ data class FeedPost(
     val data: FeedPostData,
 
     @Relation(
-        entityColumn = "eventId",
-        parentColumn = "postId",
+        entityColumns = ["eventId"],
+        parentColumns = ["postId"],
     )
     val uris: List<EventUri> = emptyList(),
 
     @Relation(
-        entityColumn = "eventId",
-        parentColumn = "postId",
+        entityColumns = ["eventId"],
+        parentColumns = ["postId"],
     )
     val nostrUris: List<EventUriNostr> = emptyList(),
 
     @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "authorId",
+        entity = ProfileData::class,
+        entityColumns = ["ownerId"],
+        parentColumns = ["authorId"],
     )
-    val author: ProfileData? = null,
+    val author: FeedAuthorLite? = null,
 
     @Relation(
-        entityColumn = "eventId",
-        parentColumn = "postId",
+        entityColumns = ["eventId"],
+        parentColumns = ["postId"],
     )
     val eventStats: EventStats? = null,
 
@@ -45,44 +46,46 @@ data class FeedPost(
     val userStats: FeedPostUserStats? = null,
 
     @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "repostAuthorId",
+        entity = ProfileData::class,
+        entityColumns = ["ownerId"],
+        parentColumns = ["repostAuthorId"],
     )
-    val repostAuthor: ProfileData? = null,
+    val repostAuthor: FeedAuthorNameLite? = null,
 
     @Relation(
-        entityColumn = "ownerId",
-        parentColumn = "replyToAuthorId",
+        entity = ProfileData::class,
+        entityColumns = ["ownerId"],
+        parentColumns = ["replyToAuthorId"],
     )
-    val replyToAuthor: ProfileData? = null,
+    val replyToAuthor: FeedAuthorNameLite? = null,
 
     @Relation(
-        entityColumn = "eventId",
-        parentColumn = "postId",
+        entityColumns = ["eventId"],
+        parentColumns = ["postId"],
     )
     val eventRelayHints: EventRelayHints? = null,
 
     @Relation(
-        entityColumn = "eventId",
-        parentColumn = "postId",
+        entityColumns = ["eventId"],
+        parentColumns = ["postId"],
     )
     val eventZaps: List<EventZap> = emptyList(),
 
     @Relation(
-        entityColumn = "tagValue",
-        parentColumn = "postId",
+        entityColumns = ["tagValue"],
+        parentColumns = ["postId"],
     )
     val bookmark: PublicBookmark? = null,
 
     @Relation(
-        entityColumn = "mainHostId",
-        parentColumn = "authorId",
+        entityColumns = ["mainHostId"],
+        parentColumns = ["authorId"],
     )
     val streams: List<StreamData> = emptyList(),
 
     @Relation(
-        entityColumn = "postId",
-        parentColumn = "postId",
+        entityColumns = ["postId"],
+        parentColumns = ["postId"],
     )
     val pollData: PollData? = null,
 )

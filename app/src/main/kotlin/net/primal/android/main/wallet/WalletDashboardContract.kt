@@ -18,7 +18,6 @@ interface WalletDashboardContract {
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
         val wallet: Wallet? = null,
-        val exchangeBtcUsdRate: Double? = null,
         val walletPickerEnabled: Boolean = false,
         val lowBalance: Boolean = false,
         val isWalletBackedUp: Boolean = false,

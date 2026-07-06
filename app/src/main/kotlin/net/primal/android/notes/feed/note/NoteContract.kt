@@ -9,7 +9,6 @@ interface NoteContract {
     data class UiState(
         val shouldApproveBookmark: Boolean = false,
         val relayHints: List<String> = emptyList(),
-        val currentExchangeRate: Double = 0.0,
         val poll: PollUi? = null,
         val error: UiError? = null,
     )

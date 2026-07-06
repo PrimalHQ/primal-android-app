@@ -41,8 +41,4 @@ interface ExploreRepository {
     suspend fun searchUsers(query: String, limit: Int = 20): List<UserProfileSearchItem>
 
     fun observeTrendingTopics(): Flow<List<ExploreTrendingTopic>>
-
-    suspend fun saveRecentSearch(ownerId: String, query: String)
-
-    fun observeRecentSearches(ownerId: String, limit: Int): Flow<List<String>>
 }

@@ -12,15 +12,23 @@ import net.primal.data.account.signer.remote.model.RemoteSignerMethodResponse
 import net.primal.data.account.signer.remote.model.withPubKey
 import net.primal.data.account.signer.remote.utils.PERM_ID_CONNECT
 import net.primal.data.account.signer.remote.utils.PERM_ID_GET_PUBLIC_KEY
+import net.primal.data.account.signer.remote.utils.PERM_ID_LOGOUT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP04_DECRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP04_ENCRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP44_DECRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP44_ENCRYPT
 import net.primal.data.account.signer.remote.utils.PERM_ID_PING
 import net.primal.data.account.signer.remote.utils.PERM_ID_PREFIX_SIGN_EVENT
+import net.primal.data.account.signer.remote.utils.PERM_ID_SWITCH_RELAYS
 import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
 import net.primal.shared.data.local.encryption.asEncryptable
+
+private val SESSION_EVENT_SKIPPED_REQUEST_TYPES = setOf(
+    SignerMethodType.Ping,
+    SignerMethodType.SwitchRelays,
+    SignerMethodType.Logout,
+)
 
 fun buildSessionEventData(
     sessionId: String,
@@ -33,7 +41,9 @@ fun buildSessionEventData(
     requestState: RemoteAppRequestStatePO?,
 ): RemoteAppSessionEventData? {
     val clientPubkey = method?.clientPubKey ?: response?.clientPubKey
-    if (requestType == SignerMethodType.Ping || clientPubkey == null) return null
+    if (requestType in SESSION_EVENT_SKIPPED_REQUEST_TYPES || clientPubkey == null) {
+        return null
+    }
 
     val resolvedRequestState = requestState ?: when (response) {
         is RemoteSignerMethodResponse.Error -> RemoteAppRequestStatePO.Rejected
@@ -145,6 +155,8 @@ fun RemoteAppSessionEventData.asDomain(): SessionEvent? {
         SignerMethodType.Connect,
         SignerMethodType.Ping,
         SignerMethodType.DecryptZapEvent,
+        SignerMethodType.SwitchRelays,
+        SignerMethodType.Logout,
         -> null
     }
 }
@@ -166,6 +178,8 @@ fun RemoteSignerMethod.getRequestType(): SignerMethodType {
         is RemoteSignerMethod.Nip44Encrypt -> SignerMethodType.Nip44Encrypt
         is RemoteSignerMethod.Ping -> SignerMethodType.Ping
         is RemoteSignerMethod.SignEvent -> SignerMethodType.SignEvent
+        is RemoteSignerMethod.SwitchRelays -> SignerMethodType.SwitchRelays
+        is RemoteSignerMethod.Logout -> SignerMethodType.Logout
     }
 }
 
@@ -179,6 +193,8 @@ fun RemoteAppSessionEventData.getRequestTypeId() =
         SignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
         SignerMethodType.Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
         SignerMethodType.Nip44Decrypt -> PERM_ID_NIP44_DECRYPT
+        SignerMethodType.SwitchRelays -> PERM_ID_SWITCH_RELAYS
+        SignerMethodType.Logout -> PERM_ID_LOGOUT
         SignerMethodType.DecryptZapEvent -> error("Unsupported request type: ${this.requestType}")
     }
 

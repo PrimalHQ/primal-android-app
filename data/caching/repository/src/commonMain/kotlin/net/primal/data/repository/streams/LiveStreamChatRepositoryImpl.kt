@@ -6,7 +6,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.streams.StreamChatMessageData
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.repository.mappers.local.asChatMessageDO
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -18,7 +18,7 @@ import net.primal.domain.streams.chat.LiveStreamChatRepository
 
 class LiveStreamChatRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val primalPublisher: PrimalPublisher,
 ) : LiveStreamChatRepository {
 

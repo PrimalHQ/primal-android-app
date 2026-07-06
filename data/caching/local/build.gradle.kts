@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.jetpack.room)
+    alias(libs.plugins.jetpack.room3)
 }
 
 private val xcfName = "PrimalDataCachingLocal"
@@ -60,7 +60,7 @@ kotlin {
     }
 }
 
-room {
+room3 {
     schemaDirectory("$projectDir/schemas")
 }
 
@@ -71,6 +71,6 @@ dependencies {
         "kspIosSimulatorArm64",
         "kspIosArm64",
     ).forEach {
-        add(it, libs.room.compiler)
+        add(it, libs.room3.compiler)
     }
 }

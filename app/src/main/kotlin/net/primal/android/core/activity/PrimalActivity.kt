@@ -30,6 +30,7 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.zaps.ZappingStateStore
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.domain.zaps.ZappingState
 
 @AndroidEntryPoint
@@ -43,7 +44,12 @@ abstract class PrimalActivity : FragmentActivity() {
     @Inject
     lateinit var zappingStateStore: ZappingStateStore
 
+    @Inject
+    lateinit var exchangeRateHandler: ExchangeRateHandler
+
     private val splashViewModel: SplashViewModel by viewModels()
+
+    protected open val prefetchFeedsOnSplash: Boolean = false
 
     private lateinit var primalTheme: PrimalTheme
 
@@ -53,6 +59,8 @@ abstract class PrimalActivity : FragmentActivity() {
         }
 
         super.onCreate(savedInstanceState)
+
+        splashViewModel.start(prefetchFeeds = prefetchFeedsOnSplash)
 
         observeThemeChanges()
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
@@ -78,6 +86,10 @@ abstract class PrimalActivity : FragmentActivity() {
             activeAccountStore.activeUserId.collect { value = it }
         }
 
+        val exchangeRate = produceState(initialValue = 0.0) {
+            exchangeRateHandler.usdExchangeRate.collect { value = it }
+        }
+
         val primalRippleConfiguration = RippleConfiguration(
             color = AppTheme.colorScheme.outline,
             rippleAlpha = RippleDefaults.RippleAlpha,
@@ -90,6 +102,7 @@ abstract class PrimalActivity : FragmentActivity() {
                 LocalContentDisplaySettings provides contentDisplaySettings.value,
                 LocalZappingState provides zappingState.value,
                 LocalActiveAccountId provides activeAccountId.value,
+                LocalExchangeRate provides exchangeRate.value,
             ) {
                 ApplyEdgeToEdge()
                 val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
@@ -138,3 +151,5 @@ val LocalContentDisplaySettings = compositionLocalOf<ContentDisplaySettings> {
 val LocalZappingState = compositionLocalOf<ZappingState> { error("No ZappingState provided.") }
 
 val LocalActiveAccountId = compositionLocalOf<String> { error("No active account id provided.") }
+
+val LocalExchangeRate = compositionLocalOf<Double> { error("No exchange rate provided.") }

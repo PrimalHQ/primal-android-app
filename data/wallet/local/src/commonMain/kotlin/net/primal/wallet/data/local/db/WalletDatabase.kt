@@ -1,12 +1,14 @@
 package net.primal.wallet.data.local.db
 
-import androidx.room.AutoMigration
-import androidx.room.ConstructedBy
-import androidx.room.Database
-import androidx.room.RoomDatabase
-import androidx.room.RoomDatabaseConstructor
-import androidx.room.TypeConverters
-import androidx.room.migration.Migration
+import androidx.room3.AutoMigration
+import androidx.room3.ColumnTypeConverters
+import androidx.room3.ConstructedBy
+import androidx.room3.DaoReturnTypeConverters
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.RoomDatabaseConstructor
+import androidx.room3.migration.Migration
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
@@ -70,7 +72,8 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         AutoMigration(from = 4, to = 5),
     ],
 )
-@TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
+@ColumnTypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
@@ -88,7 +91,7 @@ abstract class WalletDatabase : RoomDatabase() {
 
     companion object {
         val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(connection: SQLiteConnection) {
+            override suspend fun migrate(connection: SQLiteConnection) {
                 // Drop tables that will be re-fetched from server.
                 // NostrWalletData, ActiveWalletData, WalletInfo, WalletSettings preserved
                 // (can't be re-fetched, and their schemas are compatible).
@@ -124,7 +127,7 @@ abstract class WalletDatabase : RoomDatabase() {
         }
 
         val MIGRATION_5_6 = object : Migration(5, 6) {
-            override fun migrate(connection: SQLiteConnection) {
+            override suspend fun migrate(connection: SQLiteConnection) {
                 // Create new tables
                 connection.execSQL(
                     """

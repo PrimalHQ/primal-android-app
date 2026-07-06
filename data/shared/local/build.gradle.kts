@@ -50,8 +50,8 @@ kotlin {
                 implementation(libs.whyoleg.cryptography.provider.optimal)
 
                 // Room
-                api(libs.room.runtime)
-                api(libs.room.paging)
+                api(libs.room3.runtime)
+                api(libs.room3.paging)
 
                 // Serialization
                 api(libs.kotlinx.serialization.json)
@@ -70,7 +70,7 @@ kotlin {
                 implementation(libs.androidx.security.crypto)
 
                 // Room
-                api(libs.room.runtime.android)
+                api(libs.room3.runtime.android)
                 api(libs.jetpack.sqlite.bundled.android)
             }
         }
@@ -118,6 +118,12 @@ kotlin {
     targets.withType<KotlinNativeTarget> {
         binaries.all {
             linkerOpts("-lsqlite3")
+            // androidx.sqlite's NativeSQLiteDriver cinterop references sqlite3_load_extension,
+            // which the iOS SDK's libsqlite3.tbd no longer exports (extension loading is
+            // disabled on Apple platforms). Room never loads SQLite extensions, so allow the
+            // symbol to stay undefined. Pass -U and the symbol as two separate args: Kotlin/
+            // Native forwards these directly to ld, so -Xlinker wrapping would fail.
+            linkerOpts("-U", "_sqlite3_load_extension")
         }
     }
 }

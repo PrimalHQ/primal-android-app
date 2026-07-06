@@ -1,6 +1,6 @@
 package net.primal.data.local.queries
 
-import androidx.room.RoomRawQuery
+import androidx.room3.RoomRawQuery
 
 class ChronologicalFeedWithRepostsQueryBuilder(
     private val feedSpec: String,
@@ -14,8 +14,8 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 PostData.postId,
                 PostData.authorId,
                 PostData.createdAt,
+                PostData.kind,
                 PostData.content,
-                PostData.tags,
                 PostData.raw,
                 PostData.authorMetadataId,
                 PostData.hashtags,
@@ -46,8 +46,8 @@ class ChronologicalFeedWithRepostsQueryBuilder(
                 PostData.postId,
                 PostData.authorId,
                 PostData.createdAt,
+                PostData.kind,
                 PostData.content,
-                PostData.tags,
                 PostData.raw,
                 PostData.authorMetadataId,
                 PostData.hashtags,

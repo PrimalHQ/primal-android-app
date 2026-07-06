@@ -54,6 +54,7 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
 import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalExchangeRate
 import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -81,6 +82,7 @@ import net.primal.android.notes.feed.zaps.ZapPollBottomSheet
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.utils.canZap
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -203,7 +205,7 @@ private fun FeedNoteCard(
             optionId = zapPollSelectedOptionId ?: "",
             valueMinimum = zapPoll.valueMinimum,
             valueMaximum = zapPoll.valueMaximum,
-            exchangeRate = state.currentExchangeRate,
+            exchangeRate = LocalExchangeRate.current,
             defaultZapAmounts = zappingState.zapsConfig.map { it.amount },
             onDismissRequest = { zapPollSelectedOptionId = null },
             onVote = { optionId, amount, comment ->
@@ -546,7 +548,7 @@ private fun FeedNote(
                         .padding(top = if (isFeedLayout) 3.dp else 0.dp)
                         .padding(end = 4.dp)
                         .fillMaxWidth(),
-                    postTimestamp = data.timestamp,
+                    postTimestamp = if (headerSingleLine) data.timestamp else null,
                     singleLine = headerSingleLine,
                     verticalAlignment = headerVerticalAlignment,
                     authorAvatarVisible = fullWidthContent && !forceContentIndent,
@@ -582,7 +584,7 @@ private fun FeedNote(
                         .padding(
                             top = if ((fullWidthContent && !forceContentIndent) || !headerSingleLine) 10.dp else 5.dp,
                         ),
-                    data = data.toNoteContentUi(),
+                    data = remember(data, expanded) { data.toNoteContentUi(useFullContent = expanded) },
                     expanded = expanded,
                     textSelectable = textSelectable,
                     nestingCutOffLimit = nestingCutOffLimit,
@@ -674,6 +676,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 replyToAuthorHandle = "alex",
             ),
             FeedPostUi(
@@ -701,6 +704,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 replyToAuthorHandle = null,
             ),
             FeedPostUi(
@@ -728,6 +732,7 @@ class FeedPostUiProvider : PreviewParameterProvider<FeedPostUi> {
                 ),
                 hashtags = listOf("#nostr"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 replyToAuthorHandle = null,
             ),
         )
@@ -871,6 +876,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollPending() {
                 ),
                 hashtags = listOf("#nostr", "#polloftheday"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 poll = PollUi(
                     options = listOf(
                         PollOptionUi(id = "1", label = "\uD83D\uDC40 Conspiracy Contemplators"),
@@ -916,6 +922,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollVoted() {
                 ),
                 hashtags = listOf("#nostr", "#polloftheday"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 poll = PollUi(
                     options = listOf(
                         PollOptionUi(
@@ -979,6 +986,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollEnded() {
                 ),
                 hashtags = listOf("#nostr", "#polloftheday"),
                 rawNostrEventJson = "",
+                kind = NostrEventKind.ShortTextNote.value,
                 poll = PollUi(
                     options = listOf(
                         PollOptionUi(

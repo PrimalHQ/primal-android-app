@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.notifications
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.events.EventUriNostr
@@ -14,24 +14,24 @@ data class Notification(
     @Embedded
     val data: NotificationData,
 
-    @Relation(entityColumn = "ownerId", parentColumn = "actionUserId")
+    @Relation(entityColumns = ["ownerId"], parentColumns = ["actionUserId"])
     val actionByUser: ProfileData?,
 
-    @Relation(entityColumn = "postId", parentColumn = "actionPostId")
+    @Relation(entityColumns = ["postId"], parentColumns = ["actionPostId"])
     val actionPost: PostData? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["actionPostId"])
     val actionPostStats: EventStats? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["actionPostId"])
     val actionPostUserStats: EventUserStats? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["actionPostId"])
     val actionPostUris: List<EventUri> = emptyList(),
 
-    @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["actionPostId"])
     val actionPostNostrUris: List<EventUriNostr> = emptyList(),
 
-    @Relation(entityColumn = "aTag", parentColumn = "actionPostId")
+    @Relation(entityColumns = ["aTag"], parentColumns = ["actionPostId"])
     val liveActivity: StreamData? = null,
 )

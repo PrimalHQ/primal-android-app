@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import net.primal.data.local.dao.notes.FeedPost
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 
 /**
@@ -60,7 +60,7 @@ class NoteThreadLoadBenchmark {
         }
     }
 
-    private suspend fun loadThread(db: PrimalDatabase, thread: Thread): List<FeedPost> =
+    private suspend fun loadThread(db: CachingDatabase, thread: Thread): List<FeedPost> =
         db.threadConversations().observeNoteConversation(postId = thread.rootId, userId = thread.userId).first()
 
     private data class Stats(val minMs: Double, val medianMs: Double, val p90Ms: Double) {
@@ -81,7 +81,7 @@ class NoteThreadLoadBenchmark {
     }
 
     /** Copies the snapshot (and its -wal/-shm siblings) to a temp file and opens it through Room. */
-    private fun openDatabase(snapshot: File): PrimalDatabase {
+    private fun openDatabase(snapshot: File): CachingDatabase {
         val dbName = "$DB_NAME_PREFIX.db"
         val tmp = File(System.getProperty("java.io.tmpdir"), dbName)
         snapshot.copyTo(tmp, overwrite = true)
@@ -89,7 +89,7 @@ class NoteThreadLoadBenchmark {
             val sib = File(snapshot.parentFile, snapshot.name + ext)
             if (sib.exists()) sib.copyTo(File(tmp.parentFile, dbName + ext), overwrite = true)
         }
-        return LocalDatabaseFactory.createDatabase<PrimalDatabase>(databaseName = dbName)
+        return LocalDatabaseFactory.createDatabase<CachingDatabase>(databaseName = dbName)
     }
 
     /**

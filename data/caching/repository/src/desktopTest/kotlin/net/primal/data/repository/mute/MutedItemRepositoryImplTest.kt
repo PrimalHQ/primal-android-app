@@ -11,7 +11,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -47,7 +47,7 @@ class MutedItemRepositoryImplTest {
         every { main() } returns testDispatcher
     }
 
-    private val mockDatabase: PrimalDatabase = mockk(relaxed = true)
+    private val mockDatabase: CachingDatabase = mockk(relaxed = true)
 
     private fun buildRepository(settingsApi: SettingsApi, primalPublisher: PrimalPublisher) =
         MutedItemRepositoryImpl(

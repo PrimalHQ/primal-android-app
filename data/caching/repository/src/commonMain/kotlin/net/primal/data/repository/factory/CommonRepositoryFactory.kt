@@ -3,7 +3,7 @@ package net.primal.data.repository.factory
 import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
@@ -58,7 +58,7 @@ abstract class CommonRepositoryFactory {
 
     private val dispatcherProvider = createDispatcherProvider()
 
-    abstract fun resolveCachingDatabase(): PrimalDatabase
+    abstract fun resolveCachingDatabase(): CachingDatabase
 
     fun createArticleRepository(
         cachingPrimalApiClient: PrimalApiClient,

@@ -68,11 +68,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
+import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -109,6 +109,7 @@ import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReactionType
 
 private const val REPLIES_LOADING_PLACEHOLDER_DEFAULT_MAX_COUNT = 3
@@ -782,6 +783,7 @@ fun ThreadScreenPreview() {
                         stats = EventStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
+                        kind = NostrEventKind.ShortTextNote.value,
                         replyToAuthorHandle = "alex",
                     ),
                     FeedPostUi(
@@ -799,6 +801,7 @@ fun ThreadScreenPreview() {
                         stats = EventStatsUi(),
                         hashtags = listOf("#nostr"),
                         rawNostrEventJson = "raaaw",
+                        kind = NostrEventKind.ShortTextNote.value,
                         replyToAuthorHandle = "alex",
                     ),
                 ),

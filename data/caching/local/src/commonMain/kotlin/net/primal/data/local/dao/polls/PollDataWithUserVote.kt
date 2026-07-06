@@ -1,6 +1,6 @@
 package net.primal.data.local.dao.polls
 
-import androidx.room.Embedded
+import androidx.room3.Embedded
 
 data class PollDataWithUserVote(
     @Embedded val pollData: PollData,

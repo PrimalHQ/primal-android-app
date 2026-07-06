@@ -1,7 +1,7 @@
 package net.primal.data.account.local.dao.apps.remote
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity

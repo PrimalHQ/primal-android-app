@@ -3,7 +3,7 @@ package net.primal.data.repository.messages.processors
 import io.github.aakira.napier.Napier
 import net.primal.core.caching.MediaCacher
 import net.primal.data.local.dao.messages.DirectMessageData
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
@@ -30,7 +30,7 @@ import net.primal.domain.nostr.utils.isNostrUri
 import net.primal.shared.data.local.db.withTransaction
 
 internal class MessagesProcessor(
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
     private val messageCipher: MessageCipher,
@@ -90,12 +90,9 @@ internal class MessagesProcessor(
                     userId = userId,
                     database = database,
                 )
-                val referencedPostsWithoutReplies = response.referencedEvents.mapNotNullAsPostDataPO()
-                val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
-                    referencedPostsWithoutReplies,
-                )
+                val referencedPosts = response.referencedEvents.mapNotNullAsPostDataPO()
                 response.notes.mapAsPostDataPO(
-                    referencedPosts = referencedPostsWithReplies,
+                    referencedPosts = referencedPosts,
                     referencedArticles = emptyList(),
                     referencedHighlights = emptyList(),
                 )

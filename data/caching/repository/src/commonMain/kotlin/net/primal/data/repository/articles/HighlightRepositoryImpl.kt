@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.repository.mappers.local.asHighlightDO
 import net.primal.data.repository.mappers.remote.asHighlightData
 import net.primal.domain.nostr.Nevent
@@ -23,7 +23,7 @@ import net.primal.domain.reads.HighlightRepository
 
 class HighlightRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val primalPublisher: PrimalPublisher,
 ) : HighlightRepository {
 

@@ -3,6 +3,8 @@ package net.primal.android.user.updater
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlin.time.Clock
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.repository.PremiumRepository
@@ -46,45 +48,58 @@ class UserDataUpdater @AssistedInject constructor(
 ) : Updater() {
 
     override suspend fun doUpdate(): Result<Unit> {
-        activeAccountStore.activeUserAccount().let { activeAccount ->
-            if (activeAccount.nostrWallet != null || activeAccount.primalWallet != null) {
-                runCatching { migrateWalletData(userAccount = activeAccount) }
+        coroutineScope {
+            // Wallet chain — migrate (conditional) must not overlap ensurePrimalWallet (same wallet rows).
+            launch {
+                activeAccountStore.activeUserAccount().let { activeAccount ->
+                    if (activeAccount.nostrWallet != null || activeAccount.primalWallet != null) {
+                        runCatching { migrateWalletData(userAccount = activeAccount) }
+                    }
+                }
+                runCatching { ensurePrimalWalletExistsUseCase.invoke(userId = userId) }
             }
-        }
 
-        runCatching {
-            val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
-                userId = userId,
-                description = "Sync app settings",
-            ).unwrapOrThrow()
-            settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
-            settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
-                nostrNotary.signAppSettingsNostrEvent(
-                    userId = userId,
-                    appSettings = appSettings,
-                ).unwrapOrThrow()
+            // Profile chain — user account fetched before profile lookup + eager verification.
+            launch {
+                runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
+                runCatching {
+                    val profile = profileRepository.findProfileDataOrNull(profileId = userId)
+                    profile?.internetIdentifier?.let { identifier ->
+                        nip05VerificationService.verifyEagerly(
+                            pubkey = userId,
+                            internetIdentifier = identifier,
+                        )
+                    }
+                }
             }
-        }
-        runCatching { premiumRepository.fetchMembershipStatus(userId = userId) }
-        runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
-        runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
-        runCatching {
-            val profile = profileRepository.findProfileDataOrNull(profileId = userId)
-            profile?.internetIdentifier?.let { identifier ->
-                nip05VerificationService.verifyEagerly(
-                    pubkey = userId,
-                    internetIdentifier = identifier,
-                )
+
+            // Settings block — ensureZapConfig reads the settings fetchAndPersistAppSettings just wrote.
+            launch {
+                runCatching {
+                    val authorizationEvent = nostrNotary.signAuthorizationNostrEvent(
+                        userId = userId,
+                        description = "Sync app settings",
+                    ).unwrapOrThrow()
+                    settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
+                    settingsRepository.ensureZapConfig(authorizationEvent) { appSettings ->
+                        nostrNotary.signAppSettingsNostrEvent(
+                            userId = userId,
+                            appSettings = appSettings,
+                        ).unwrapOrThrow()
+                    }
+                }
             }
+
+            launch { runCatching { premiumRepository.fetchMembershipStatus(userId = userId) } }
+            launch { runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) } }
+            launch { runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) } }
+            launch { runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() } }
+            launch { runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() } }
+            launch { runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() } }
+            launch { runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) } }
+            launch { runCatching { walletRepository.enrichUnenrichedTransactions() } }
+            launch { runCatching { mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId) } }
         }
-        runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
-        runCatching { ensurePrimalWalletExistsUseCase.invoke(userId = userId) }
-        runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
-        runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() }
-        runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
-        runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
-        runCatching { walletRepository.enrichUnenrichedTransactions() }
-        mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
 
         return Result.success(Unit)
     }

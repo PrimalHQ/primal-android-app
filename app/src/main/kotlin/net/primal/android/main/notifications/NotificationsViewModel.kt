@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.isOnlyEmoji
 import net.primal.android.core.utils.usernameUiFriendly
@@ -92,13 +91,6 @@ class NotificationsViewModel @Inject constructor(
     init {
         subscribeToEvents()
         subscribeToBadgesUpdates()
-        ensureSeenNotificationsAreAlwaysCached()
-    }
-
-    private fun ensureSeenNotificationsAreAlwaysCached() {
-        seenPagerCache.values.forEach { seenNotifications ->
-            viewModelScope.launch { seenNotifications.keepLoaded() }
-        }
     }
 
     private fun subscribeToEvents() =
@@ -224,6 +216,7 @@ class NotificationsViewModel @Inject constructor(
                 authorAvatarCdnImage = this.actionByUser?.avatarCdnImage,
                 timestamp = actionOnPost.timestamp.toJavaInstant(),
                 content = actionOnPost.content,
+                kind = actionOnPost.kind,
                 uris = actionOnPost.links.map { it.asEventUriUiModel() },
                 nostrUris = actionOnPost.nostrUris.map { it.asNoteNostrUriUi() },
                 stats = EventStatsUi.from(actionOnPost.stats),

@@ -12,7 +12,7 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.feeds.Feed
 import net.primal.data.local.dao.feeds.asSpecKindFilter
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feeds.FeedsApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -61,7 +61,7 @@ import net.primal.shared.data.local.db.withTransaction
 class FeedsRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val feedsApi: FeedsApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val signatureHandler: NostrEventSignatureHandler,
     private val mediaCacher: MediaCacher? = null,
 ) : FeedsRepository {

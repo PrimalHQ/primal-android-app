@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.reads.Article as ArticlePO
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleDetailsRequestBody
 import net.primal.data.remote.api.articles.model.ArticleHighlightsRequestBody
@@ -35,7 +35,7 @@ import net.primal.shared.data.local.db.withTransaction
 class ArticleRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val articlesApi: ArticlesApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : ArticleRepository {
 

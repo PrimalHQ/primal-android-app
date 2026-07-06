@@ -115,4 +115,15 @@ tasks.withType<Test>().configureEach {
     if (snapshot != null) {
         systemProperty("primal.db.snapshot", snapshot)
     }
+    // Opt-in for the self-contained persist-mapping benchmark (bundled fixture, no snapshot needed):
+    // -PpersistBench. Absent it the benchmark no-ops, keeping CI cheap. When opted in, stream the
+    // benchmark's stdout to the console and force the task to always re-run (never UP-TO-DATE).
+    if (project.hasProperty("persistBench")) {
+        systemProperty("primal.persist.bench", "1")
+        outputs.upToDateWhen { false }
+        testLogging {
+            showStandardStreams = true
+            events("passed", "skipped", "failed")
+        }
+    }
 }

@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.primal.android.core.ext.keepLoaded
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -31,6 +30,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
@@ -59,6 +59,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val streamRepository: StreamRepository,
     private val dispatcherProvider: DispatcherProvider,
+    private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -98,13 +99,14 @@ class NoteFeedViewModel @AssistedInject constructor(
         subscribeToEvents()
         observeActiveAccount()
         observeMutedUsers()
-        ensureNotesAreAlwaysCached()
+        fetchExchangeRate()
     }
 
-    private fun ensureNotesAreAlwaysCached() =
+    private fun fetchExchangeRate() =
         viewModelScope.launch {
-            _state.value.notes.keepLoaded()
+            exchangeRateHandler.updateExchangeRate(userId = activeAccountStore.activeUserId())
         }
+
 
     private fun observeMutedUsers() =
         viewModelScope.launch {

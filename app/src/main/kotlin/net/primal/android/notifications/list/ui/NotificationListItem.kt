@@ -57,6 +57,7 @@ import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme.Midnight
 import net.primal.domain.links.ReferencedStream
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.notifications.NotificationType
 import net.primal.domain.streams.StreamStatus
 
@@ -610,6 +611,7 @@ private val PreviewExamplePost = FeedPostUi(
     hashtags = listOf("#Nostr"),
     postId = "",
     rawNostrEventJson = "",
+    kind = NostrEventKind.ShortTextNote.value,
     stats = EventStatsUi(),
     timestamp = Instant.now(),
 )
@@ -785,6 +787,7 @@ private class NotificationsParameterProvider : PreviewParameterProvider<List<Not
                         authorHandle = "rabbithole",
                         content = "",
                         rawNostrEventJson = "",
+                        kind = NostrEventKind.ShortTextNote.value,
                         timestamp = Instant.now(),
                         stats = EventStatsUi(),
                     ),

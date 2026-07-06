@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification as NotificationPO
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.repository.mappers.local.asNotificationDO
 import net.primal.data.repository.notifications.paging.NotificationsRemoteMediator
@@ -26,7 +26,7 @@ import net.primal.domain.notifications.NotificationRepository
 @OptIn(ExperimentalPagingApi::class)
 class NotificationRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val notificationsApi: NotificationsApi,
     private val mediaCacher: MediaCacher? = null,
 ) : NotificationRepository {

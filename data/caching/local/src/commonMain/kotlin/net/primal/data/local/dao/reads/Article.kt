@@ -1,7 +1,7 @@
 package net.primal.data.local.dao.reads
 
-import androidx.room.Embedded
-import androidx.room.Relation
+import androidx.room3.Embedded
+import androidx.room3.Relation
 import net.primal.data.local.dao.bookmarks.PublicBookmark
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventUserStats
@@ -12,21 +12,21 @@ data class Article(
     @Embedded
     val data: ArticleData,
 
-    @Relation(entityColumn = "ownerId", parentColumn = "authorId")
+    @Relation(entityColumns = ["ownerId"], parentColumns = ["authorId"])
     val author: ProfileData? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "eventId")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["eventId"])
     val eventStats: EventStats? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "eventId")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["eventId"])
     val userEventStats: EventUserStats? = null,
 
-    @Relation(entityColumn = "eventId", parentColumn = "aTag")
+    @Relation(entityColumns = ["eventId"], parentColumns = ["aTag"])
     val eventZaps: List<EventZap> = emptyList(),
 
-    @Relation(entityColumn = "tagValue", parentColumn = "aTag")
+    @Relation(entityColumns = ["tagValue"], parentColumns = ["aTag"])
     val bookmark: PublicBookmark? = null,
 
-    @Relation(entity = HighlightData::class, entityColumn = "referencedEventATag", parentColumn = "aTag")
+    @Relation(entity = HighlightData::class, entityColumns = ["referencedEventATag"], parentColumns = ["aTag"])
     val highlights: List<Highlight> = emptyList(),
 )

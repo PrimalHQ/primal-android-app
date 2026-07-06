@@ -16,7 +16,7 @@ import net.primal.data.local.dao.events.EventStatsDao
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventUserStatsDao
 import net.primal.data.local.dao.events.EventZapDao
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.withTransaction
 
 @Suppress("MaxLineLength")
@@ -37,7 +37,7 @@ class EventStatsUpdaterTest {
     private val mockEventStatsDao = mockk<EventStatsDao>(relaxUnitFun = true)
     private val mockEventUserStatsDao = mockk<EventUserStatsDao>(relaxUnitFun = true)
     private val mockEventZapDao = mockk<EventZapDao>(relaxUnitFun = true)
-    private val mockDatabase = mockk<PrimalDatabase> {
+    private val mockDatabase = mockk<CachingDatabase> {
         coEvery { eventStats() } returns mockEventStatsDao
         coEvery { eventUserStats() } returns mockEventUserStatsDao
         coEvery { eventZaps() } returns mockEventZapDao

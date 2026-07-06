@@ -15,7 +15,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.polls.PollVoteWithProfile
 import net.primal.data.local.dao.polls.PollVoterRemoteKey
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.polls.PollsApi
 import net.primal.data.remote.api.polls.model.PollVotesRequestBody
 import net.primal.data.remote.api.polls.model.PollVotesResponse
@@ -41,7 +41,7 @@ internal class PollVotersRemoteMediator(
     private val postId: String,
     private val optionId: String,
     private val pollsApi: PollsApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val dispatcherProvider: DispatcherProvider,
     private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, PollVoteWithProfile>() {

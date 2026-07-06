@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.model
 
+import androidx.compose.runtime.Immutable
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
@@ -8,16 +9,14 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
 
+@Immutable
 data class FeedPostUi(
     val postId: String,
     val authorId: String,
@@ -25,9 +24,10 @@ data class FeedPostUi(
     val authorHandle: String,
     val timestamp: Instant,
     val content: String,
+    val feedContent: String = content,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
-    val rawKind: Int? = rawNostrEventJson.decodeFromJsonStringOrNull<NostrEvent>()?.kind,
+    val kind: Int,
     val repostId: String? = null,
     val repostAuthorId: String? = null,
     val repostAuthorName: String? = null,
@@ -49,6 +49,8 @@ data class FeedPostUi(
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
     val repost = this.reposts.firstOrNull()
+    val uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position }
+    val nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position }
     return FeedPostUi(
         postId = this.eventId,
         repostId = repost?.repostId,
@@ -62,8 +64,9 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorBlossoms = this.author.blossomServers,
         timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
         content = this.content,
-        uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position },
-        nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position },
+        feedContent = computeFeedContent(content = this.content, uris = uris, nostrUris = nostrUris),
+        uris = uris,
+        nostrUris = nostrUris,
         stats = this.stats?.let { stats ->
             EventStatsUi(
                 repliesCount = stats.repliesCount,
@@ -79,6 +82,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         } ?: EventStatsUi(),
         hashtags = this.hashtags,
         rawNostrEventJson = this.rawNostrEvent,
+        kind = this.kind,
         replyToAuthorHandle = this.replyToAuthor?.handle ?: this.replyToAuthor?.authorId?.asEllipsizedNpub(),
         isBookmarked = this.bookmark != null,
         isThreadMuted = this.isThreadMuted,
@@ -95,7 +99,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
 fun FeedPostUi.asNeventString(): String {
     return Nevent(
         eventId = this.postId,
-        kind = this.rawKind ?: NostrEventKind.ShortTextNote.value,
+        kind = this.kind,
         userId = this.authorId,
         relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
     ).toNeventString()

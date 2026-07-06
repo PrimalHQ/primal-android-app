@@ -44,7 +44,8 @@ jetpack-datastore = "1.2.1"
 jetpack-lifecycle = "2.11.0"
 jetpack-paging = "3.5.0"
 jetpack-room = "2.8.4"
-jetpack-sqlite = "2.6.2"
+jetpack-room3 = "3.0.0"
+jetpack-sqlite = "2.7.0"
 jetpack-webkit = "1.16.0"
 junit = "4.13.2"
 korlibs-crypto = "6.0.1"
@@ -210,13 +211,19 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-csv = { module = "de.brudaswen.kotlinx.serialization:kotlinx-serialization-csv", version.ref = "kotlinx-serialization-csv" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
-# KMP Room
+# Room 2.x (app / UsersDatabase — SQLCipher, stays on androidx.room)
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "jetpack-room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "jetpack-room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "jetpack-room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "jetpack-room" }
 room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "jetpack-room" }
 room-paging = { module = "androidx.room:room-paging", version.ref = "jetpack-room" }
+
+# Room 3.x KMP (data:shared:local + caching/wallet/account local — androidx.room3)
+room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "jetpack-room3" }
+room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "jetpack-room3" }
+room3-runtime-android = { group = "androidx.room3", name = "room3-runtime-android", version.ref = "jetpack-room3" }
+room3-paging = { module = "androidx.room3:room3-paging", version.ref = "jetpack-room3" }
 jetpack-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-bundled-android = { module = "androidx.sqlite:sqlite-bundled-android", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "jetpack-sqlite" }
@@ -330,6 +337,7 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
+jetpack-room3 = { id = "androidx.room3", version.ref = "jetpack-room3" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 touchlab-skie = { id = "co.touchlab.skie", version.ref = "skie" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }

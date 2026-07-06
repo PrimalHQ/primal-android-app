@@ -1,8 +1,9 @@
 package net.primal.data.repository.factory
 
 import kotlin.experimental.ExperimentalObjCName
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
+import net.primal.shared.data.local.db.LocalDatabasePragmaConfig
 
 typealias PrimalRepositoryFactory = IosRepositoryFactory
 
@@ -10,12 +11,14 @@ typealias PrimalRepositoryFactory = IosRepositoryFactory
 @ObjCName("PrimalRepositoryFactory")
 object IosRepositoryFactory : CommonRepositoryFactory() {
 
-    private val cachingDatabase: PrimalDatabase by lazy {
+    private val cachingDatabase: CachingDatabase by lazy {
+        LocalDatabaseFactory.deleteDatabases(CachingDatabase.OBSOLETE_FILE_NAMES)
         LocalDatabaseFactory.createDatabase(
-            databaseName = "primal_database.db",
+            databaseName = "caching_database.db",
             fallbackToDestructiveMigration = true,
+            pragmaConfig = LocalDatabasePragmaConfig.CACHING,
         )
     }
 
-    override fun resolveCachingDatabase(): PrimalDatabase = cachingDatabase
+    override fun resolveCachingDatabase(): CachingDatabase = cachingDatabase
 }

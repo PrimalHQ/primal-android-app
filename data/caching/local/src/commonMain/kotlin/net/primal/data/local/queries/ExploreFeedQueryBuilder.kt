@@ -1,6 +1,6 @@
 package net.primal.data.local.queries
 
-import androidx.room.RoomRawQuery
+import androidx.room3.RoomRawQuery
 
 class ExploreFeedQueryBuilder(
     private val feedSpec: String,
@@ -14,8 +14,8 @@ class ExploreFeedQueryBuilder(
                 PostData.postId,
                 PostData.authorId,
                 PostData.createdAt,
+                PostData.kind,
                 PostData.content,
-                PostData.tags,
                 PostData.raw,
                 PostData.authorMetadataId,
                 PostData.hashtags,

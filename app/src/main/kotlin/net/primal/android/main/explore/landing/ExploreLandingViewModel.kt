@@ -65,7 +65,7 @@ class ExploreLandingViewModel @Inject constructor(
 
     private fun observeRecentSearches() =
         viewModelScope.launch {
-            exploreRepository.observeRecentSearches(
+            userRepository.observeRecentSearches(
                 ownerId = activeAccountStore.activeUserId(),
                 limit = MAX_RECENT_SEARCHES,
             )

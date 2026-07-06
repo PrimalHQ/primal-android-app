@@ -1,6 +1,6 @@
 package net.primal.data.local.dao.feeds
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(primaryKeys = ["ownerId", "dvmEventId", "specKindFilter"])
 data class RecommendedDvmFeedCrossRef(

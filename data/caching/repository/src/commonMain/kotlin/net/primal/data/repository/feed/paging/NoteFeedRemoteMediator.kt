@@ -18,7 +18,7 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
-import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.api.feed.model.MultiKindFeedBySpecRequestBody
@@ -37,7 +37,7 @@ internal class NoteFeedRemoteMediator(
     private val feedSpec: String,
     private val userId: String,
     private val feedApi: FeedApi,
-    private val database: PrimalDatabase,
+    private val database: CachingDatabase,
     private val mediaCacher: MediaCacher? = null,
     private val kinds: List<Int> = FeedRepository.DEFAULT_FEED_KINDS,
 ) : RemoteMediator<Int, FeedPost>() {
