@@ -299,9 +299,9 @@ private fun UserFollowedByIndicator(
         Text(
             text = text,
             maxLines = 2,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             overflow = TextOverflow.Ellipsis,
-            style = AppTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
+            style = AppTheme.typography.bodySmall.copy(lineHeight = 16.sp),
         )
     }
 }

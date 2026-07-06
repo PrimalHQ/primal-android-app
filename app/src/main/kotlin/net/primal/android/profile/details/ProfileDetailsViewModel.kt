@@ -224,6 +224,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun fetchProfileFollowedBy(profileId: String) =
         viewModelScope.launch {
+            setState { copy(isResolvingFollowedBy = true) }
             try {
                 val profiles = profileRepository.fetchUserProfileFollowedBy(
                     profileId = profileId,
