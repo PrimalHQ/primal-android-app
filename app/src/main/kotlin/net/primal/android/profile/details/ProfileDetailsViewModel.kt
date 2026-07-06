@@ -241,6 +241,8 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
             } catch (error: NetworkException) {
                 Napier.e(throwable = error) { "Failed to fetch profiles followed by" }
+            } finally {
+                setState { copy(isResolvingFollowedBy = false) }
             }
         }
 

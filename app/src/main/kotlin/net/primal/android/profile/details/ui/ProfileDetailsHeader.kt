@@ -1,11 +1,17 @@
 package net.primal.android.profile.details.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -241,12 +247,25 @@ private fun ProfileHeaderDetails(
             )
         }
 
-        if (state.userFollowedByProfiles.isNotEmpty()) {
-            UserFollowedByIndicator(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                profiles = state.userFollowedByProfiles,
-                onProfileClick = onProfileClick,
-            )
+        AnimatedVisibility(
+            visible = state.isResolvingFollowedBy || state.userFollowedByProfiles.isNotEmpty(),
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut(),
+        ) {
+            if (state.userFollowedByProfiles.isNotEmpty()) {
+                UserFollowedByIndicator(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    profiles = state.userFollowedByProfiles,
+                    onProfileClick = onProfileClick,
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .fillMaxWidth()
+                        .height(36.dp),
+                )
+            }
         }
     }
 }
@@ -282,7 +301,7 @@ private fun UserFollowedByIndicator(
             maxLines = 2,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             overflow = TextOverflow.Ellipsis,
-            style = AppTheme.typography.bodyMedium.copy(lineHeight = 16.sp),
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
         )
     }
 }

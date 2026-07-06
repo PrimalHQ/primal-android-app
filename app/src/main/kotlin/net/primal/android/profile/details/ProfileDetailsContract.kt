@@ -27,6 +27,7 @@ interface ProfileDetailsContract {
         val isProfileFeedInActiveUserFeeds: Boolean = false,
         val profileDetails: ProfileDetailsUi? = null,
         val userFollowedByProfiles: List<ProfileDetailsUi> = emptyList(),
+        val isResolvingFollowedBy: Boolean = true,
         val profileStats: ProfileStatsUi? = null,
         val referencedProfilesData: Set<ProfileDetailsUi> = emptySet(),
         val profileFeedSpecs: List<ProfileFeedSpec> = listOf(
