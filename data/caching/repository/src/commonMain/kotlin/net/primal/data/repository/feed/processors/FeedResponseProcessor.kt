@@ -8,8 +8,8 @@ import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResourcesAndThumbnails
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
-import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.remote.applyPollStats
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
@@ -45,8 +45,9 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
 }
 
 internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: CachingDatabase) {
-    val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
-    val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
+    val cdnResourcesAndThumbnails = this.cdnResources.flatMapNotNullAsCdnResourcesAndThumbnails()
+    val cdnResources = cdnResourcesAndThumbnails.cdnResources.asMapByKey { it.url }
+    val videoThumbnails = cdnResourcesAndThumbnails.videoThumbnails
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
 

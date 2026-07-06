@@ -11,9 +11,8 @@ import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
-import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResourcesAndThumbnails
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
-import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.applyPollStats
@@ -177,9 +176,10 @@ class FeedPersistMappingBenchmark {
 
         with(response) {
             val cdn = timed("cdn_media_hints", cdnResources.size) {
+                val cdnResourcesAndThumbnails = cdnResources.flatMapNotNullAsCdnResourcesAndThumbnails()
                 Triple(
-                    cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url },
-                    cdnResources.flatMapNotNullAsVideoThumbnailsMap(),
+                    cdnResourcesAndThumbnails.cdnResources.asMapByKey { it.url },
+                    cdnResourcesAndThumbnails.videoThumbnails,
                     primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url },
                 )
             }
