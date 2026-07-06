@@ -49,6 +49,8 @@ abstract class PrimalActivity : FragmentActivity() {
 
     private val splashViewModel: SplashViewModel by viewModels()
 
+    protected open val prefetchFeedsOnSplash: Boolean = false
+
     private lateinit var primalTheme: PrimalTheme
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +59,8 @@ abstract class PrimalActivity : FragmentActivity() {
         }
 
         super.onCreate(savedInstanceState)
+
+        splashViewModel.start(prefetchFeeds = prefetchFeedsOnSplash)
 
         observeThemeChanges()
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
