@@ -200,13 +200,10 @@ class FeedPersistMappingBenchmark {
             val allArticles = arts.second
 
             val refPosts = timed("referenced_posts", referencedEvents.size) {
-                val withoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
-                val withReplyTo = referencedEvents.mapNotNullAsPostDataPO(
-                    referencedPosts = withoutReplyTo,
+                referencedEvents.mapNotNullAsPostDataPO(
                     referencedArticles = allArticles,
                     referencedHighlights = referencedHighlights,
                 )
-                withReplyTo
             }
             val feedPosts = timed("feed_posts_map", notes.size + polls.size) {
                 (notes + polls).mapAsPostDataPO(

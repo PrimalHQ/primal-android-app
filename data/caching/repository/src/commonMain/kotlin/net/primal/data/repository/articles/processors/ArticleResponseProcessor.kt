@@ -54,15 +54,13 @@ suspend inline fun ArticleResponse.persistToDatabase(userId: String, database: C
         cdnResources = cdnResources,
     )
     val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
-    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
-    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
-        referencedPosts = referencedPostsWithoutReplyTo,
+    val referencedPosts = referencedEvents.mapNotNullAsPostDataPO(
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
 
     val allNotes = this.notes.mapAsPostDataPO(
-        referencedPosts = referencedPostsWithReplyTo,
+        referencedPosts = referencedPosts,
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
@@ -81,7 +79,7 @@ suspend inline fun ArticleResponse.persistToDatabase(userId: String, database: C
     val eventUserStats = this.primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
     database.profiles().insertOrUpdateAll(data = profiles)
-    database.posts().upsertAll(data = allNotes + referencedPostsWithReplyTo)
+    database.posts().upsertAll(data = allNotes + referencedPosts)
     database.articles().upsertAll(list = allArticles)
     database.eventStats().upsertAll(data = eventStats)
     database.eventUserStats().upsertAll(data = eventUserStats)

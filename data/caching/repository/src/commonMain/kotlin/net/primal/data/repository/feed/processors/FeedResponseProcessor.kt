@@ -55,14 +55,12 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val referencedHighlights = this.referencedEvents.mapReferencedEventsAsHighlightDataPO()
     val allArticles = articles + referencedArticles
 
-    val referencedPostsWithoutReplyTo = referencedEvents.mapNotNullAsPostDataPO()
-    val referencedPostsWithReplyTo = referencedEvents.mapNotNullAsPostDataPO(
-        referencedPosts = referencedPostsWithoutReplyTo,
+    val referencedPosts = referencedEvents.mapNotNullAsPostDataPO(
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
     val feedPosts = (notes + polls).mapAsPostDataPO(
-        referencedPosts = referencedPostsWithReplyTo,
+        referencedPosts = referencedPosts,
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
@@ -87,7 +85,7 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
     val eventIdMap = profileIdToProfileDataMap.mapValues { it.value.eventId }
 
-    val allPosts = (referencedPostsWithReplyTo + feedPosts).map { postData ->
+    val allPosts = (referencedPosts + feedPosts).map { postData ->
         postData.copy(authorMetadataId = eventIdMap[postData.authorId])
     }
 

@@ -90,12 +90,9 @@ internal class MessagesProcessor(
                     userId = userId,
                     database = database,
                 )
-                val referencedPostsWithoutReplies = response.referencedEvents.mapNotNullAsPostDataPO()
-                val referencedPostsWithReplies = response.referencedEvents.mapNotNullAsPostDataPO(
-                    referencedPostsWithoutReplies,
-                )
+                val referencedPosts = response.referencedEvents.mapNotNullAsPostDataPO()
                 response.notes.mapAsPostDataPO(
-                    referencedPosts = referencedPostsWithReplies,
+                    referencedPosts = referencedPosts,
                     referencedArticles = emptyList(),
                     referencedHighlights = emptyList(),
                 )
