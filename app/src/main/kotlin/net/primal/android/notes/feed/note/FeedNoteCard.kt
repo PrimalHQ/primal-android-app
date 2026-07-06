@@ -299,7 +299,7 @@ private fun FeedNoteCard(
                     isBookmarked = data.isBookmarked,
                     isThreadMuted = data.isThreadMuted,
                     isNoteAuthor = data.authorId == LocalActiveAccountId.current,
-                    noteKind = data.rawKind,
+                    noteKind = data.kind,
                     isPoll = data.poll != null,
                     relayHints = state.relayHints,
                     enabled = noteOptionsMenuEnabled,

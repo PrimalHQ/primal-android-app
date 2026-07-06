@@ -1056,7 +1056,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         val relayHints = runCatching { relayHintsRepository.findRelaysByIds(listOf(this.postId)) }.getOrNull()
 
         return Nevent(
-            kind = this.rawKind ?: NostrEventKind.ShortTextNote.value,
+            kind = this.kind,
             userId = this.authorId,
             eventId = this.postId,
             relays = relayHints?.firstOrNull { it.eventId == this.postId }?.relays?.take(MAX_RELAY_HINTS)

@@ -87,7 +87,7 @@ fun NoteCardDialogs(
                 eventPublisher(
                     UiEvent.RequestDeleteAction(
                         noteId = data.postId,
-                        noteKind = data.rawKind,
+                        noteKind = data.kind,
                         userId = data.authorId,
                     ),
                 )
@@ -120,7 +120,7 @@ fun NoteCardDialogs(
                 eventPublisher(
                     UiEvent.RepostAction(
                         postId = data.postId,
-                        postKind = data.rawKind,
+                        postKind = data.kind,
                         postAuthorId = data.authorId,
                         postNostrEvent = data.rawNostrEventJson,
                     ),
@@ -130,7 +130,7 @@ fun NoteCardDialogs(
                 eventPublisher(
                     UiEvent.DeleteRepostAction(
                         postId = data.postId,
-                        postKind = data.rawKind,
+                        postKind = data.kind,
                         repostId = data.repostId,
                         repostAuthorId = data.repostAuthorId,
                     ),
