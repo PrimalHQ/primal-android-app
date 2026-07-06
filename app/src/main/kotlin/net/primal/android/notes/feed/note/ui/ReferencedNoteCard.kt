@@ -29,6 +29,7 @@ import net.primal.domain.nostr.NostrEventKind
 
 private val clickableNoteKinds = setOf(
     NostrEventKind.ShortTextNote.value,
+    NostrEventKind.Comment.value,
     NostrEventKind.Poll.value,
     NostrEventKind.ZapPoll.value,
 )

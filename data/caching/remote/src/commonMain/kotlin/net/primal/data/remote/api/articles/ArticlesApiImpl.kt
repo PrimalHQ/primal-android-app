@@ -28,7 +28,8 @@ internal class ArticlesApiImpl(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
-            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote) +
+                queryResult.filterNostrEvents(NostrEventKind.Comment),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),

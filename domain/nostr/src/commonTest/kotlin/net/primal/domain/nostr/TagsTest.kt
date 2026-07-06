@@ -131,6 +131,23 @@ class TagsTest {
     }
 
     @Test
+    fun `getPubkeyFromCommentEventTag reads pubkey at index three`() {
+        val tag = "eventId".asCommentEventIdTag(
+            relayHint = "wss://relay.primal.net",
+            authorPubkey = "authorId",
+        )
+
+        tag.getPubkeyFromCommentEventTag() shouldBe "authorId"
+    }
+
+    @Test
+    fun `getPubkeyFromCommentEventTag returns null when pubkey absent`() {
+        val tag = "eventId".asCommentEventIdTag(relayHint = null, authorPubkey = null)
+
+        tag.getPubkeyFromCommentEventTag() shouldBe null
+    }
+
+    @Test
     fun `asQuoteTag returns proper JsonArray tag`() {
         val actual = "eventId".asQuoteTag(
             relayHint = "wss://relay.primal.net",

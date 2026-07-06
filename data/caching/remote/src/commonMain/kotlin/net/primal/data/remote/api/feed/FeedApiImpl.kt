@@ -26,7 +26,8 @@ internal class FeedApiImpl(
         return FeedResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote) +
+                queryResult.filterNostrEvents(NostrEventKind.Comment),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNoteRepost),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -96,7 +97,8 @@ internal class FeedApiImpl(
         return FeedResponse(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote) +
+                queryResult.filterNostrEvents(NostrEventKind.Comment),
             polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
                 queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
@@ -134,7 +136,8 @@ internal class FeedApiImpl(
         return FeedResponse(
             paging = null,
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote) +
+                queryResult.filterNostrEvents(NostrEventKind.Comment),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),

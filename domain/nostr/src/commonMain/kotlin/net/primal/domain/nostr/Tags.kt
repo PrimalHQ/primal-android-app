@@ -124,6 +124,8 @@ fun JsonArray.getRelayFromReplyOrRootTag() = getOrNull(2)?.jsonPrimitive?.conten
 
 fun JsonArray.getPubkeyFromReplyOrRootTag() = getOrNull(4)?.jsonPrimitive?.content
 
+fun JsonArray.getPubkeyFromCommentEventTag() = getOrNull(3)?.jsonPrimitive?.content
+
 fun List<JsonArray>.findFirstStreaming() = firstOrNull { it.isStreamingTag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstStatus() = firstOrNull { it.isStatusTag() }?.getTagValueOrNull()

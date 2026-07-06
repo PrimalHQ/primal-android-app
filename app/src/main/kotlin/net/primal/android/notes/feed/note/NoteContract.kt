@@ -26,12 +26,14 @@ interface NoteContract {
 
         data class DeleteRepostAction(
             val postId: String,
+            val postKind: Int?,
             val repostId: String?,
             val repostAuthorId: String?,
         ) : UiEvent()
 
         data class RepostAction(
             val postId: String,
+            val postKind: Int?,
             val postAuthorId: String,
             val postNostrEvent: String,
         ) : UiEvent()
@@ -72,6 +74,7 @@ interface NoteContract {
 
         data class RequestDeleteAction(
             val noteId: String,
+            val noteKind: Int?,
             val userId: String,
         ) : UiEvent()
 

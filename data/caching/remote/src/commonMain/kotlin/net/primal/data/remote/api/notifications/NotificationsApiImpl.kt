@@ -55,7 +55,8 @@ class NotificationsApiImpl(
 
         return NotificationsResponse(
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
-            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote) +
+                queryResult.filterNostrEvents(NostrEventKind.Comment),
             primalNoteStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalReferencedNotes = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),

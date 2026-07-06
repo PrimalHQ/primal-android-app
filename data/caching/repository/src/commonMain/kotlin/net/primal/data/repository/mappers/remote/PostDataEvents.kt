@@ -10,10 +10,14 @@ import net.primal.domain.common.PrimalEvent
 import net.primal.domain.common.util.takeContentOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.findFirstKindTag
 import net.primal.domain.nostr.findReplyTargetId
+import net.primal.domain.nostr.getPubkeyFromCommentEventTag
 import net.primal.domain.nostr.getPubkeyFromReplyOrRootTag
+import net.primal.domain.nostr.getTagValueOrNull
 import net.primal.domain.nostr.hasReplyMarker
 import net.primal.domain.nostr.hasRootMarker
+import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.isIMetaTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
@@ -47,6 +51,7 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
 
     val postKinds = setOf(
         NostrEventKind.ShortTextNote.value,
+        NostrEventKind.Comment.value,
         NostrEventKind.Poll.value,
         NostrEventKind.ZapPoll.value,
     )
@@ -79,6 +84,21 @@ private fun NostrEvent.resolveReplyReference(
     referencedPostsMap: Map<String, PostData> = emptyMap(),
     referencedArticlesMap: Map<String, ArticleData> = emptyMap(),
     referencedHighlightsMap: Map<String, HighlightData> = emptyMap(),
+): ReplyReference =
+    if (this.kind == NostrEventKind.Comment.value) {
+        resolveCommentReplyReference(referencedPostsMap = referencedPostsMap)
+    } else {
+        resolveNoteReplyReference(
+            referencedPostsMap = referencedPostsMap,
+            referencedArticlesMap = referencedArticlesMap,
+            referencedHighlightsMap = referencedHighlightsMap,
+        )
+    }
+
+private fun NostrEvent.resolveNoteReplyReference(
+    referencedPostsMap: Map<String, PostData>,
+    referencedArticlesMap: Map<String, ArticleData>,
+    referencedHighlightsMap: Map<String, HighlightData>,
 ): ReplyReference {
     val referencedNoteId = this.tags.findReplyTargetId()
         ?: return ReplyReference(replyToPostId = null, replyToAuthorId = null)
@@ -90,6 +110,21 @@ private fun NostrEvent.resolveReplyReference(
         ?: referencedHighlightsMap[referencedNoteId]?.authorId
 
     return ReplyReference(replyToPostId = referencedNoteId, replyToAuthorId = referencedNoteAuthorId)
+}
+
+private fun NostrEvent.resolveCommentReplyReference(referencedPostsMap: Map<String, PostData>): ReplyReference {
+    val parentKind = this.tags.findFirstKindTag()?.toIntOrNull()
+    val parentEventTag = this.tags.lastOrNull { it.isEventIdTag() }
+    val parentEventId = parentEventTag?.getTagValueOrNull()
+
+    if (parentKind != NostrEventKind.Comment.value || parentEventId == null) {
+        return ReplyReference(replyToPostId = null, replyToAuthorId = null)
+    }
+
+    val parentAuthorId = parentEventTag.getPubkeyFromCommentEventTag()?.takeIf { it.isNotEmpty() }
+        ?: referencedPostsMap[parentEventId]?.authorId
+
+    return ReplyReference(replyToPostId = parentEventId, replyToAuthorId = parentAuthorId)
 }
 
 private fun NostrEvent.nostrEventAsPost(
