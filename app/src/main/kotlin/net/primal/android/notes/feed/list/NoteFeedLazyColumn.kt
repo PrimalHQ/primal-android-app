@@ -97,12 +97,14 @@ fun NoteFeedLazyColumn(
             }
         }
 
-        item(key = STREAM_PILLS_ROW_KEY) {
-            StreamPillsRow(
-                streamPills = streamPills,
-                onClick = { streamState.start(it) },
-                onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-            )
+        if (pagingItems.isNotEmpty()) {
+            item(key = STREAM_PILLS_ROW_KEY) {
+                StreamPillsRow(
+                    streamPills = streamPills,
+                    onClick = { streamState.start(it) },
+                    onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                )
+            }
         }
 
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
