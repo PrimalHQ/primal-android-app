@@ -28,7 +28,6 @@ fun HighlightPO.asHighlightDO(): HighlightDO {
                     authorId = it.post.authorId,
                     handle = it.author?.handle ?: it.post.authorId.asEllipsizedNpub(),
                     displayName = it.author?.displayName ?: it.post.authorId.asEllipsizedNpub(),
-                    rawNostrEvent = it.author?.raw,
                     internetIdentifier = it.author?.internetIdentifier,
                     avatarCdnImage = it.author?.avatarCdnImage,
                     legendProfile = it.author?.primalPremiumInfo?.legendProfile,

@@ -10,7 +10,6 @@ import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.events.EventZap
 import net.primal.domain.events.ZapKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
-import net.primal.domain.nostr.utils.formatNip05Identifier
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedPost as FeedPostDO
 import net.primal.domain.posts.FeedPostAuthor
@@ -48,7 +47,6 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             authorId = this.data.authorId,
             handle = this.author?.usernameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
             displayName = this.author?.authorNameUiFriendly() ?: this.data.authorId.asEllipsizedNpub(),
-            rawNostrEvent = this.author?.raw,
             internetIdentifier = this.author?.internetIdentifier,
             avatarCdnImage = this.author?.avatarCdnImage,
             legendProfile = this.author?.primalPremiumInfo?.legendProfile,
@@ -66,11 +64,6 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
                 authorId = replyToAuthor.ownerId,
                 handle = replyToAuthor.usernameUiFriendly(),
                 displayName = replyToAuthor.authorNameUiFriendly(),
-                rawNostrEvent = replyToAuthor.raw,
-                internetIdentifier = replyToAuthor.internetIdentifier?.formatNip05Identifier(),
-                avatarCdnImage = replyToAuthor.avatarCdnImage,
-                legendProfile = replyToAuthor.primalPremiumInfo?.legendProfile,
-                blossomServers = replyToAuthor.blossoms,
             )
         },
         reposts = this.data.repostId?.let { repostId ->

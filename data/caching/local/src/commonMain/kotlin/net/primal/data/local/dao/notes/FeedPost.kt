@@ -30,10 +30,11 @@ data class FeedPost(
     val nostrUris: List<EventUriNostr> = emptyList(),
 
     @Relation(
+        entity = ProfileData::class,
         entityColumns = ["ownerId"],
         parentColumns = ["authorId"],
     )
-    val author: ProfileData? = null,
+    val author: FeedAuthorLite? = null,
 
     @Relation(
         entityColumns = ["eventId"],
@@ -45,16 +46,18 @@ data class FeedPost(
     val userStats: FeedPostUserStats? = null,
 
     @Relation(
+        entity = ProfileData::class,
         entityColumns = ["ownerId"],
         parentColumns = ["repostAuthorId"],
     )
-    val repostAuthor: ProfileData? = null,
+    val repostAuthor: FeedAuthorNameLite? = null,
 
     @Relation(
+        entity = ProfileData::class,
         entityColumns = ["ownerId"],
         parentColumns = ["replyToAuthorId"],
     )
-    val replyToAuthor: ProfileData? = null,
+    val replyToAuthor: FeedAuthorNameLite? = null,
 
     @Relation(
         entityColumns = ["eventId"],
