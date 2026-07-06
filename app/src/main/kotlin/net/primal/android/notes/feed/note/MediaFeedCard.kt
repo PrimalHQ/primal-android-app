@@ -40,6 +40,8 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -54,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import java.text.NumberFormat
 import java.time.Instant
 import kotlinx.coroutines.delay
@@ -82,6 +86,7 @@ import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.TextMatcher
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -439,6 +444,7 @@ private fun MediaFeedPager(
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val pagerHeight = findMediaFeedCardMediaSize(eventUri = mediaUris.first()).height
+        val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
 
         Column {
             HorizontalPager(
@@ -466,8 +472,12 @@ private fun MediaFeedPager(
                         couldAutoPlay = couldAutoPlay && pagerState.currentPage == page,
                     )
                 } else {
+                    val variantUrl = media.variants.findNearestOrNull(maxWidthPx = maxWidthPx)?.mediaUrl ?: media.url
                     PrimalAsyncImage(
-                        model = media.url,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(variantUrl)
+                            .placeholderMemoryCacheKey(MemoryCache.Key(variantUrl))
+                            .build(),
                         modifier = Modifier
                             .fillMaxSize()
                             .then(
