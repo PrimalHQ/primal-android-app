@@ -224,6 +224,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     private fun fetchProfileFollowedBy(profileId: String) =
         viewModelScope.launch {
+            setState { copy(isResolvingFollowedBy = true) }
             try {
                 val profiles = profileRepository.fetchUserProfileFollowedBy(
                     profileId = profileId,
@@ -241,6 +242,8 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
             } catch (error: NetworkException) {
                 Napier.e(throwable = error) { "Failed to fetch profiles followed by" }
+            } finally {
+                setState { copy(isResolvingFollowedBy = false) }
             }
         }
 
