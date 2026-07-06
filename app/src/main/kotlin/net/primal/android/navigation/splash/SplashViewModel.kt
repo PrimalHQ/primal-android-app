@@ -72,6 +72,6 @@ class SplashViewModel @Inject constructor(
         }
 
     companion object {
-        private val FEEDS_PREFETCH_TIMEOUT = 5.seconds
+        private val FEEDS_PREFETCH_TIMEOUT = 2.seconds
     }
 }
