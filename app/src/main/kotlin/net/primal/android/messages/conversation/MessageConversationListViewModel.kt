@@ -37,23 +37,21 @@ import net.primal.domain.nostr.cryptography.SignResult
 
 @HiltViewModel
 class MessageConversationListViewModel @Inject constructor(
-    dispatcherProvider: DispatcherProvider,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val subscriptionsManager: SubscriptionsManager,
     private val chatRepository: ChatRepository,
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
 
+    private val conversationsPagerCache = ConversationRelation.entries.associateWith { relation ->
+        buildConversationsPager(relation = relation)
+    }
+
     private val _state = MutableStateFlow(
         value = UiState(
             activeRelation = ConversationRelation.Follows,
-            conversations = chatRepository
-                .newestConversations(
-                    userId = activeAccountStore.activeUserId(),
-                    relation = ConversationRelation.Follows,
-                )
-                .mapAsPagingDataOfMessageConversationUi()
-                .cachedIn(viewModelScope + dispatcherProvider.io()),
+            conversations = conversationsPagerCache.getValue(ConversationRelation.Follows),
         ),
     )
     val state = _state.asStateFlow()
@@ -113,13 +111,17 @@ class MessageConversationListViewModel @Inject constructor(
             }
         }
 
+    private fun buildConversationsPager(relation: ConversationRelation) =
+        chatRepository
+            .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
+            .mapAsPagingDataOfMessageConversationUi()
+            .cachedIn(viewModelScope + dispatcherProvider.io())
+
     private fun changeRelation(relation: ConversationRelation) {
         setState {
             copy(
                 activeRelation = relation,
-                conversations = chatRepository
-                    .newestConversations(userId = activeAccountStore.activeUserId(), relation = relation)
-                    .mapAsPagingDataOfMessageConversationUi(),
+                conversations = conversationsPagerCache.getValue(relation),
             )
         }
     }
