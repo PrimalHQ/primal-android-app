@@ -27,6 +27,8 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
@@ -112,9 +114,14 @@ class NoteViewModel @AssistedInject constructor(
                     is UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.UpdateAutoPlayVideoSoundPreference -> updateVideoSoundSettings(it.soundOn)
-                    is UiEvent.RequestDeleteAction -> requestDelete(noteId = it.noteId, userId = it.userId)
+                    is UiEvent.RequestDeleteAction -> requestDelete(
+                        noteId = it.noteId,
+                        noteKind = it.noteKind,
+                        userId = it.userId,
+                    )
                     is UiEvent.DeleteRepostAction -> requestDeleteRepost(
                         postId = it.postId,
+                        postKind = it.postKind,
                         repostId = it.repostId,
                         repostAuthorId = it.repostAuthorId,
                     )
@@ -155,7 +162,7 @@ class NoteViewModel @AssistedInject constructor(
                     userId = activeAccountStore.activeUserId(),
                     eventId = repostAction.postId,
                     eventAuthorId = repostAction.postAuthorId,
-                    eventKind = NostrEventKind.ShortTextNote.value,
+                    eventKind = repostAction.postKind ?: NostrEventKind.ShortTextNote.value,
                     eventRawNostrEvent = repostAction.postNostrEvent,
                 )
             } catch (error: NostrPublishException) {
@@ -308,37 +315,49 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
-    private fun requestDelete(noteId: String, userId: String) =
-        viewModelScope.launch {
-            if (userId != activeAccountStore.activeUserId()) return@launch
+    private fun requestDelete(
+        noteId: String,
+        noteKind: Int?,
+        userId: String,
+    ) = viewModelScope.launch {
+        if (userId != activeAccountStore.activeUserId()) return@launch
 
-            try {
-                eventInteractionRepository.deleteEvent(
-                    userId = userId,
-                    eventIdentifier = noteId,
-                    eventKind = NostrEventKind.ShortTextNote,
-                    relayHint = state.value.relayHints.firstOrNull(),
-                )
-
-                feedRepository.deletePostById(postId = noteId, userId = activeAccountStore.activeUserId())
-                setEffect(SideEffect.NoteDeleted)
-            } catch (error: NostrPublishException) {
-                Napier.w(throwable = error) { "Failed to delete note due to nostr publish error." }
-                setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
-            } catch (error: MissingRelaysException) {
-                Napier.w(throwable = error) { "Failed to delete note due to missing relays." }
-                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: SigningKeyNotFoundException) {
-                setState { copy(error = UiError.MissingPrivateKey) }
-                Napier.w(throwable = error) { "Failed to delete note due to signing key not found." }
-            } catch (error: SigningRejectedException) {
-                setState { copy(error = UiError.NostrSignUnauthorized) }
-                Napier.w(throwable = error) { "Failed to delete note due to signing rejection." }
+        runCatching {
+            eventInteractionRepository.deleteEvent(
+                userId = userId,
+                eventIdentifier = noteId,
+                eventKind = noteKind?.let { NostrEventKind.valueOf(it) } ?: NostrEventKind.ShortTextNote,
+                relayHint = state.value.relayHints.firstOrNull(),
+            )
+            feedRepository.deletePostById(postId = noteId, userId = activeAccountStore.activeUserId())
+        }.onSuccess {
+            setEffect(SideEffect.NoteDeleted)
+        }.onFailure { error ->
+            when (error) {
+                is NostrPublishException -> {
+                    Napier.w(throwable = error) { "Failed to delete note due to nostr publish error." }
+                    setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
+                }
+                is MissingRelaysException -> {
+                    Napier.w(throwable = error) { "Failed to delete note due to missing relays." }
+                    setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+                }
+                is SigningKeyNotFoundException -> {
+                    setState { copy(error = UiError.MissingPrivateKey) }
+                    Napier.w(throwable = error) { "Failed to delete note due to signing key not found." }
+                }
+                is SigningRejectedException -> {
+                    setState { copy(error = UiError.NostrSignUnauthorized) }
+                    Napier.w(throwable = error) { "Failed to delete note due to signing rejection." }
+                }
+                else -> Napier.w(throwable = error) { "Failed to delete note." }
             }
         }
+    }
 
     private fun requestDeleteRepost(
         postId: String,
+        postKind: Int?,
         repostId: String?,
         repostAuthorId: String?,
     ) = viewModelScope.launch {
@@ -352,31 +371,44 @@ class NoteViewModel @AssistedInject constructor(
             repostId to repostAuthorId
         }
 
-        try {
+        val repostKind = if (postKind == null || postKind == NostrEventKind.ShortTextNote.value) {
+            NostrEventKind.ShortTextNoteRepost
+        } else {
+            NostrEventKind.GenericRepost
+        }
+
+        runCatching {
             eventInteractionRepository.deleteEvent(
                 userId = resolvedRepostAuthorId,
                 eventIdentifier = resolvedRepostId,
-                eventKind = NostrEventKind.ShortTextNoteRepost,
+                eventKind = repostKind,
                 relayHint = state.value.relayHints.firstOrNull(),
             )
-
             feedRepository.deleteRepostById(
                 postId = postId,
                 repostId = resolvedRepostId,
                 userId = resolvedRepostAuthorId,
             )
-        } catch (error: NostrPublishException) {
-            Napier.w(throwable = error) { "Failed to delete repost due to nostr publish error." }
-            setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
-        } catch (error: MissingRelaysException) {
-            Napier.w(throwable = error) { "Failed to delete repost due to missing relays." }
-            setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-        } catch (error: SigningKeyNotFoundException) {
-            setState { copy(error = UiError.MissingPrivateKey) }
-            Napier.w(throwable = error) { "Failed to delete repost due to signing key not found." }
-        } catch (error: SigningRejectedException) {
-            setState { copy(error = UiError.NostrSignUnauthorized) }
-            Napier.w(throwable = error) { "Failed to delete repost due to signing rejection." }
+        }.onFailure { error ->
+            when (error) {
+                is NostrPublishException -> {
+                    Napier.w(throwable = error) { "Failed to delete repost due to nostr publish error." }
+                    setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
+                }
+                is MissingRelaysException -> {
+                    Napier.w(throwable = error) { "Failed to delete repost due to missing relays." }
+                    setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+                }
+                is SigningKeyNotFoundException -> {
+                    setState { copy(error = UiError.MissingPrivateKey) }
+                    Napier.w(throwable = error) { "Failed to delete repost due to signing key not found." }
+                }
+                is SigningRejectedException -> {
+                    setState { copy(error = UiError.NostrSignUnauthorized) }
+                    Napier.w(throwable = error) { "Failed to delete repost due to signing rejection." }
+                }
+                else -> Napier.w(throwable = error) { "Failed to delete repost." }
+            }
         }
     }
 

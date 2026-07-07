@@ -59,6 +59,7 @@ fun NoteDropdownMenuIcon(
     isBookmarked: Boolean,
     isThreadMuted: Boolean,
     isNoteAuthor: Boolean,
+    noteKind: Int? = null,
     isPoll: Boolean = false,
     relayHints: List<String> = emptyList(),
     noteGraphicsLayer: GraphicsLayer,
@@ -194,7 +195,7 @@ fun NoteDropdownMenuIcon(
                 onClick = {
                     val nevent = Nevent(
                         eventId = noteId,
-                        kind = NostrEventKind.ShortTextNote.value,
+                        kind = noteKind ?: NostrEventKind.ShortTextNote.value,
                         userId = authorId,
                         relays = relayHints,
                     ).toNeventString()

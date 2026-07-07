@@ -196,6 +196,7 @@ private fun NotificationFilterPage(
             noteEventPublisher(
                 NoteContract.UiEvent.RepostAction(
                     postId = it.postId,
+                    postKind = it.kind,
                     postAuthorId = it.authorId,
                     postNostrEvent = it.rawNostrEventJson,
                 ),
@@ -205,6 +206,7 @@ private fun NotificationFilterPage(
             noteEventPublisher(
                 NoteContract.UiEvent.DeleteRepostAction(
                     postId = it.postId,
+                    postKind = it.kind,
                     repostId = it.repostId,
                     repostAuthorId = it.repostAuthorId,
                 ),

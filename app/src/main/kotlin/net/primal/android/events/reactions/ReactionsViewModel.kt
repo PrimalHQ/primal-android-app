@@ -20,6 +20,8 @@ import net.primal.android.navigation.articleATag
 import net.primal.android.navigation.eventIdOrThrow
 import net.primal.android.navigation.reactionTypeOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.NostrEventAction
@@ -73,18 +75,20 @@ class ReactionsViewModel @Inject constructor(
 
     private fun fetchReposts() =
         viewModelScope.launch {
-            try {
-                setState { copy(loading = true) }
+            setState { copy(loading = true) }
+            runCatching {
                 val reposts = eventRepository.fetchEventActions(
                     eventId = eventId,
                     kind = NostrEventKind.ShortTextNoteRepost.value,
+                ) + eventRepository.fetchEventActions(
+                    eventId = eventId,
+                    kind = NostrEventKind.GenericRepost.value,
                 )
                 setState { copy(reposts = reposts.map { it.mapAsEventActionUi() }) }
-            } catch (error: NetworkException) {
+            }.onFailure { error ->
                 Napier.e(throwable = error) { "Failed to fetch reposts for eventId=$eventId" }
-            } finally {
-                setState { copy(loading = false) }
             }
+            setState { copy(loading = false) }
         }
 
     private fun NostrEventAction.mapAsEventActionUi(): EventActionUi {

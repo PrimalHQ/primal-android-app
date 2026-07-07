@@ -23,16 +23,25 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asClientTag
 import net.primal.domain.nostr.asClosedAtTag
+import net.primal.domain.nostr.asCommentEventIdTag
+import net.primal.domain.nostr.asCommentEventTag
 import net.primal.domain.nostr.asEndsAtTag
 import net.primal.domain.nostr.asEventTag
+import net.primal.domain.nostr.asKindTag
 import net.primal.domain.nostr.asOptionTag
 import net.primal.domain.nostr.asPollOptionTag
 import net.primal.domain.nostr.asPollTypeTag
 import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asQuoteTag
 import net.primal.domain.nostr.asRelayTag
 import net.primal.domain.nostr.asReplaceableEventTag
+import net.primal.domain.nostr.asRootKindTag
+import net.primal.domain.nostr.asRootPubkeyTag
+import net.primal.domain.nostr.asRootReplaceableEventTag
 import net.primal.domain.nostr.asValueMaximumTag
 import net.primal.domain.nostr.asValueMinimumTag
+import net.primal.domain.nostr.getPubkeyFromReplyOrRootTag
+import net.primal.domain.nostr.getRelayFromReplyOrRootTag
 import net.primal.domain.nostr.isPubKeyTag
 import net.primal.domain.nostr.parseEventTags
 import net.primal.domain.nostr.parseHashtagTags
@@ -55,15 +64,19 @@ class NotePublishHandler @Inject constructor(
         attachments: List<NoteAttachment>,
         rootNoteNevent: Nevent?,
         rootArticleNaddr: Naddr?,
+        rootArticleEventId: String? = null,
         rootHighlightNevent: Nevent?,
         replyToNoteNevent: Nevent?,
+        publishAsComment: Boolean = false,
     ): PreparedNote {
         val noteContent = content.ensureWhitespaceBeforeUserTag()
 
         /* Event mentions from content */
         val mentionEventTags = noteContent.parseEventTags(marker = "mention")
         val mentionReplaceableEventTags = noteContent.parseReplaceableEventTags(marker = "mention")
-        val allMentionedEventTags = mentionEventTags + mentionReplaceableEventTags
+        val allMentionedEventTags = (mentionEventTags + mentionReplaceableEventTags)
+            .map { if (publishAsComment) it.asQuoteTagFromMentionTag() else it }
+            .toSet()
 
         /* Pubkey mentions from content and referenced pub keys */
         val mentionPubkeyTags = noteContent.parsePubkeyTags(marker = "mention").toSet()
@@ -76,17 +89,27 @@ class NotePublishHandler @Inject constructor(
         val allPubkeyTags = mentionPubkeyTags + referencedPubkeyTags
 
         /* Reply & Root tags */
-        val replyEventTag = resolveReplyEventTag(
-            rootNote = rootNoteNevent,
-            replyTo = replyToNoteNevent,
-            rootHighlight = rootHighlightNevent,
-            rootArticle = rootArticleNaddr,
-        )
-        val rootTag = resolveRootEventTag(
-            highlight = rootHighlightNevent,
-            article = rootArticleNaddr,
-            note = rootNoteNevent,
-        )
+        val threadTags = if (publishAsComment && rootArticleNaddr != null) {
+            buildCommentTags(
+                article = rootArticleNaddr,
+                articleEventId = rootArticleEventId,
+                replyTo = replyToNoteNevent,
+            )
+        } else {
+            listOfNotNull(
+                resolveReplyEventTag(
+                    rootNote = rootNoteNevent,
+                    replyTo = replyToNoteNevent,
+                    rootHighlight = rootHighlightNevent,
+                    rootArticle = rootArticleNaddr,
+                ),
+                resolveRootEventTag(
+                    highlight = rootHighlightNevent,
+                    article = rootArticleNaddr,
+                    note = rootNoteNevent,
+                ),
+            )
+        }
 
         /* Hashtag tags */
         val hashtagTags = noteContent.parseHashtagTags().toSet()
@@ -95,7 +118,7 @@ class NotePublishHandler @Inject constructor(
         val iMetaTags = attachments.filter { it.isMediaAttachment }.map { it.asIMetaTag() }
 
         /* Relay Hints */
-        val allReferenceTags = (allMentionedEventTags + allPubkeyTags + replyEventTag + rootTag).filterNotNull().toSet()
+        val allReferenceTags = (allMentionedEventTags + allPubkeyTags + threadTags).toSet()
         val relayHintsMap = withContext(dispatcherProvider.io()) {
             val tagNoteIds = allReferenceTags.map { it.get(index = 1).jsonPrimitive.content }
             val hints = eventRelayHintsRepository.findRelaysByIds(eventIds = tagNoteIds)
@@ -121,29 +144,36 @@ class NotePublishHandler @Inject constructor(
     }
 
     @Throws(NostrPublishException::class)
+    @Suppress("LongParameterList")
     suspend fun publishShortTextNote(
         userId: String,
         content: String,
         attachments: List<NoteAttachment> = emptyList(),
         rootNoteNevent: Nevent? = null,
         rootArticleNaddr: Naddr? = null,
+        rootArticleEventId: String? = null,
         rootHighlightNevent: Nevent? = null,
         replyToNoteNevent: Nevent? = null,
     ): PrimalPublishResult {
+        val publishAsComment = rootHighlightNevent == null && rootArticleNaddr != null &&
+            (replyToNoteNevent == null || replyToNoteNevent.kind == NostrEventKind.Comment.value)
+
         val prepared = prepareNote(
             content = content,
             attachments = attachments,
             rootNoteNevent = rootNoteNevent,
             rootArticleNaddr = rootArticleNaddr,
+            rootArticleEventId = rootArticleEventId,
             rootHighlightNevent = rootHighlightNevent,
             replyToNoteNevent = replyToNoteNevent,
+            publishAsComment = publishAsComment,
         )
 
         return withContext(dispatcherProvider.io()) {
             nostrPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
-                    kind = NostrEventKind.ShortTextNote.value,
+                    kind = if (publishAsComment) NostrEventKind.Comment.value else NostrEventKind.ShortTextNote.value,
                     tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags).toList() +
                         listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
                     content = prepared.refinedContent,
@@ -264,6 +294,38 @@ class NotePublishHandler @Inject constructor(
 
         return tags
     }
+
+    private fun buildCommentTags(
+        article: Naddr,
+        articleEventId: String?,
+        replyTo: Nevent?,
+    ): List<JsonArray> =
+        buildList {
+            add(article.asRootReplaceableEventTag())
+            add(NostrEventKind.LongFormContent.asRootKindTag())
+            add(article.asRootPubkeyTag())
+            if (replyTo != null) {
+                add(replyTo.asCommentEventTag())
+                add((replyTo.kind?.let { NostrEventKind.valueOf(it) } ?: NostrEventKind.Comment).asKindTag())
+            } else {
+                add(article.asReplaceableEventTag())
+                articleEventId?.let {
+                    add(
+                        it.asCommentEventIdTag(
+                            relayHint = article.relays.firstOrNull(),
+                            authorPubkey = article.userId,
+                        ),
+                    )
+                }
+                add(NostrEventKind.LongFormContent.asKindTag())
+            }
+        }
+
+    private fun JsonArray.asQuoteTagFromMentionTag(): JsonArray =
+        this[1].jsonPrimitive.content.asQuoteTag(
+            relayHint = getRelayFromReplyOrRootTag()?.takeIf { it.isNotEmpty() },
+            authorPubkey = getPubkeyFromReplyOrRootTag()?.takeIf { it.isNotEmpty() },
+        )
 
     private fun resolveRootEventTag(
         highlight: Nevent?,

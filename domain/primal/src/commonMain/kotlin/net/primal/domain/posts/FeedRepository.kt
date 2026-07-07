@@ -74,6 +74,7 @@ interface FeedRepository {
 
         val DEFAULT_THREAD_KINDS = listOf(
             NostrEventKind.ShortTextNote.value,
+            NostrEventKind.Comment.value,
             NostrEventKind.PictureNote.value,
             NostrEventKind.Poll.value,
             NostrEventKind.PollResponse.value,

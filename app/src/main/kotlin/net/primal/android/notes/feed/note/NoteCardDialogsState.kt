@@ -84,7 +84,13 @@ fun NoteCardDialogs(
             dialogText = stringResource(id = R.string.context_confirm_delete_note_text),
             onConfirmation = {
                 dialogsState.showDeleteDialog = false
-                eventPublisher(UiEvent.RequestDeleteAction(noteId = data.postId, userId = data.authorId))
+                eventPublisher(
+                    UiEvent.RequestDeleteAction(
+                        noteId = data.postId,
+                        noteKind = data.kind,
+                        userId = data.authorId,
+                    ),
+                )
             },
             onDismissRequest = { dialogsState.showDeleteDialog = false },
         )
@@ -114,6 +120,7 @@ fun NoteCardDialogs(
                 eventPublisher(
                     UiEvent.RepostAction(
                         postId = data.postId,
+                        postKind = data.kind,
                         postAuthorId = data.authorId,
                         postNostrEvent = data.rawNostrEventJson,
                     ),
@@ -123,6 +130,7 @@ fun NoteCardDialogs(
                 eventPublisher(
                     UiEvent.DeleteRepostAction(
                         postId = data.postId,
+                        postKind = data.kind,
                         repostId = data.repostId,
                         repostAuthorId = data.repostAuthorId,
                     ),

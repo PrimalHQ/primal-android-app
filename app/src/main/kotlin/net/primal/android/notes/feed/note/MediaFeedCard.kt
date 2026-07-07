@@ -413,6 +413,7 @@ private fun MediaFeedHeader(
             isBookmarked = data.isBookmarked,
             isThreadMuted = data.isThreadMuted,
             isNoteAuthor = data.authorId == LocalActiveAccountId.current,
+            noteKind = data.kind,
             isPoll = data.poll != null,
             relayHints = state.relayHints,
             noteGraphicsLayer = graphicsLayer,

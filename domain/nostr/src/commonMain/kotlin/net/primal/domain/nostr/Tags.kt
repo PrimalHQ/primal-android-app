@@ -124,6 +124,8 @@ fun JsonArray.getRelayFromReplyOrRootTag() = getOrNull(2)?.jsonPrimitive?.conten
 
 fun JsonArray.getPubkeyFromReplyOrRootTag() = getOrNull(4)?.jsonPrimitive?.content
 
+fun JsonArray.getPubkeyFromCommentEventTag() = getOrNull(3)?.jsonPrimitive?.content
+
 fun List<JsonArray>.findFirstStreaming() = firstOrNull { it.isStreamingTag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findFirstStatus() = firstOrNull { it.isStatusTag() }?.getTagValueOrNull()
@@ -215,6 +217,53 @@ fun NostrEventKind.asKindTag(): JsonArray =
         add("k")
         add(this@asKindTag.value.toString())
     }
+
+fun NostrEventKind.asRootKindTag(): JsonArray =
+    buildJsonArray {
+        add("K")
+        add(this@asRootKindTag.value.toString())
+    }
+
+fun String.asRootPubkeyTag(relayHint: String? = null): JsonArray =
+    buildJsonArray {
+        add("P")
+        add(this@asRootPubkeyTag)
+        add(relayHint ?: "")
+    }.removeTrailingEmptyStrings()
+
+fun Naddr.asRootPubkeyTag(): JsonArray = this.userId.asRootPubkeyTag(relayHint = this.relays.firstOrNull())
+
+fun String.asRootReplaceableEventTag(relayHint: String? = null): JsonArray =
+    buildJsonArray {
+        add("A")
+        add(this@asRootReplaceableEventTag)
+        add(relayHint ?: "")
+    }.removeTrailingEmptyStrings()
+
+fun Naddr.asRootReplaceableEventTag(): JsonArray =
+    this.asATagValue().asRootReplaceableEventTag(relayHint = this.relays.firstOrNull())
+
+fun String.asCommentEventIdTag(relayHint: String? = null, authorPubkey: String? = null): JsonArray =
+    buildJsonArray {
+        add("e")
+        add(this@asCommentEventIdTag)
+        add(relayHint ?: "")
+        add(authorPubkey ?: "")
+    }.removeTrailingEmptyStrings()
+
+fun Nevent.asCommentEventTag(): JsonArray =
+    this.eventId.asCommentEventIdTag(
+        relayHint = this.relays.firstOrNull(),
+        authorPubkey = this.userId,
+    )
+
+fun String.asQuoteTag(relayHint: String? = null, authorPubkey: String? = null): JsonArray =
+    buildJsonArray {
+        add("q")
+        add(this@asQuoteTag)
+        add(relayHint ?: "")
+        add(authorPubkey ?: "")
+    }.removeTrailingEmptyStrings()
 
 fun String.asEventIdTag(
     relayHint: String? = null,
