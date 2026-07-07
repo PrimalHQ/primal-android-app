@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
@@ -78,7 +79,7 @@ class NoteFeedViewModel @AssistedInject constructor(
             allowMutedThreads = allowMutedThreads,
         )
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
-            .cachedIn(viewModelScope)
+            .cachedIn(viewModelScope + dispatcherProvider.io())
 
     private val _state = MutableStateFlow(UiState(notes = buildFeedByDirective(feedSpec)))
     val state = _state.asStateFlow()

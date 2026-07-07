@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.core.logging.AppLogPreferences
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.main.wallet.WalletDashboardContract.UiEvent
@@ -37,6 +38,7 @@ import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
@@ -57,6 +59,7 @@ class WalletDashboardViewModel @Inject constructor(
     appLogPreferences: AppLogPreferences,
     userRepository: UserRepository,
     pendingDepositsSyncerFactory: PendingDepositsSyncerFactory,
+    private val dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
     private val walletRepository: WalletRepository,
@@ -180,7 +183,7 @@ class WalletDashboardViewModel @Inject constructor(
                             walletRepository
                                 .latestTransactions(walletId = walletId)
                                 .mapAsPagingDataOfTransactionUi()
-                                .cachedIn(viewModelScope)
+                                .cachedIn(viewModelScope + dispatcherProvider.io())
                         } else {
                             null
                         }

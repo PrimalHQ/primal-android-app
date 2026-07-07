@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.isOnlyEmoji
@@ -60,7 +61,7 @@ class NotificationsViewModel @Inject constructor(
             notificationRepository
                 .observeSeenNotifications(userId = activeAccountStore.activeUserId(), group = group)
                 .map { it.map { notification -> notification.asNotificationUi() } }
-                .cachedIn(viewModelScope)
+                .cachedIn(viewModelScope + dispatcherProvider.io())
         }
 
     private val unseenCache: Map<NotificationGroup, Flow<List<List<NotificationUi>>>> =
