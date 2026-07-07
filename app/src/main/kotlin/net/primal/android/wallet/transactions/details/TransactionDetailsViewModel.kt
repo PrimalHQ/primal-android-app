@@ -11,8 +11,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
@@ -155,9 +156,10 @@ class TransactionDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 .filter { it.isNotEmpty() }
-                .mapNotNull { conversation -> conversation.first { it.eventId == noteId } }
+                .map { conversation -> conversation.first { it.eventId == noteId }.asFeedPostUi() }
+                .flowOn(dispatcherProvider.io())
                 .collect {
-                    setState { copy(feedPost = it.asFeedPostUi()) }
+                    setState { copy(feedPost = it) }
                 }
         }
 

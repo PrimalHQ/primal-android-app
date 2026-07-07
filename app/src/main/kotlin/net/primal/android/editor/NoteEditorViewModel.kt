@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -54,6 +55,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.fetchAndGet
 import net.primal.core.utils.fetchAndGetResult
 import net.primal.core.utils.fold
@@ -103,6 +105,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val relayHintsRepository: EventRelayHintsRepository,
     private val eventRepository: EventRepository,
     private val gifBlossomUploader: GifBlossomUploader,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     private val userMentionHandler = userMentionHandlerFactory.create(
@@ -523,6 +526,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
+                .flowOn(dispatcherProvider.io())
                 .collect { conversation ->
                     val replyToNoteIndex = conversation.indexOfFirst { it.postId == replyToNoteId }
                     val thread = conversation.subList(0, replyToNoteIndex + 1)

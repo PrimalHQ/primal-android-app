@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.articles.highlights.JoinedHighlightsUi
@@ -34,6 +36,7 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
@@ -79,6 +82,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
     private val walletAccountRepository: WalletAccountRepository,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -172,7 +176,7 @@ class ArticleDetailsViewModel @Inject constructor(
         }
 
     private fun observeArticle(naddr: Naddr) =
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.io()) {
             var referencedNotesUris: Set<String> = emptySet()
             var referencedProfileUris: Set<String> = emptySet()
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
@@ -186,9 +190,10 @@ class ArticleDetailsViewModel @Inject constructor(
                         val referencedNotes = feedRepository.findAllPostsByIds(
                             postIds = nostrNoteUris.mapNotNull { it.extractNoteId() },
                         )
+                        val referencedNotesUi = referencedNotes.map { it.asFeedPostUi() }
                         setState {
                             copy(
-                                referencedNotes = referencedNotes.map { it.asFeedPostUi() },
+                                referencedNotes = referencedNotesUi,
                             )
                         }
                     }
@@ -233,9 +238,9 @@ class ArticleDetailsViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
                 articleId = naddr.identifier,
                 articleAuthorId = naddr.userId,
-            ).collect { comments ->
-                setState { copy(comments = comments.map { it.asFeedPostUi() }) }
-            }
+            ).map { comments -> comments.map { it.asFeedPostUi() } }
+                .flowOn(dispatcherProvider.io())
+                .collect { setState { copy(comments = it) } }
         }
 
     private fun observeActiveAccount() =
