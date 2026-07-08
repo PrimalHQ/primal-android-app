@@ -155,6 +155,7 @@ private fun AvatarThumbnailListItemImage(
             hasOuterBorder = hasOuterBorder,
             hasInnerBorder = hasInnerBorder,
         )
+        .background(color = backgroundColor)
 
     val blossomUrls = resolveBlossomUrls(originalUrl = sourceUrl, blossoms = blossoms)
     val imageUrls = ((listOfNotNull(cdnVariantUrl, sourceUrl) + blossomUrls)).distinct()
