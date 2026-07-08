@@ -417,25 +417,37 @@ private fun ProfileFollowIndicators(
             style = AppTheme.typography.labelLarge,
         )
 
+        FollowsYouBadge(isProfileFollowingMe = isProfileFollowingMe)
+    }
+}
+
+@Composable
+private fun FollowsYouBadge(isProfileFollowingMe: Boolean) {
+    Box(
+        modifier = Modifier
+            .height(20.dp)
+            .then(
+                if (isProfileFollowingMe) {
+                    Modifier
+                        .clip(AppTheme.shapes.extraLarge)
+                        .background(
+                            color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                            shape = AppTheme.shapes.extraSmall,
+                        )
+                        .padding(horizontal = 12.dp)
+                        .padding(top = 0.5.dp)
+                } else {
+                    Modifier
+                },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
         if (isProfileFollowingMe) {
-            Box(
-                modifier = Modifier
-                    .height(20.dp)
-                    .clip(AppTheme.shapes.extraLarge)
-                    .background(
-                        color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                        shape = AppTheme.shapes.extraSmall,
-                    )
-                    .padding(horizontal = 12.dp)
-                    .padding(top = 0.5.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.profile_follows_you).lowercase(),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    style = AppTheme.typography.bodySmall,
-                )
-            }
+            Text(
+                text = stringResource(id = R.string.profile_follows_you).lowercase(),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                style = AppTheme.typography.bodySmall,
+            )
         }
     }
 }
