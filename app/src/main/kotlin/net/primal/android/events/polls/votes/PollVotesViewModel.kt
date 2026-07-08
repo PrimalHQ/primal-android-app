@@ -20,12 +20,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.core.compose.profile.model.asUserProfileItemUi
 import net.primal.android.events.polls.votes.PollVotesContract.UiEvent
 import net.primal.android.events.polls.votes.PollVotesContract.UiState
 import net.primal.android.events.polls.votes.model.PollVoterUi
 import net.primal.android.navigation.eventIdOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
 import net.primal.domain.polls.PollVoter
@@ -35,6 +37,7 @@ import net.primal.domain.polls.PollsRepository
 @OptIn(ExperimentalCoroutinesApi::class)
 class PollVotesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val pollsRepository: PollsRepository,
 ) : ViewModel() {
@@ -56,7 +59,7 @@ class PollVotesViewModel @Inject constructor(
             pollsRepository.createVotersPager(eventId = eventId, optionId = optionId)
                 .map { pagingData -> pagingData.map { voter -> voter.toUi() } }
         }
-        .cachedIn(viewModelScope)
+        .cachedIn(viewModelScope + dispatcherProvider.io())
 
     init {
         observeEvents()

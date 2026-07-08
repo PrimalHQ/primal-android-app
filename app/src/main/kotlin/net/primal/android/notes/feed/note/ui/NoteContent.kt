@@ -18,8 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,17 +26,22 @@ import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.PrimalClickableText
-import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Document
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.core.compose.zaps.ReferencedZap
-import net.primal.android.core.utils.TextMatch
-import net.primal.android.core.utils.TextMatcher
+import net.primal.android.notes.feed.model.HASHTAG_ANNOTATION_TAG
+import net.primal.android.notes.feed.model.NOSTR_ADDRESS_ANNOTATION_TAG
+import net.primal.android.notes.feed.model.NOTE_ANNOTATION_TAG
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
+import net.primal.android.notes.feed.model.PROFILE_ID_ANNOTATION_TAG
+import net.primal.android.notes.feed.model.RenderedNoteContent
+import net.primal.android.notes.feed.model.URL_ANNOTATION_TAG
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
+import net.primal.android.notes.feed.model.computeRenderedNoteContent
+import net.primal.android.notes.feed.model.toAnnotatedString
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -46,112 +49,10 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.common.util.isPrimalIdentifier
 import net.primal.domain.links.EventUriNostrType
-import net.primal.domain.links.EventUriType
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
-
-private const val PROFILE_ID_ANNOTATION_TAG = "profileId"
-private const val URL_ANNOTATION_TAG = "url"
-private const val NOTE_ANNOTATION_TAG = "note"
-private const val HASHTAG_ANNOTATION_TAG = "hashtag"
-private const val NOSTR_ADDRESS_ANNOTATION_TAG = "naddr"
-
-private fun List<NoteNostrUriUi>.filter(type: EventUriNostrType) = filter { it.type == type }
-
-private fun List<NoteNostrUriUi>.filterUnhandledNostrAddressUris() =
-    filter {
-        it.uri.contains("naddr") && it.referencedUser == null && it.referencedNote == null
-    }
-
-private fun String.remove(texts: List<String>): String {
-    var newContent = this
-    texts.forEach {
-        newContent = newContent.replace(it, "")
-    }
-    return newContent
-}
-
-private const val ELLIPSIZE_URL_THRESHOLD = 40
-private const val ELLIPSIZE_URL_TEXT = "..."
-
-private fun String.ellipsizeLongUrls(texts: List<String>): String {
-    var newContent = this
-    texts.filter { it.length > ELLIPSIZE_URL_THRESHOLD }.forEach {
-        newContent = newContent.replace(it, it.take(ELLIPSIZE_URL_THRESHOLD) + ELLIPSIZE_URL_TEXT)
-    }
-    return newContent
-}
-
-private fun String.replaceNostrProfileUrisWithHandles(resources: List<NoteNostrUriUi>): String {
-    var newContent = this
-    resources.forEach {
-        checkNotNull(it.referencedUser)
-        newContent = newContent.replace(
-            oldValue = it.uri,
-            newValue = it.referencedUser.displayUsername,
-            ignoreCase = true,
-        )
-    }
-    return newContent
-}
-
-private val noteLinkLeftovers = listOf(
-    "https://primal.net/e/ " to "",
-    "https://www.primal.net/e/ " to "",
-    "http://primal.net/e/ " to "",
-    "http://www.primal.net/e/ " to "",
-    "https://primal.net/e/\n" to "",
-    "https://www.primal.net/e/\n" to "",
-    "http://primal.net/e/\n" to "",
-    "http://www.primal.net/e/\n" to "",
-)
-
-private val profileLinkLeftovers = listOf(
-    "https://primal.net/p/@" to "@",
-    "https://www.primal.net/p/@" to "@",
-    "http://primal.net/p/@" to "@",
-    "http://www.primal.net/p/@" to "@",
-)
-
-private fun String.clearParsedPrimalLinks(): String {
-    var newContent = this
-    (noteLinkLeftovers + profileLinkLeftovers).forEach {
-        newContent = newContent.replace(
-            oldValue = it.first,
-            newValue = it.second,
-            ignoreCase = false,
-        )
-    }
-    noteLinkLeftovers.map { it.first.trim() }.toSet().forEach {
-        if (newContent.endsWith(it)) {
-            newContent = newContent.replace(
-                oldValue = it,
-                newValue = "",
-            )
-        }
-    }
-    return newContent
-}
-
-private fun String.limitLineBreaks(maxBreaks: Int = 2): String {
-    val maxBreakPattern = "(\\n){${maxBreaks + 1},}".toRegex()
-    return this.replace(maxBreakPattern, "\n".repeat(maxBreaks))
-}
-
-internal const val ELLIPSIZE_THRESHOLD = 300
-
-private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
-    val shouldEllipsize = length > ELLIPSIZE_THRESHOLD
-    return if (expanded || !shouldEllipsize) {
-        this
-    } else {
-        substring(0, ELLIPSIZE_THRESHOLD).plus(" $ellipsizeText")
-    }
-}
 
 internal const val NOT_FOUND_NOTICE_CUT_OFF_LEVEL = 2
 
@@ -160,6 +61,7 @@ internal const val NOT_FOUND_NOTICE_CUT_OFF_LEVEL = 2
 fun NoteContent(
     modifier: Modifier = Modifier,
     data: NoteContentUi,
+    rendered: RenderedNoteContent? = null,
     expanded: Boolean,
     noteCallbacks: NoteCallbacks,
     nestingLevel: Int = 0,
@@ -180,13 +82,14 @@ fun NoteContent(
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
-    val contentText = remember(data, expanded, seeMoreText, highlightColor) {
-        renderContentAsAnnotatedString(
-            data = data,
-            expanded = expanded,
-            seeMoreText = seeMoreText,
-            highlightColor = highlightColor,
-        )
+    val contentText = remember(data, rendered, expanded, seeMoreText, highlightColor) {
+        rendered?.toAnnotatedString(seeMoreText = seeMoreText, highlightColor = highlightColor)
+            ?: renderContentAsAnnotatedString(
+                data = data,
+                expanded = expanded,
+                seeMoreText = seeMoreText,
+                highlightColor = highlightColor,
+            )
     }
 
     Column(modifier = modifier) {
@@ -229,11 +132,7 @@ fun NoteContent(
             )
         }
 
-        val referencedStreams = remember(data.nostrUris) {
-            data.nostrUris
-                .filter(type = EventUriNostrType.Stream)
-                .mapNotNull { it.referencedStream }
-        }
+        val referencedStreams = data.partitions.referencedStreams
 
         if (referencedStreams.isNotEmpty()) {
             val streamState = LocalStreamState.current
@@ -251,11 +150,7 @@ fun NoteContent(
             }
         }
 
-        val referencedHighlights = remember(data.nostrUris) {
-            data.nostrUris
-                .filter(type = EventUriNostrType.Highlight)
-                .mapNotNull { it.referencedHighlight }
-        }
+        val referencedHighlights = data.partitions.referencedHighlights
         if (referencedHighlights.isNotEmpty()) {
             referencedHighlights.forEachIndexed { index, highlight ->
                 ReferencedHighlight(
@@ -279,26 +174,12 @@ fun NoteContent(
         }
 
         if (data.uris.isNotEmpty()) {
-            val existingNostrUris = remember(data.nostrUris) {
-                data.nostrUris
-                    .filter { it.type == EventUriNostrType.Note || it.type == EventUriNostrType.Article }
-                    .map { it.uri }
-                    .toSet()
-            }
-
-            val filteredEventUris = remember(data.uris, existingNostrUris) {
-                data.uris.filterNot { uriItem ->
-                    uriItem.url.isPrimalIdentifier() &&
-                        uriItem.url.substringAfterLast("/") in existingNostrUris
-                }
-            }
-
             NoteAttachments(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp)
                     .heightIn(min = 0.dp, max = 500.dp),
-                eventUris = filteredEventUris,
+                eventUris = data.partitions.filteredEventUris,
                 blossoms = data.blossoms,
                 expanded = expanded,
                 couldAutoPlay = couldAutoPlay,
@@ -313,9 +194,7 @@ fun NoteContent(
             )
         }
 
-        val referencedPostResources = remember(data.nostrUris) {
-            data.nostrUris.filter(type = EventUriNostrType.Note)
-        }
+        val referencedPostResources = data.partitions.referencedNotes
         if (referencedPostResources.isNotEmpty() && (nestingLevel < nestingCutOffLimit || expanded)) {
             ReferencedNotesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -331,9 +210,7 @@ fun NoteContent(
             )
         }
 
-        val referencedArticleResources = remember(data.nostrUris) {
-            data.nostrUris.filter(type = EventUriNostrType.Article)
-        }
+        val referencedArticleResources = data.partitions.referencedArticles
         if (referencedArticleResources.isNotEmpty()) {
             ReferencedArticlesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -345,11 +222,7 @@ fun NoteContent(
             )
         }
 
-        val referencedZaps = remember(data.nostrUris) {
-            data.nostrUris
-                .filter(type = EventUriNostrType.Zap)
-                .mapNotNull { it.referencedZap }
-        }
+        val referencedZaps = data.partitions.referencedZaps
         referencedZaps.forEach { zap ->
             val zappedEventId = zap.zappedEventId
             val zappedEventContent = zap.zappedEventContent
@@ -389,9 +262,7 @@ fun NoteContent(
             }
         }
 
-        val genericEvents = remember(data.nostrUris) {
-            data.nostrUris.filter(type = EventUriNostrType.Unsupported)
-        }
+        val genericEvents = data.partitions.unsupportedEvents
         if (genericEvents.isNotEmpty() && (nestingLevel < NOT_FOUND_NOTICE_CUT_OFF_LEVEL)) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
                 NoteUnknownEvent(
@@ -466,187 +337,12 @@ fun renderContentAsAnnotatedString(
     seeMoreText: String,
     highlightColor: Color,
     shouldKeepNostrNoteUris: Boolean = false,
-): AnnotatedString {
-    val mediaAttachments = data.uris.filter { it.isMediaUri() }
-    val linkAttachments = data.uris.filterNot { it.isMediaUri() }
-
-    val effectiveNostrUris = data.nostrUris.filterNot { nostrUri ->
-        data.uris.any { uri ->
-            uri.url.contains(nostrUri.uri) &&
-                data.content.indexOf(uri.url).takeIf { it >= 0 }?.let { uriIndex ->
-                    val nostrIndex = data.content.indexOf(nostrUri.uri, startIndex = uriIndex)
-                    nostrIndex in uriIndex until (uriIndex + uri.url.length)
-                } == true
-        }
-    }
-
-    val mentionedUsers = effectiveNostrUris.filter(type = EventUriNostrType.Profile)
-    val unhandledNostrAddressUris = effectiveNostrUris.filterUnhandledNostrAddressUris()
-
-    val refinedContent = data.content
-        .clearAtSignFromNostrUris()
-        .remove(texts = mediaAttachments.map { it.url })
-        .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
-        .remove(texts = linkAttachments.filter { it.type == EventUriType.Audio }.map { it.url })
-        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
-        .remove(texts = if (!shouldKeepNostrNoteUris) effectiveNostrUris.map { it.uri } else emptyList())
-        .remove(texts = data.invoices)
-        .clearParsedPrimalLinks()
-        .limitLineBreaks(maxBreaks = 2)
-        .trim()
-        .ellipsizeLongUrls(texts = linkAttachments.filter { it.title?.isNotEmpty() != true }.map { it.url })
-        .ellipsize(expanded = expanded, ellipsizeText = seeMoreText)
-
-    return buildAnnotatedString {
-        append(refinedContent)
-
-        if (refinedContent.endsWith(seeMoreText)) {
-            addStyle(
-                style = SpanStyle(color = highlightColor),
-                start = refinedContent.length - seeMoreText.length,
-                end = refinedContent.length,
-            )
-        }
-
-        unhandledNostrAddressUris.forEach {
-            addNostrAddressAnnotation(
-                nostrUri = it,
-                content = refinedContent,
-                highlightColor = highlightColor,
-            )
-        }
-
-        data.uris
-            .filterNot { it.isMediaUri() }
-            .filterNot { it.type == EventUriType.Audio }
-            .map { it.url }
-            .forEach {
-                addUrlAnnotation(
-                    url = it,
-                    content = refinedContent,
-                    highlightColor = highlightColor,
-                )
-            }
-
-        mentionedUsers.forEach {
-            checkNotNull(it.referencedUser)
-            addProfileAnnotation(
-                referencedUser = it.referencedUser,
-                content = refinedContent,
-                highlightColor = highlightColor,
-            )
-        }
-
-        TextMatcher(
-            content = refinedContent,
-            texts = data.hashtags,
-            repeatingOccurrences = true,
-        )
-            .matches()
-            .forEach {
-                addHashtagAnnotation(
-                    textMatch = it,
-                    highlightColor = highlightColor,
-                )
-            }
-    }
-}
-
-private fun AnnotatedString.Builder.addHashtagAnnotation(highlightColor: Color, textMatch: TextMatch) {
-    addStyle(
-        style = SpanStyle(color = highlightColor),
-        start = textMatch.startIndex,
-        end = textMatch.endIndex,
-    )
-    addStringAnnotation(
-        tag = HASHTAG_ANNOTATION_TAG,
-        annotation = textMatch.value,
-        start = textMatch.startIndex,
-        end = textMatch.endIndex,
-    )
-}
-
-private fun AnnotatedString.Builder.addProfileAnnotation(
-    referencedUser: ReferencedUser,
-    content: String,
-    highlightColor: Color,
-) {
-    val displayHandle = referencedUser.displayUsername
-    var startIndex = content.indexOf(displayHandle)
-
-    while (startIndex >= 0) {
-        val endIndex = startIndex + displayHandle.length
-
-        addStyle(
-            style = SpanStyle(color = highlightColor),
-            start = startIndex,
-            end = endIndex,
-        )
-
-        addStringAnnotation(
-            tag = PROFILE_ID_ANNOTATION_TAG,
-            annotation = referencedUser.userId,
-            start = startIndex,
-            end = endIndex,
-        )
-
-        startIndex = content.indexOf(displayHandle, startIndex + 1)
-    }
-}
-
-private fun AnnotatedString.Builder.addUrlAnnotation(
-    url: String,
-    content: String,
-    highlightColor: Color,
-) {
-    val ellipsizedUrl = if (url.length > ELLIPSIZE_URL_THRESHOLD) {
-        url.take(ELLIPSIZE_URL_THRESHOLD) + ELLIPSIZE_URL_TEXT
-    } else {
-        url
-    }
-
-    var startIndex = content.indexOf(ellipsizedUrl)
-
-    while (startIndex >= 0) {
-        val endIndex = startIndex + ellipsizedUrl.length
-        addStyle(
-            style = SpanStyle(color = highlightColor),
-            start = startIndex,
-            end = endIndex,
-        )
-
-        addStringAnnotation(
-            tag = URL_ANNOTATION_TAG,
-            annotation = url,
-            start = startIndex,
-            end = endIndex,
-        )
-
-        startIndex = content.indexOf(ellipsizedUrl, startIndex + 1)
-    }
-}
-
-private fun AnnotatedString.Builder.addNostrAddressAnnotation(
-    nostrUri: NoteNostrUriUi,
-    content: String,
-    highlightColor: Color,
-) {
-    val startIndex = content.indexOf(nostrUri.uri)
-    if (startIndex >= 0) {
-        val endIndex = startIndex + nostrUri.uri.length
-        addStyle(
-            style = SpanStyle(color = highlightColor),
-            start = startIndex,
-            end = endIndex,
-        )
-        addStringAnnotation(
-            tag = NOSTR_ADDRESS_ANNOTATION_TAG,
-            annotation = nostrUri.uri,
-            start = startIndex,
-            end = endIndex,
-        )
-    }
-}
+): AnnotatedString =
+    computeRenderedNoteContent(
+        data = data,
+        expanded = expanded,
+        shouldKeepNostrNoteUris = shouldKeepNostrNoteUris,
+    ).toAnnotatedString(seeMoreText = seeMoreText, highlightColor = highlightColor)
 
 private const val PRIMAL_LEGENDS_URL = "primal.net/legends"
 

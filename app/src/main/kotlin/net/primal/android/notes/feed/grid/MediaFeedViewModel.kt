@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.notes.feed.grid.MediaFeedContract.UiState
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.feeds.isPremiumFeedSpec
 import net.primal.domain.posts.FeedRepository
 
@@ -25,6 +27,7 @@ class MediaFeedViewModel @AssistedInject constructor(
     @Assisted private val feedSpec: String,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -35,7 +38,7 @@ class MediaFeedViewModel @AssistedInject constructor(
     private fun buildFeedByDirective(feedSpec: String) =
         feedRepository.feedBySpec(userId = activeAccountStore.activeUserId(), feedSpec = feedSpec)
             .map { it.map { feedNote -> feedNote.asFeedPostUi() } }
-            .cachedIn(viewModelScope)
+            .cachedIn(viewModelScope + dispatcherProvider.io())
 
     private val _state = MutableStateFlow(UiState(notes = buildFeedByDirective(feedSpec = feedSpec)))
     val state = _state.asStateFlow()

@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.articles.highlights.JoinedHighlightsUi
@@ -29,11 +31,13 @@ import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEff
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
 import net.primal.android.thread.articles.details.ui.mapAsArticleDetailsUi
+import net.primal.android.thread.articles.details.ui.rendering.buildArticleParts
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
@@ -79,6 +83,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
     private val walletAccountRepository: WalletAccountRepository,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -172,43 +177,27 @@ class ArticleDetailsViewModel @Inject constructor(
         }
 
     private fun observeArticle(naddr: Naddr) =
-        viewModelScope.launch {
-            var referencedNotesUris: Set<String> = emptySet()
-            var referencedProfileUris: Set<String> = emptySet()
+        viewModelScope.launch(dispatcherProvider.io()) {
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .collect { article ->
-                    val nostrNoteUris = article.uris
-                        .filter { it.isNoteUri() || it.isNote() || it.isNEventUri() || it.isNEvent() }
-                        .toSet()
+                    val referencedNotes = feedRepository.findAllPostsByIds(
+                        postIds = article.uris
+                            .filter { it.isNoteUri() || it.isNote() || it.isNEventUri() || it.isNEvent() }
+                            .mapNotNull { it.extractNoteId() },
+                    ).map { it.asFeedPostUi() }
 
-                    if (nostrNoteUris != referencedNotesUris) {
-                        referencedNotesUris = nostrNoteUris
-                        val referencedNotes = feedRepository.findAllPostsByIds(
-                            postIds = nostrNoteUris.mapNotNull { it.extractNoteId() },
-                        )
-                        setState {
-                            copy(
-                                referencedNotes = referencedNotes.map { it.asFeedPostUi() },
-                            )
-                        }
-                    }
+                    val npubToDisplayNameMap = profileRepository.findProfileData(
+                        profileIds = article.uris
+                            .filter { it.isNPubUri() || it.isNPub() || it.isNProfileUri() || it.isNProfile() }
+                            .mapNotNull { it.extractProfileId() },
+                    ).associateBy { it.profileId.hexToNpubHrp() }
+                        .mapValues { "@${it.value.authorNameUiFriendly()}" }
 
-                    val nostrProfileUris = article.uris
-                        .filter { it.isNPubUri() || it.isNPub() || it.isNProfileUri() || it.isNProfile() }
-                        .toSet()
-                    if (nostrProfileUris != referencedProfileUris) {
-                        referencedProfileUris = nostrProfileUris
-                        val referencedProfiles = profileRepository.findProfileData(
-                            profileIds = nostrProfileUris.mapNotNull { it.extractProfileId() },
-                        )
-                        setState {
-                            copy(
-                                npubToDisplayNameMap = referencedProfiles
-                                    .associateBy { it.profileId.hexToNpubHrp() }
-                                    .mapValues { "@${it.value.authorNameUiFriendly()}" },
-                            )
-                        }
-                    }
+                    val articleParts = buildArticleParts(
+                        content = article.content,
+                        npubToDisplayNameMap = npubToDisplayNameMap,
+                        referencedNotes = referencedNotes,
+                    )
 
                     setState {
                         val joinedHighlights = article.highlights.joinOnContent()
@@ -217,6 +206,7 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                         copy(
                             article = article.mapAsArticleDetailsUi(),
+                            articleParts = articleParts,
                             highlights = joinedHighlights,
                             selectedHighlight = selectedHighlight,
                             topZaps = article.eventZaps
@@ -233,9 +223,9 @@ class ArticleDetailsViewModel @Inject constructor(
                 userId = activeAccountStore.activeUserId(),
                 articleId = naddr.identifier,
                 articleAuthorId = naddr.userId,
-            ).collect { comments ->
-                setState { copy(comments = comments.map { it.asFeedPostUi() }) }
-            }
+            ).map { comments -> comments.map { it.asFeedPostUi() } }
+                .flowOn(dispatcherProvider.io())
+                .collect { setState { copy(comments = it) } }
         }
 
     private fun observeActiveAccount() =

@@ -2,13 +2,16 @@ package net.primal.data.local.dao.reads
 
 import androidx.paging.PagingSource
 import androidx.room3.Dao
+import androidx.room3.DaoReturnTypeConverters
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import kotlinx.coroutines.flow.Flow
 
 @Dao
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 interface ArticleDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -77,6 +78,7 @@ class ThreadViewModel @Inject constructor(
             feedRepository.observeConversation(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
                 .filter { it.isNotEmpty() }
                 .map { posts -> posts.map { it.asFeedPostUi() } }
+                .flowOn(dispatcherProvider.io())
                 .collect { conversation ->
                     setState { copy(highlightNote = conversation.find { it.postId == highlightPostId }) }
 

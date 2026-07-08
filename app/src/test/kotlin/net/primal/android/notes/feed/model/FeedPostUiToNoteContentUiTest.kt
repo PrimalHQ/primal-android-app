@@ -7,7 +7,7 @@ import org.junit.Test
 
 class FeedPostUiToNoteContentUiTest {
 
-    private fun feedPostUi(content: String, feedContent: String) =
+    private fun feedPostUi(content: String) =
         FeedPostUi(
             postId = "postId",
             authorId = "authorId",
@@ -15,29 +15,21 @@ class FeedPostUiToNoteContentUiTest {
             authorHandle = "authorHandle",
             timestamp = Instant.EPOCH,
             content = content,
-            feedContent = feedContent,
             stats = EventStatsUi(),
             rawNostrEventJson = "",
             kind = NostrEventKind.ShortTextNote.value,
         )
 
     @Test
-    fun `toNoteContentUi uses the trimmed feedContent when not showing full content`() {
-        val post = feedPostUi(content = "FULL CONTENT", feedContent = "TRIMMED")
+    fun `toNoteContentUi uses the provided content override`() {
+        val post = feedPostUi(content = "FULL CONTENT")
 
-        post.toNoteContentUi(useFullContent = false).content shouldBe "TRIMMED"
+        post.toNoteContentUi(content = "TRIMMED").content shouldBe "TRIMMED"
     }
 
     @Test
-    fun `toNoteContentUi uses the full content when showing full content`() {
-        val post = feedPostUi(content = "FULL CONTENT", feedContent = "TRIMMED")
-
-        post.toNoteContentUi(useFullContent = true).content shouldBe "FULL CONTENT"
-    }
-
-    @Test
-    fun `toNoteContentUi defaults to full content`() {
-        val post = feedPostUi(content = "FULL CONTENT", feedContent = "TRIMMED")
+    fun `toNoteContentUi defaults to the full content`() {
+        val post = feedPostUi(content = "FULL CONTENT")
 
         post.toNoteContentUi().content shouldBe "FULL CONTENT"
     }

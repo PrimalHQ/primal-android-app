@@ -2,12 +2,15 @@ package net.primal.data.local.dao.messages
 
 import androidx.paging.PagingSource
 import androidx.room3.Dao
+import androidx.room3.DaoReturnTypeConverters
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
+import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 
 @Dao
+@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
 interface DirectMessageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

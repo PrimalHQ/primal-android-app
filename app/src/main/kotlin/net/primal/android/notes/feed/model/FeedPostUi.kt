@@ -24,7 +24,6 @@ data class FeedPostUi(
     val authorHandle: String,
     val timestamp: Instant,
     val content: String,
-    val feedContent: String = content,
     val stats: EventStatsUi,
     val rawNostrEventJson: String,
     val kind: Int,
@@ -45,13 +44,15 @@ data class FeedPostUi(
     val eventRelayHints: List<String> = emptyList(),
     val isAuthorLiveStreamingNow: Boolean = false,
     val poll: PollUi? = null,
+    val feedNoteContent: NoteContentUi? = null,
+    val feedNoteContentRendered: RenderedNoteContent? = null,
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
     val repost = this.reposts.firstOrNull()
     val uris = this.links.map { it.asEventUriUiModel() }.sortedBy { it.position }
     val nostrUris = this.nostrUris.map { it.asNoteNostrUriUi() }.sortedBy { it.position }
-    return FeedPostUi(
+    val postUi = FeedPostUi(
         postId = this.eventId,
         repostId = repost?.repostId,
         repostAuthorId = repost?.repostAuthorId,
@@ -64,7 +65,6 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorBlossoms = this.author.blossomServers,
         timestamp = Instant.ofEpochSecond(this.timestamp.epochSeconds),
         content = this.content,
-        feedContent = computeFeedContent(content = this.content, uris = uris, nostrUris = nostrUris),
         uris = uris,
         nostrUris = nostrUris,
         stats = this.stats?.let { stats ->
@@ -93,6 +93,12 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
         poll = this.pollInfo?.asPollUi(),
+    )
+    val feedContent = computeFeedContent(content = this.content, uris = uris, nostrUris = nostrUris)
+    val feedNoteContent = postUi.toNoteContentUi(content = feedContent)
+    return postUi.copy(
+        feedNoteContent = feedNoteContent,
+        feedNoteContentRendered = computeRenderedNoteContent(data = feedNoteContent, expanded = false),
     )
 }
 

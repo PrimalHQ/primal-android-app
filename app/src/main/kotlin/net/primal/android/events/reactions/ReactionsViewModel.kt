@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.events.reactions.ReactionsContract.UiState
 import net.primal.android.events.ui.asEventZapUiModel
@@ -20,6 +21,7 @@ import net.primal.android.navigation.articleATag
 import net.primal.android.navigation.eventIdOrThrow
 import net.primal.android.navigation.reactionTypeOrThrow
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.NostrEventAction
@@ -29,6 +31,7 @@ import net.primal.domain.nostr.NostrEventKind
 class ReactionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     activeAccountStore: ActiveAccountStore,
+    dispatcherProvider: DispatcherProvider,
     private val eventRepository: EventRepository,
 ) : ViewModel() {
 
@@ -43,7 +46,7 @@ class ReactionsViewModel @Inject constructor(
                 articleATag = articleATag,
             )
                 .map { it.map { noteZap -> noteZap.asEventZapUiModel() } }
-                .cachedIn(viewModelScope),
+                .cachedIn(viewModelScope + dispatcherProvider.io()),
             initialReactionType = savedStateHandle.reactionTypeOrThrow,
         ),
     )

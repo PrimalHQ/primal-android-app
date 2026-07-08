@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.messages.chat.ChatContract.UiEvent
@@ -34,6 +35,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.messages.DirectMessage
@@ -47,6 +49,7 @@ import net.primal.domain.profile.ProfileRepository
 class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     activeAccountStore: ActiveAccountStore,
+    dispatcherProvider: DispatcherProvider,
     private val subscriptionsManager: SubscriptionsManager,
     private val chatRepository: ChatRepository,
     private val profileRepository: ProfileRepository,
@@ -62,7 +65,7 @@ class ChatViewModel @Inject constructor(
             messages = chatRepository
                 .newestMessages(userId = userId, participantId = participantId)
                 .mapAsPagingDataOfChatMessageUi()
-                .cachedIn(viewModelScope),
+                .cachedIn(viewModelScope + dispatcherProvider.io()),
         ),
     )
     val state = _state.asStateFlow()

@@ -2,11 +2,9 @@ package net.primal.data.local.db
 
 import androidx.room3.ColumnTypeConverters
 import androidx.room3.ConstructedBy
-import androidx.room3.DaoReturnTypeConverters
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
-import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import net.primal.data.local.dao.bookmarks.PublicBookmark
 import net.primal.data.local.dao.bookmarks.PublicBookmarkDao
 import net.primal.data.local.dao.events.EventRelayHints
@@ -151,7 +149,8 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     Nip05TypeConverters::class,
     EncryptableTypeConverters::class,
 )
-@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
+// PagingSource return-type converters are registered per-DAO because of
+// FeedPostDao's narrowed-observation FeedPagingSourceDaoReturnTypeConverter
 abstract class CachingDatabase : RoomDatabase() {
 
     abstract fun profiles(): ProfileDataDao

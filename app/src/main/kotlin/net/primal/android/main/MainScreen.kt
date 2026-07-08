@@ -860,7 +860,7 @@ private fun WalletErrorHandler(navBackStackEntry: NavBackStackEntry, snackbarHos
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun rememberHomeTopAppBarState(): TopAppBarState {
-    return remember {
+    return rememberSaveable(saver = TopAppBarState.Saver) {
         TopAppBarState(
             initialHeightOffsetLimit = -Float.MAX_VALUE,
             initialHeightOffset = 0f,
