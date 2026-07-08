@@ -7,11 +7,11 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
-import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.local.db.NotificationPagingSourceDaoReturnTypeConverter
 
 @Dao
-@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
+@DaoReturnTypeConverters(NotificationPagingSourceDaoReturnTypeConverter::class)
 interface NotificationDao {
 
     @Transaction
