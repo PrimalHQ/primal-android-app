@@ -313,8 +313,11 @@ class MutedItemRepositoryImpl(
         muteList: Set<MutedItemData>,
     ) = withContext(dispatcherProvider.io()) {
         database.withTransaction {
-            database.mutedItems().deleteListByOwnerId(ownerId = ownerId, listType = listType)
-            database.mutedItems().upsertAll(data = muteList)
+            val storedList = database.mutedItems().getListByOwnerId(ownerId = ownerId, listType = listType)
+            if (storedList.toSet() != muteList) {
+                database.mutedItems().deleteListByOwnerId(ownerId = ownerId, listType = listType)
+                database.mutedItems().upsertAll(data = muteList)
+            }
         }
     }
 

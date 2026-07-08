@@ -20,6 +20,9 @@ interface MutedItemDao {
     @Query("DELETE FROM MutedItemData WHERE ownerId = :ownerId AND listType = :listType")
     suspend fun deleteListByOwnerId(ownerId: String, listType: ListType)
 
+    @Query("SELECT * FROM MutedItemData WHERE ownerId = :ownerId AND listType = :listType")
+    suspend fun getListByOwnerId(ownerId: String, listType: ListType): List<MutedItemData>
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
