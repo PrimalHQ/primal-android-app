@@ -21,4 +21,5 @@
 - Capped media pre-cache concurrency to keep loading order stable
 - Fixed connections stalling when a relay stopped responding
 - Fixed request timeouts not being reflected in the UI
-- Fixed invalid entries being pulled in from follow lists
+- Fixed invalid entries being pulled in from the follow lists
+- Fixed the transparent avatar background on Profile Details
