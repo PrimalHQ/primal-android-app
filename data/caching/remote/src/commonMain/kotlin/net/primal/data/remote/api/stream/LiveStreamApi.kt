@@ -17,5 +17,7 @@ interface LiveStreamApi {
 
     suspend fun subscribeToLiveEventsFromFollows(userId: String): Flow<NostrEvent>
 
+    suspend fun getLiveEventsFromFollowsSnapshot(userId: String): List<NostrEvent>
+
     suspend fun findLiveStream(body: FindLiveStreamRequestBody): FindLiveStreamResponse
 }
