@@ -1,6 +1,7 @@
 package net.primal.android.thread.notes
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -59,6 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import java.time.Instant
 import java.time.format.FormatStyle
@@ -68,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
+import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.activity.LocalActiveAccountId
 import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
@@ -88,6 +91,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Expand
 import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.icons.primaliconpack.Poll
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
@@ -95,6 +99,7 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.zaps.ThreadNoteTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.core.utils.formatToDefaultTimeFormat
 import net.primal.android.editor.NoteEditorContract
@@ -109,6 +114,8 @@ import net.primal.android.notes.feed.note.ui.ThreadNoteStatsRow
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.thread.articles.ArticleContract
+import net.primal.android.thread.articles.ArticleViewModel
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReactionType
 
@@ -157,8 +164,10 @@ fun ThreadScreen(
     )
 
     val replyState by noteEditorViewModel.state.collectAsState()
+    val articleViewModel = hiltViewModel<ArticleViewModel>()
+    val articleState by articleViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val errorToShow = replyState.error ?: state.error
+    val errorToShow = replyState.error ?: state.error ?: articleState.error
 
     SnackbarErrorHandler(
         error = errorToShow,
@@ -173,8 +182,40 @@ fun ThreadScreen(
             if (state.error != null) {
                 eventPublisher(ThreadContract.UiEvent.DismissError)
             }
+            if (articleState.error != null) {
+                articleViewModel.setEvent(ArticleContract.UiEvent.DismissError)
+            }
         },
     )
+
+    val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
+    LaunchedEffect(articleViewModel, articleViewModel.effects) {
+        articleViewModel.effects.collect {
+            when (it) {
+                ArticleContract.SideEffect.ArticleDeleted -> Unit
+                is ArticleContract.SideEffect.CopyText -> {
+                    context.copyText(text = it.text)
+                    Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    if (articleState.shouldApproveBookmark && state.replyToArticle != null) {
+        ApproveBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                articleViewModel.setEvent(
+                    ArticleContract.UiEvent.BookmarkAction(
+                        forceUpdate = true,
+                        articleATag = state.replyToArticle.aTag,
+                    ),
+                )
+            },
+            onClose = {
+                articleViewModel.setEvent(ArticleContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
 
     PrimalScaffold(
         modifier = Modifier.imePadding(),
@@ -198,6 +239,7 @@ fun ThreadScreen(
                     noteCallbacks = noteCallbacks,
                     onGoToWallet = callbacks.onGoToWallet,
                     eventPublisher = eventPublisher,
+                    articleEventPublisher = articleViewModel::setEvent,
                     onRootPostDeleted = callbacks.onClose,
                     onUiError = { uiError ->
                         uiScope.launch {
@@ -324,6 +366,7 @@ private fun ThreadConversationLazyColumn(
     onGoToWallet: () -> Unit,
     onRootPostDeleted: () -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
+    articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -373,6 +416,7 @@ private fun ThreadConversationLazyColumn(
                 onGoToWallet = onGoToWallet,
                 noteCallbacks = noteCallbacks,
                 onRootPostDeleted = onRootPostDeleted,
+                articleEventPublisher = articleEventPublisher,
                 onUiError = onUiError,
             )
         }
@@ -387,6 +431,7 @@ private fun ThreadLazyColumn(
     noteCallbacks: NoteCallbacks,
     onRootPostDeleted: () -> Unit,
     onGoToWallet: (() -> Unit),
+    articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onUiError: ((UiError) -> Unit)? = null,
 ) {
@@ -430,15 +475,11 @@ private fun ThreadLazyColumn(
                 key = state.replyToArticle.eventId,
                 contentType = "MentionedArticle",
             ) {
-                Column {
-                    FeedArticleListItem(
-                        data = state.replyToArticle,
-                        modifier = Modifier.padding(all = 16.dp),
-                        onClick = noteCallbacks.onArticleClick,
-                        isArticleAuthor = state.replyToArticle.authorId == LocalActiveAccountId.current,
-                    )
-                    PrimalDivider()
-                }
+                ReplyToArticleItem(
+                    article = state.replyToArticle,
+                    noteCallbacks = noteCallbacks,
+                    articleEventPublisher = articleEventPublisher,
+                )
             }
         }
 
@@ -556,6 +597,63 @@ private fun ThreadLazyColumn(
                 Spacer(modifier = Modifier.height(height = extraSpacing.coerceAtLeast(50.dp)))
             }
         }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun ReplyToArticleItem(
+    article: FeedArticleUi,
+    noteCallbacks: NoteCallbacks,
+    articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
+) {
+    Column {
+        FeedArticleListItem(
+            data = article,
+            modifier = Modifier.padding(all = 16.dp),
+            onClick = noteCallbacks.onArticleClick,
+            isArticleAuthor = article.authorId == LocalActiveAccountId.current,
+            onBookmarkClick = {
+                articleEventPublisher(
+                    ArticleContract.UiEvent.BookmarkAction(articleATag = article.aTag),
+                )
+            },
+            onMuteUserClick = {
+                articleEventPublisher(
+                    ArticleContract.UiEvent.MuteAction(userId = article.authorId),
+                )
+            },
+            onReportContentClick = { reportType ->
+                articleEventPublisher(
+                    ArticleContract.UiEvent.ReportAbuse(
+                        reportType = reportType,
+                        authorId = article.authorId,
+                        eventId = article.eventId,
+                        articleId = article.articleId,
+                    ),
+                )
+            },
+            onRequestDeleteClick = { eventId, articleATag, authorId ->
+                articleEventPublisher(
+                    ArticleContract.UiEvent.RequestDeleteAction(
+                        eventId = eventId,
+                        articleATag = articleATag,
+                        authorId = authorId,
+                    ),
+                )
+            },
+            onCopyArticleTextClick = {
+                articleEventPublisher(
+                    ArticleContract.UiEvent.CopyArticleTextAction(articleATag = article.aTag),
+                )
+            },
+            onCopyRawDataClick = {
+                articleEventPublisher(
+                    ArticleContract.UiEvent.CopyRawDataAction(articleATag = article.aTag),
+                )
+            },
+        )
+        PrimalDivider()
     }
 }
 
