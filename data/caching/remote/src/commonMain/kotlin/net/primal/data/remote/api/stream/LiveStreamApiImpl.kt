@@ -2,11 +2,16 @@ package net.primal.data.remote.api.stream
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.flow.timeout
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.NostrIncomingMessage
@@ -73,13 +78,35 @@ class LiveStreamApiImpl(
             }
     }
 
-    override suspend fun getLiveEventsFromFollows(userId: String): List<NostrEvent> =
-        primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.LIVE_EVENTS_FROM_FOLLOWS.id,
-                optionsJson = LiveEventsFromFollowsRequest(pubkey = userId).encodeToJsonString(),
-            ),
-        ).filterNostrEvents(NostrEventKind.LiveActivity)
+    @OptIn(FlowPreview::class)
+    override suspend fun getLiveEventsFromFollowsSnapshot(userId: String): List<NostrEvent> {
+        val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+        val liveEvents = mutableListOf<NostrEvent>()
+        try {
+            primalApiClient
+                .subscribe(
+                    subscriptionId = subscriptionId,
+                    message = PrimalCacheFilter(
+                        primalVerb = PrimalVerb.LIVE_EVENTS_FROM_FOLLOWS.id,
+                        optionsJson = LiveEventsFromFollowsRequest(pubkey = userId).encodeToJsonString(),
+                    ),
+                )
+                .takeWhile {
+                    it is NostrIncomingMessage.EventMessage || it is NostrIncomingMessage.EventsMessage
+                }
+                .timeout(5.seconds)
+                .collect { message ->
+                    when (message) {
+                        is NostrIncomingMessage.EventMessage -> message.nostrEvent?.let { liveEvents.add(it) }
+                        is NostrIncomingMessage.EventsMessage -> liveEvents.addAll(message.nostrEvents)
+                        else -> Unit
+                    }
+                }
+        } catch (error: TimeoutCancellationException) {
+            Napier.w(throwable = error) { "Timed out collecting `live_events_from_follows` snapshot." }
+        }
+        return liveEvents.filter { it.kind == NostrEventKind.LiveActivity.value }
+    }
 
     override suspend fun findLiveStream(body: FindLiveStreamRequestBody): FindLiveStreamResponse {
         val queryResult = primalApiClient.query(

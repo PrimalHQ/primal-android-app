@@ -112,9 +112,9 @@ class StreamRepositoryImpl(
             return@withContext job
         }
 
-    override suspend fun syncLiveEventsFromFollows(userId: String) =
+    override suspend fun fetchLiveEventsFromFollows(userId: String) =
         withContext(dispatcherProvider.io()) {
-            val currentLiveStreams = liveStreamApi.getLiveEventsFromFollows(userId = userId)
+            val currentLiveStreams = liveStreamApi.getLiveEventsFromFollowsSnapshot(userId = userId)
                 .mapNotNull { it.asStreamData() }
 
             currentLiveStreams.forEach { liveActivity ->

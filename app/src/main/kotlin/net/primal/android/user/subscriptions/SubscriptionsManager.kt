@@ -29,6 +29,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.streams.StreamRepository
@@ -138,7 +139,7 @@ class SubscriptionsManager @Inject constructor(
 
     private fun launchStreamsFromFollowsSubscription(userId: String) =
         scope.launch {
-            streamRepository.syncLiveEventsFromFollows(userId = userId)
+            runCatching { streamRepository.fetchLiveEventsFromFollows(userId = userId) }
             streamRepository.startLiveEventsFromFollowsSubscription(userId = userId)
         }
 

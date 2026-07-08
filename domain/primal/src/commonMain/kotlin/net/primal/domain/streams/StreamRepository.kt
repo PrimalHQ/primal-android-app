@@ -35,7 +35,7 @@ interface StreamRepository {
         streamContentModerationMode: StreamContentModerationMode,
     ): Job
 
-    suspend fun syncLiveEventsFromFollows(userId: String)
+    suspend fun fetchLiveEventsFromFollows(userId: String)
 
     suspend fun startLiveEventsFromFollowsSubscription(userId: String)
 
