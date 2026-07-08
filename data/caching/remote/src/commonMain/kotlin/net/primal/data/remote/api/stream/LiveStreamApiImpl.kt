@@ -73,6 +73,14 @@ class LiveStreamApiImpl(
             }
     }
 
+    override suspend fun getLiveEventsFromFollows(userId: String): List<NostrEvent> =
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.LIVE_EVENTS_FROM_FOLLOWS.id,
+                optionsJson = LiveEventsFromFollowsRequest(pubkey = userId).encodeToJsonString(),
+            ),
+        ).filterNostrEvents(NostrEventKind.LiveActivity)
+
     override suspend fun findLiveStream(body: FindLiveStreamRequestBody): FindLiveStreamResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(

@@ -112,9 +112,35 @@ class StreamRepositoryImpl(
             return@withContext job
         }
 
+    override suspend fun syncLiveEventsFromFollows(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            val currentLiveStreams = liveStreamApi.getLiveEventsFromFollows(userId = userId)
+                .mapNotNull { it.asStreamData() }
+
+            currentLiveStreams.forEach { liveActivity ->
+                scope.launch {
+                    profileRepository.fetchMissingProfiles(profileIds = listOf(liveActivity.mainHostId))
+                }
+            }
+
+            database.withTransaction {
+                database.streams().upsertStreamData(data = currentLiveStreams)
+                database.streamFollows().deleteAllByOwnerId(ownerId = userId)
+                currentLiveStreams
+                    .filter { it.isLive() }
+                    .forEach { liveActivity ->
+                        database.streamFollows().upsert(
+                            data = StreamFollowsCrossRef(
+                                streamATag = liveActivity.aTag,
+                                ownerId = userId,
+                            ),
+                        )
+                    }
+            }
+        }
+
     override suspend fun startLiveEventsFromFollowsSubscription(userId: String) =
         withContext(dispatcherProvider.io()) {
-            database.streamFollows().deleteAllByOwnerId(ownerId = userId)
             liveStreamApi.subscribeToLiveEventsFromFollows(userId = userId)
                 .collect { liveActivityEvent ->
                     val liveActivity = liveActivityEvent.asStreamData() ?: return@collect

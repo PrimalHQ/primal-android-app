@@ -138,6 +138,7 @@ class SubscriptionsManager @Inject constructor(
 
     private fun launchStreamsFromFollowsSubscription(userId: String) =
         scope.launch {
+            streamRepository.syncLiveEventsFromFollows(userId = userId)
             streamRepository.startLiveEventsFromFollowsSubscription(userId = userId)
         }
 
