@@ -6,15 +6,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -54,6 +56,7 @@ import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PulsingListItemPlaceholder
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
@@ -259,11 +262,8 @@ private fun ProfileHeaderDetails(
                     onProfileClick = onProfileClick,
                 )
             } else {
-                Spacer(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .fillMaxWidth()
-                        .height(36.dp),
+                UserFollowedByIndicatorPlaceholder(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                 )
             }
         }
@@ -291,7 +291,7 @@ private fun UserFollowedByIndicator(
             avatarOverlap = AvatarOverlap.Start,
             avatarBorderSize = 1.dp,
             avatarSize = 36.dp,
-            maxAvatarsToShow = 5,
+            maxAvatarsToShow = FOLLOWED_BY_AVATAR_COUNT,
             displayAvatarOverflowIndicator = false,
         )
         val text =
@@ -305,6 +305,51 @@ private fun UserFollowedByIndicator(
         )
     }
 }
+
+@Composable
+private fun UserFollowedByIndicatorPlaceholder(modifier: Modifier = Modifier) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        val avatarSize = 36.dp
+        val avatarSpacing = avatarSize * (1f - FOLLOWED_BY_AVATAR_OVERLAP)
+        Box(
+            modifier = Modifier.size(
+                width = avatarSpacing * (FOLLOWED_BY_AVATAR_COUNT - 1) + avatarSize,
+                height = avatarSize,
+            ),
+        ) {
+            for (index in FOLLOWED_BY_AVATAR_COUNT - 1 downTo 0) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = avatarSpacing * index)
+                        .size(avatarSize)
+                        .border(
+                            width = 1.dp,
+                            color = AppTheme.colorScheme.background,
+                            shape = CircleShape,
+                        ),
+                ) {
+                    PulsingListItemPlaceholder(
+                        height = avatarSize,
+                        width = avatarSize,
+                        shape = CircleShape,
+                    )
+                }
+            }
+        }
+        PulsingListItemPlaceholder(
+            modifier = Modifier.weight(1f),
+            height = 32.dp,
+            shape = AppTheme.shapes.small,
+        )
+    }
+}
+
+private const val FOLLOWED_BY_AVATAR_COUNT = 5
+private const val FOLLOWED_BY_AVATAR_OVERLAP = 0.25f
 
 @Composable
 private fun ProfileFollowIndicators(
