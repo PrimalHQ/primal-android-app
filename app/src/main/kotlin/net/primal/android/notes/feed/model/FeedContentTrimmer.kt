@@ -1,7 +1,6 @@
 package net.primal.android.notes.feed.model
 
 import net.primal.android.core.compose.attachment.model.EventUriUi
-import net.primal.android.notes.feed.note.ui.ELLIPSIZE_THRESHOLD
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 
 /**
