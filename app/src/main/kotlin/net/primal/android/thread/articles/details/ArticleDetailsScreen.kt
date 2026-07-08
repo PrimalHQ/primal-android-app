@@ -86,7 +86,6 @@ import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
-import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
@@ -106,14 +105,9 @@ import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheet
-import net.primal.android.thread.articles.details.ui.model.ArticleContentSegment
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
-import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
-import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
-import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
-import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
@@ -121,11 +115,6 @@ import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
-import net.primal.domain.nostr.utils.isNEvent
-import net.primal.domain.nostr.utils.isNEventUri
-import net.primal.domain.nostr.utils.isNostrUri
-import net.primal.domain.nostr.utils.isNote
-import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 import net.primal.domain.utils.canZap
 
 @Composable
@@ -205,16 +194,6 @@ private fun ArticleDetailsScreen(
 
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
-
-    val articleParts by remember(detailsState.article?.content, detailsState.npubToDisplayNameMap) {
-        mutableStateOf(
-            (detailsState.article?.content ?: "")
-                .splitMarkdownByNostrUris()
-                .flatMap { it.splitMarkdownByInlineImages() }
-                .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = detailsState.npubToDisplayNameMap)
-                .buildArticleRenderParts(referencedNotes = detailsState.referencedNotes),
-        )
-    }
 
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
@@ -362,7 +341,7 @@ private fun ArticleDetailsScreen(
                 ArticleContentWithComments(
                     state = detailsState,
                     detailsEventPublisher = detailsEventPublisher,
-                    articleParts = articleParts,
+                    articleParts = detailsState.articleParts,
                     listState = listState,
                     paddingValues = paddingValues,
                     onArticleCommentClick = {
@@ -435,7 +414,9 @@ private fun ArticleDetailsScreen(
                     onCommentsClick = {
                         uiScope.launch {
                             listState.animateScrollToItem(
-                                index = detailsState.calculateCommentsHeaderIndex(partsSize = articleParts.size),
+                                index = detailsState.calculateCommentsHeaderIndex(
+                                    partsSize = detailsState.articleParts.size,
+                                ),
                             )
                         }
                     },
@@ -475,15 +456,17 @@ private fun ArticleDetailsTopAppBar(
                     onClick = { onBookmarkClick?.invoke() },
                 )
 
-                val shareUrl = resolvePrimalArticleLink(
-                    naddr = Naddr(
-                        identifier = state.article.articleId,
-                        userId = state.article.authorId,
-                        kind = NostrEventKind.LongFormContent.value,
-                    ).toNaddrString(),
-                    primalName = state.article.authorPrimalName,
-                    articleSlug = state.article.articleId,
-                )
+                val shareUrl = remember(state.article) {
+                    resolvePrimalArticleLink(
+                        naddr = Naddr(
+                            identifier = state.article.articleId,
+                            userId = state.article.authorId,
+                            kind = NostrEventKind.LongFormContent.value,
+                        ).toNaddrString(),
+                        primalName = state.article.authorPrimalName,
+                        articleSlug = state.article.articleId,
+                    )
+                }
 
                 ArticleDropdownMenu(
                     modifier = Modifier
@@ -636,7 +619,7 @@ private fun ArticleContentWithComments(
 
         items(
             count = articleParts.size,
-            key = { index -> "${articleParts[index]}#$index" },
+            key = { index -> "part#$index" },
             contentType = { index ->
                 when (articleParts[index]) {
                     is ArticlePartRender.MarkdownRender -> "MarkdownRender"
@@ -788,7 +771,7 @@ private fun ArticleContentWithComments(
                         .padding(horizontal = 16.dp),
                 ) {
                     if (state.article.eventStatsUi.satsZapped > 0) {
-                        val numberFormat = NumberFormat.getNumberInstance()
+                        val numberFormat = remember { NumberFormat.getNumberInstance() }
                         Row(
                             modifier = Modifier.clickable(
                                 enabled = noteCallbacks.onEventReactionsClick != null,
@@ -933,51 +916,4 @@ private fun CommentsHeaderSection(modifier: Modifier, onPostCommentClick: () -> 
             )
         }
     }
-}
-
-private fun List<ArticleContentSegment>.buildArticleRenderParts(
-    referencedNotes: List<FeedPostUi>,
-): List<ArticlePartRender> {
-    return this.mapNotNull { part ->
-        when (part) {
-            is ArticleContentSegment.Text -> {
-                val content = part.content
-                if (content.isBlank()) return@mapNotNull null
-                when {
-                    content.isNostrNote() -> {
-                        referencedNotes.find { it.postId == content.takeAsNoteHexIdOrNull() }
-                            ?.let { ArticlePartRender.NoteRender(note = it) }
-                            ?: ArticlePartRender.MarkdownRender(markdown = content)
-                    }
-
-                    else -> ArticlePartRender.MarkdownRender(markdown = content)
-                }
-            }
-
-            is ArticleContentSegment.Media -> {
-                if (part.mediaUrl.isValidHttpOrHttpsUrl()) {
-                    if (part.mediaUrl.isVideoUrl()) {
-                        ArticlePartRender.VideoRender(videoUrl = part.mediaUrl)
-                    } else {
-                        ArticlePartRender.ImageRender(imageUrl = part.mediaUrl, linkUrl = part.linkUrl)
-                    }
-                } else {
-                    null
-                }
-            }
-        }
-    }
-}
-
-private fun String.isNostrNote() = isNote() || isNostrUri() || isNEvent() || isNEventUri()
-
-fun String?.isVideoUrl(): Boolean {
-    return this?.run {
-        endsWith(".mp4", ignoreCase = true) ||
-            endsWith(".mov", ignoreCase = true) ||
-            endsWith(".webm", ignoreCase = true) ||
-            endsWith(".mkv", ignoreCase = true) ||
-            endsWith(".avi", ignoreCase = true) ||
-            endsWith(".flv", ignoreCase = true)
-    } == true
 }

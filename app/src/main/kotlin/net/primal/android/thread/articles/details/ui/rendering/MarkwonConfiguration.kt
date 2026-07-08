@@ -8,8 +8,6 @@ import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -66,7 +64,7 @@ fun rememberPrimalMarkwon(
     val colorScheme = AppTheme.colorScheme
     val extraColorScheme = AppTheme.extraColorScheme
 
-    val highlightWords by remember(highlights) { mutableStateOf(highlights.map { it.content }) }
+    val highlightWords = remember(highlights) { highlights.map { it.content } }
 
     return remember(
         onLinkClick,

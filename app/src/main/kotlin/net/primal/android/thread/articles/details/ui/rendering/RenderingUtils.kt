@@ -1,11 +1,18 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
 import java.net.URL
+import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.thread.articles.details.ArticleDetailsContract.ArticlePartRender
 import net.primal.android.thread.articles.details.ui.model.ArticleContentSegment
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
+import net.primal.domain.nostr.utils.isNostrUri
+import net.primal.domain.nostr.utils.isNote
+import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 import net.primal.domain.nostr.utils.withNostrPrefix
 
 private const val LINKED_IMAGE_URL_GROUP_INDEX = 1
@@ -157,4 +164,62 @@ private fun String.splitByRawImageUrls(): List<ArticleContentSegment> {
     }
 
     return segments
+}
+
+fun buildArticleParts(
+    content: String,
+    npubToDisplayNameMap: Map<String, String>,
+    referencedNotes: List<FeedPostUi>,
+): List<ArticlePartRender> =
+    content
+        .splitMarkdownByNostrUris()
+        .flatMap { it.splitMarkdownByInlineImages() }
+        .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = npubToDisplayNameMap)
+        .buildArticleRenderParts(referencedNotes = referencedNotes)
+
+private fun List<ArticleContentSegment>.buildArticleRenderParts(
+    referencedNotes: List<FeedPostUi>,
+): List<ArticlePartRender> {
+    return this.mapNotNull { part ->
+        when (part) {
+            is ArticleContentSegment.Text -> {
+                val content = part.content
+                if (content.isBlank()) return@mapNotNull null
+                when {
+                    content.isNostrNote() -> {
+                        referencedNotes.find { it.postId == content.takeAsNoteHexIdOrNull() }
+                            ?.let { ArticlePartRender.NoteRender(note = it) }
+                            ?: ArticlePartRender.MarkdownRender(markdown = content)
+                    }
+
+                    else -> ArticlePartRender.MarkdownRender(markdown = content)
+                }
+            }
+
+            is ArticleContentSegment.Media -> {
+                if (part.mediaUrl.isValidHttpOrHttpsUrl()) {
+                    if (part.mediaUrl.isVideoUrl()) {
+                        ArticlePartRender.VideoRender(videoUrl = part.mediaUrl)
+                    } else {
+                        ArticlePartRender.ImageRender(imageUrl = part.mediaUrl, linkUrl = part.linkUrl)
+                    }
+                } else {
+                    null
+                }
+            }
+        }
+    }
+}
+
+private fun String.isNostrNote() = isNote() || isNostrUri() || isNEvent() || isNEventUri()
+
+private fun String?.isVideoUrl(): Boolean {
+    return this?.run {
+        endsWith(".mp4", ignoreCase = true) ||
+            endsWith(".mov", ignoreCase = true) ||
+            endsWith(".webm", ignoreCase = true) ||
+            endsWith(".mkv", ignoreCase = true) ||
+            endsWith(".avi", ignoreCase = true) ||
+            endsWith(".flv", ignoreCase = true)
+    } == true
 }
