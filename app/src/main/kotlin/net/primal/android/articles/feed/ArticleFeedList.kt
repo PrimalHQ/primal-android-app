@@ -1,5 +1,6 @@
 package net.primal.android.articles.feed
 
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -57,6 +59,7 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
@@ -95,6 +98,20 @@ fun ArticleFeedList(
     LaunchedEffect(articleViewModel, articleState.error, onUiError) {
         articleState.error?.let { onUiError?.invoke(it) }
         articleViewModel.setEvent(ArticleContract.UiEvent.DismissError)
+    }
+
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
+    LaunchedEffect(articleViewModel, articleViewModel.effects) {
+        articleViewModel.effects.collect {
+            when (it) {
+                ArticleContract.SideEffect.ArticleDeleted -> Unit
+                is ArticleContract.SideEffect.CopyText -> {
+                    context.copyText(text = it.text)
+                    Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     ArticleFeedList(
@@ -267,6 +284,16 @@ private fun ArticleFeedLazyColumn(
                         onClick = onArticleClick,
                         onBookmarkClick = {
                             articleEventPublisher(ArticleContract.UiEvent.BookmarkAction(articleATag = item.aTag))
+                        },
+                        onCopyArticleTextClick = {
+                            articleEventPublisher(
+                                ArticleContract.UiEvent.CopyArticleTextAction(articleATag = item.aTag),
+                            )
+                        },
+                        onCopyRawDataClick = {
+                            articleEventPublisher(
+                                ArticleContract.UiEvent.CopyRawDataAction(articleATag = item.aTag),
+                            )
                         },
                         onMuteUserClick = {
                             articleEventPublisher(ArticleContract.UiEvent.MuteAction(userId = item.authorId))

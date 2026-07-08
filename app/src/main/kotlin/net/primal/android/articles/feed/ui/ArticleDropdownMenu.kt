@@ -51,8 +51,6 @@ fun ArticleDropdownMenu(
     articleId: String,
     eventId: String,
     articleATag: String,
-    articleContent: String?,
-    articleRawData: String?,
     authorId: String,
     isBookmarked: Boolean,
     shareUrl: String,
@@ -64,6 +62,8 @@ fun ArticleDropdownMenu(
     onMuteUserClick: (() -> Unit)? = null,
     onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
+    onCopyArticleTextClick: (() -> Unit)? = null,
+    onCopyRawDataClick: (() -> Unit)? = null,
     icon: @Composable () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
@@ -108,9 +108,9 @@ fun ArticleDropdownMenu(
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
             articleId = articleId,
-            articleContent = articleContent,
-            articleRawData = articleRawData,
             authorId = authorId,
+            onCopyArticleTextClick = onCopyArticleTextClick,
+            onCopyRawDataClick = onCopyRawDataClick,
             isBookmarked = isBookmarked,
             isArticleAuthor = isArticleAuthor,
             showHighlights = showHighlights,
@@ -129,9 +129,9 @@ private fun ArticleDropdownPrimalMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     articleId: String,
-    articleContent: String?,
-    articleRawData: String?,
     authorId: String,
+    onCopyArticleTextClick: (() -> Unit)?,
+    onCopyRawDataClick: (() -> Unit)?,
     isBookmarked: Boolean,
     isArticleAuthor: Boolean,
     showHighlights: Boolean?,
@@ -195,10 +195,10 @@ private fun ArticleDropdownPrimalMenu(
 
         CopyMenuItems(
             articleId = articleId,
-            articleContent = articleContent,
-            articleRawData = articleRawData,
             authorId = authorId,
             shareUrl = shareUrl,
+            onCopyArticleTextClick = onCopyArticleTextClick,
+            onCopyRawDataClick = onCopyRawDataClick,
             onDismissRequest = onDismissRequest,
         )
 
@@ -215,10 +215,10 @@ private fun ArticleDropdownPrimalMenu(
 @Composable
 private fun CopyMenuItems(
     articleId: String,
-    articleContent: String?,
-    articleRawData: String?,
     authorId: String,
     shareUrl: String,
+    onCopyArticleTextClick: (() -> Unit)?,
+    onCopyRawDataClick: (() -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -246,13 +246,13 @@ private fun CopyMenuItems(
             onDismissRequest()
         },
     )
-    if (!articleContent.isNullOrEmpty()) {
+
+    if (onCopyArticleTextClick != null) {
         DropdownPrimalMenuItem(
             trailingIconVector = PrimalIcons.ContextCopyNoteText,
             text = stringResource(id = R.string.article_feed_context_copy_article_text),
             onClick = {
-                context.copyText(text = articleContent)
-                showCopiedToast()
+                onCopyArticleTextClick()
                 onDismissRequest()
             },
         )
@@ -268,13 +268,12 @@ private fun CopyMenuItems(
         },
     )
 
-    if (articleRawData != null) {
+    if (onCopyRawDataClick != null) {
         DropdownPrimalMenuItem(
             trailingIconVector = PrimalIcons.ContextCopyRawData,
             text = stringResource(id = R.string.article_feed_context_copy_raw_data),
             onClick = {
-                context.copyText(text = articleRawData)
-                showCopiedToast()
+                onCopyRawDataClick()
                 onDismissRequest()
             },
         )

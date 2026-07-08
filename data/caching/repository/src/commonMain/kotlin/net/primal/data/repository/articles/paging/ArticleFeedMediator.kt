@@ -15,8 +15,8 @@ import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
-import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.dao.reads.ArticleFeedCrossRef
+import net.primal.data.local.dao.reads.ArticleFeedItem
 import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
@@ -36,7 +36,7 @@ internal class ArticleFeedMediator(
     private val database: CachingDatabase,
     private val dispatcherProvider: DispatcherProvider,
     private val mediaCacher: MediaCacher? = null,
-) : RemoteMediator<Int, ArticlePO>() {
+) : RemoteMediator<Int, ArticleFeedItem>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<ArticleFeedRequestBody, Long>> = mutableMapOf()
 
@@ -55,7 +55,7 @@ internal class ArticleFeedMediator(
     }
 
     @Suppress("ReturnCount")
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, ArticlePO>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, ArticleFeedItem>): MediatorResult {
         val nextUntil = when (loadType) {
             LoadType.APPEND -> findLastRemoteKey(state = state)?.sinceId
                 ?: run {
@@ -120,7 +120,7 @@ internal class ArticleFeedMediator(
         return response
     }
 
-    private suspend fun findLastRemoteKey(state: PagingState<Int, ArticlePO>): FeedPostRemoteKey? {
+    private suspend fun findLastRemoteKey(state: PagingState<Int, ArticleFeedItem>): FeedPostRemoteKey? {
         val lastItemATag = state.lastItemOrNull()?.data?.aTag
             ?: findLastItemOrNull()?.articleATag
 

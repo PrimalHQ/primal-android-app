@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.data.local.dao.reads.Article as ArticlePO
+import net.primal.data.local.dao.reads.ArticleFeedItem
 import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleDetailsRequestBody
@@ -172,7 +172,7 @@ class ArticleRepositoryImpl(
     private fun createPager(
         userId: String,
         feedSpec: String,
-        pagingSourceFactory: () -> PagingSource<Int, ArticlePO>,
+        pagingSourceFactory: () -> PagingSource<Int, ArticleFeedItem>,
     ) = Pager(
         config = PagingConfig(
             pageSize = PAGE_SIZE,

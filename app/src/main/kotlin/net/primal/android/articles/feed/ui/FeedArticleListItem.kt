@@ -81,6 +81,8 @@ fun FeedArticleListItem(
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
     onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
+    onCopyArticleTextClick: (() -> Unit)? = null,
+    onCopyRawDataClick: (() -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.clickable(
@@ -111,6 +113,8 @@ fun FeedArticleListItem(
                 onMuteUserClick = onMuteUserClick,
                 onReportContentClick = onReportContentClick,
                 onRequestDeleteClick = onRequestDeleteClick,
+                onCopyArticleTextClick = onCopyArticleTextClick,
+                onCopyRawDataClick = onCopyRawDataClick,
             )
 
             ListItemContent(data = data)
@@ -135,6 +139,8 @@ private fun ListItemHeader(
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
     onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
+    onCopyArticleTextClick: (() -> Unit)? = null,
+    onCopyRawDataClick: (() -> Unit)? = null,
 ) {
     val overflowIconSizeDp = 32.dp
     Box(contentAlignment = Alignment.TopEnd) {
@@ -147,14 +153,14 @@ private fun ListItemHeader(
                 articleId = data.articleId,
                 eventId = data.eventId,
                 articleATag = data.aTag,
-                articleContent = data.content,
-                articleRawData = data.rawNostrEventJson,
                 authorId = data.authorId,
                 isBookmarked = data.isBookmarked,
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onRequestDeleteClick = onRequestDeleteClick,
                 onReportContentClick = onReportContentClick,
+                onCopyArticleTextClick = onCopyArticleTextClick,
+                onCopyRawDataClick = onCopyRawDataClick,
                 isArticleAuthor = isArticleAuthor,
                 shareUrl = resolvePrimalArticleLink(
                     naddr = Naddr(
@@ -367,11 +373,9 @@ private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
                 articleId = "",
                 authorId = "1234",
                 authorName = "majstor",
-                content = "This is content.",
                 title = "Purple Tech",
                 isBookmarked = false,
                 publishedAt = Instant.now(),
-                rawNostrEventJson = "raaaaw",
                 readingTimeInMinutes = 5,
                 stats = EventStatsUi(
                     repliesCount = 23,
@@ -414,11 +418,9 @@ private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
                 articleId = "",
                 authorId = "1234",
                 authorName = "majstor of long author user names and other stuff",
-                content = "This is content.",
                 title = "Purple Tech",
                 isBookmarked = false,
                 publishedAt = Instant.now(),
-                rawNostrEventJson = "raaaaw",
                 readingTimeInMinutes = 5,
                 stats = EventStatsUi(
                     repliesCount = 23,

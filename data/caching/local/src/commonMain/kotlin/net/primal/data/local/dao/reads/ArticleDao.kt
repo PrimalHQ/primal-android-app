@@ -7,11 +7,11 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
-import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.local.db.ArticleFeedPagingSourceDaoReturnTypeConverter
 
 @Dao
-@DaoReturnTypeConverters(PagingSourceDaoReturnTypeConverter::class)
+@DaoReturnTypeConverters(ArticleFeedPagingSourceDaoReturnTypeConverter::class)
 interface ArticleDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -20,12 +20,22 @@ interface ArticleDao {
     @Transaction
     @Query(
         """
-            SELECT 
-                ArticleData.*, 
+            SELECT
+                ArticleData.aTag,
+                ArticleData.eventId,
+                ArticleData.articleId,
+                ArticleData.authorId,
+                ArticleData.createdAt,
+                ArticleData.title,
+                ArticleData.publishedAt,
+                ArticleData.imageCdnImage,
+                ArticleData.summary,
+                ArticleData.wordsCount,
+                ArticleData.client,
                 CASE WHEN MutedItemData.item IS NOT NULL THEN 1 ELSE 0 END AS isMuted
             FROM ArticleData
-            INNER JOIN ArticleFeedCrossRef 
-                ON ArticleFeedCrossRef.articleATag = ArticleData.aTag 
+            INNER JOIN ArticleFeedCrossRef
+                ON ArticleFeedCrossRef.articleATag = ArticleData.aTag
                 AND ArticleFeedCrossRef.articleAuthorId = ArticleData.authorId
             LEFT JOIN EventUserStats ON EventUserStats.eventId = ArticleData.eventId AND EventUserStats.userId = :userId
             LEFT JOIN MutedItemData ON MutedItemData.item = ArticleData.authorId
@@ -33,7 +43,7 @@ interface ArticleDao {
             ORDER BY ArticleFeedCrossRef.position ASC
         """,
     )
-    fun feed(spec: String, userId: String): PagingSource<Int, Article>
+    fun feed(spec: String, userId: String): PagingSource<Int, ArticleFeedItem>
 
     @Transaction
     @Query(

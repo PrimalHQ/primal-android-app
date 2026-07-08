@@ -5,7 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import java.io.File
 import kotlin.test.Test
 import kotlinx.coroutines.runBlocking
-import net.primal.data.local.dao.reads.Article
+import net.primal.data.local.dao.reads.ArticleFeedItem
 import net.primal.data.local.db.CachingDatabase
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 
@@ -51,7 +51,7 @@ class ArticleFeedPageLoadBenchmark {
             println("\n[article feed] feedSpec=${feed.spec}")
             println(
                 "  loaded ${first.size} of ${feed.rows} rows, ${first.count { it.author != null }} authors, " +
-                    "${first.sumOf { it.eventZaps.size }} zaps, ${first.sumOf { it.highlights.size }} highlights",
+                    "${first.sumOf { it.eventZaps.size }} zaps",
             )
             println("  ${stats.format()}")
         } finally {
@@ -60,7 +60,7 @@ class ArticleFeedPageLoadBenchmark {
     }
 
     /** Drives one Refresh page like Paging does: a fresh PagingSource, loadSize = initial load. */
-    private suspend fun loadPage(db: CachingDatabase, feed: Feed): List<Article> {
+    private suspend fun loadPage(db: CachingDatabase, feed: Feed): List<ArticleFeedItem> {
         val source = db.articles().feed(spec = feed.spec, userId = feed.owner)
         val params = PagingSource.LoadParams.Refresh<Int>(
             key = null,

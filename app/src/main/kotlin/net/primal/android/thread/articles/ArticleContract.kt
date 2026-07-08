@@ -12,6 +12,8 @@ interface ArticleContract {
 
     sealed class SideEffect {
         data object ArticleDeleted : SideEffect()
+
+        data class CopyText(val text: String) : SideEffect()
     }
 
     sealed class UiEvent {
@@ -35,6 +37,14 @@ interface ArticleContract {
             val eventId: String,
             val articleATag: String,
             val authorId: String,
+        ) : UiEvent()
+
+        data class CopyArticleTextAction(
+            val articleATag: String,
+        ) : UiEvent()
+
+        data class CopyRawDataAction(
+            val articleATag: String,
         ) : UiEvent()
 
         data object DismissBookmarkConfirmation : UiEvent()

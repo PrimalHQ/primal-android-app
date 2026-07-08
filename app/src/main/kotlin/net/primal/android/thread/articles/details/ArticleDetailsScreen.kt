@@ -1,5 +1,6 @@
 package net.primal.android.thread.articles.details
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -82,6 +83,7 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
@@ -139,10 +141,16 @@ fun ArticleDetailsScreen(
     val articleViewModel = hiltViewModel<ArticleViewModel>()
     val articleState by articleViewModel.state.collectAsState()
 
+    val context = LocalContext.current
+    val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
     LaunchedEffect(articleViewModel, articleViewModel.effects, callbacks) {
         articleViewModel.effects.collect {
             when (it) {
                 ArticleContract.SideEffect.ArticleDeleted -> callbacks.onClose()
+                is ArticleContract.SideEffect.CopyText -> {
+                    context.copyText(text = it.text)
+                    Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -334,6 +342,20 @@ private fun ArticleDetailsScreen(
                         )
                     }
                 },
+                onCopyArticleTextClick = {
+                    if (detailsState.article != null) {
+                        articleEventPublisher(
+                            ArticleContract.UiEvent.CopyArticleTextAction(articleATag = detailsState.article.aTag),
+                        )
+                    }
+                },
+                onCopyRawDataClick = {
+                    if (detailsState.article != null) {
+                        articleEventPublisher(
+                            ArticleContract.UiEvent.CopyRawDataAction(articleATag = detailsState.article.aTag),
+                        )
+                    }
+                },
             )
         },
         content = { paddingValues ->
@@ -441,6 +463,8 @@ private fun ArticleDetailsTopAppBar(
     onMuteUserClick: (() -> Unit)? = null,
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
     onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
+    onCopyArticleTextClick: (() -> Unit)? = null,
+    onCopyRawDataClick: (() -> Unit)? = null,
 ) {
     PrimalTopAppBar(
         navigationIcon = PrimalIcons.ArrowBack,
@@ -476,8 +500,6 @@ private fun ArticleDetailsTopAppBar(
                     eventId = state.article.eventId,
                     articleATag = state.article.aTag,
                     articleId = state.article.articleId,
-                    articleContent = state.article.content,
-                    articleRawData = state.article.eventRawNostrEvent,
                     authorId = state.article.authorId,
                     isBookmarked = state.article.isBookmarked,
                     isArticleAuthor = state.article.authorId == LocalActiveAccountId.current,
@@ -487,6 +509,8 @@ private fun ArticleDetailsTopAppBar(
                     onMuteUserClick = onMuteUserClick,
                     onRequestDeleteClick = onRequestDeleteClick,
                     onReportContentClick = onReportContentClick,
+                    onCopyArticleTextClick = onCopyArticleTextClick,
+                    onCopyRawDataClick = onCopyRawDataClick,
                     icon = {
                         Icon(
                             modifier = Modifier.padding(top = 10.dp),

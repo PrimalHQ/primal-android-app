@@ -30,6 +30,7 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 
 @HiltViewModel
@@ -68,6 +69,10 @@ class ArticleViewModel @Inject constructor(
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     is UiEvent.RequestDeleteAction -> requestDelete(it.eventId, it.articleATag, it.authorId)
+                    is UiEvent.CopyArticleTextAction -> copyArticleData(it.articleATag) { article -> article.content }
+                    is UiEvent.CopyRawDataAction -> copyArticleData(it.articleATag) { article ->
+                        article.articleRawJson
+                    }
                 }
             }
         }
@@ -190,5 +195,12 @@ class ArticleViewModel @Inject constructor(
     private fun dismissBookmarkConfirmation() =
         viewModelScope.launch {
             setState { copy(shouldApproveBookmark = false) }
+        }
+
+    private fun copyArticleData(articleATag: String, resolveText: (Article) -> String) =
+        viewModelScope.launch {
+            articleRepository.getArticleByATag(aTag = articleATag)?.let {
+                setEffect(SideEffect.CopyText(text = resolveText(it)))
+            }
         }
 }
