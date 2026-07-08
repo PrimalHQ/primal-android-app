@@ -21,7 +21,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -426,88 +425,76 @@ private fun MainScreenContent(
 ) {
     val onGoToWallet = { onTabChanged(PrimalTopLevelDestination.Wallet) }
     Box {
-        Box(
-            modifier = if (activeTab != PrimalTopLevelDestination.Feeds) {
-                Modifier.graphicsLayer { alpha = 0f }
-            } else {
-                Modifier
-            },
-        ) {
-            NoteFeedsContent(
-                state = homeState,
-                pagerState = sharedState.homePagerState,
-                noteCallbacks = noteCallbacks,
-                eventPublisher = homeEventPublisher,
-                onActiveFeedChanged = { sharedState.homeActiveFeed.value = it },
-                topAppBarCollapsedFraction = homeTopAppBarState.collapsedFraction,
-                shouldAnimateScrollToTop = sharedState.homeShouldAnimateScrollToTop,
-                scrollToFeed = sharedState.homeScrollToFeed,
-                snackbarHostState = sharedState.snackbarHostState,
-                paddingValues = paddingValues,
-                onGoToWallet = onGoToWallet,
-            )
-        }
+        saveableStateHolder.SaveableStateProvider(activeTab.name) {
+            when (activeTab) {
+                PrimalTopLevelDestination.Feeds -> NoteFeedsContent(
+                    state = homeState,
+                    pagerState = sharedState.homePagerState,
+                    noteCallbacks = noteCallbacks,
+                    eventPublisher = homeEventPublisher,
+                    onActiveFeedChanged = { sharedState.homeActiveFeed.value = it },
+                    topAppBarCollapsedFraction = homeTopAppBarState.collapsedFraction,
+                    shouldAnimateScrollToTop = sharedState.homeShouldAnimateScrollToTop,
+                    scrollToFeed = sharedState.homeScrollToFeed,
+                    snackbarHostState = sharedState.snackbarHostState,
+                    paddingValues = paddingValues,
+                    onGoToWallet = onGoToWallet,
+                )
 
-        if (activeTab != PrimalTopLevelDestination.Feeds) {
-            saveableStateHolder.SaveableStateProvider(activeTab.name) {
-                when (activeTab) {
-                    PrimalTopLevelDestination.Reads -> ReadsContent(
-                        state = readsState,
-                        pagerState = sharedState.readsPagerState,
-                        eventPublisher = readsEventPublisher,
-                        onActiveFeedChanged = { sharedState.readsActiveFeed.value = it },
-                        shouldAnimateScrollToTop = sharedState.readsShouldAnimateScrollToTop,
-                        scrollToFeed = sharedState.readsScrollToFeed,
-                        snackbarHostState = sharedState.snackbarHostState,
-                        paddingValues = paddingValues,
-                        navController = navController,
-                    )
+                PrimalTopLevelDestination.Reads -> ReadsContent(
+                    state = readsState,
+                    pagerState = sharedState.readsPagerState,
+                    eventPublisher = readsEventPublisher,
+                    onActiveFeedChanged = { sharedState.readsActiveFeed.value = it },
+                    shouldAnimateScrollToTop = sharedState.readsShouldAnimateScrollToTop,
+                    scrollToFeed = sharedState.readsScrollToFeed,
+                    snackbarHostState = sharedState.snackbarHostState,
+                    paddingValues = paddingValues,
+                    navController = navController,
+                )
 
-                    PrimalTopLevelDestination.Explore -> ExploreHomeContent(
-                        pagerState = sharedState.explorePagerState,
-                        paddingValues = paddingValues,
-                        noteCallbacks = noteCallbacks,
-                        snackbarHostState = sharedState.snackbarHostState,
-                        onFollowPackClick = { profileId, identifier ->
-                            navController.navigateToFollowPack(profileId, identifier)
-                        },
-                        onRecentSearchEditClick = { query ->
-                            navController.navigateToSearch(
-                                searchScope = SearchScope.Notes,
-                                initialQuery = query,
-                            )
-                        },
-                        onRecentSearchExecuteClick = { query ->
-                            navController.navigateToExploreFeed(
-                                feedSpec = buildAdvancedSearchNotesFeedSpec(query = query),
-                            )
-                        },
-                        onGoToWallet = onGoToWallet,
-                    )
+                PrimalTopLevelDestination.Explore -> ExploreHomeContent(
+                    pagerState = sharedState.explorePagerState,
+                    paddingValues = paddingValues,
+                    noteCallbacks = noteCallbacks,
+                    snackbarHostState = sharedState.snackbarHostState,
+                    onFollowPackClick = { profileId, identifier ->
+                        navController.navigateToFollowPack(profileId, identifier)
+                    },
+                    onRecentSearchEditClick = { query ->
+                        navController.navigateToSearch(
+                            searchScope = SearchScope.Notes,
+                            initialQuery = query,
+                        )
+                    },
+                    onRecentSearchExecuteClick = { query ->
+                        navController.navigateToExploreFeed(
+                            feedSpec = buildAdvancedSearchNotesFeedSpec(query = query),
+                        )
+                    },
+                    onGoToWallet = onGoToWallet,
+                )
 
-                    PrimalTopLevelDestination.Alerts -> NotificationsContent(
-                        pagerState = sharedState.notificationsPagerState,
-                        badges = notificationsState.badges,
-                        seenNotificationsProvider = notificationsSeenProvider,
-                        unseenNotificationsProvider = notificationsUnseenProvider,
-                        onNotificationsSeen = onNotificationsSeen,
-                        paddingValues = paddingValues,
-                        noteCallbacks = noteCallbacks,
-                        onGoToWallet = onGoToWallet,
-                        shouldAnimateScrollToTop = sharedState.notificationsShouldAnimateScrollToTop,
-                    )
+                PrimalTopLevelDestination.Alerts -> NotificationsContent(
+                    pagerState = sharedState.notificationsPagerState,
+                    badges = notificationsState.badges,
+                    seenNotificationsProvider = notificationsSeenProvider,
+                    unseenNotificationsProvider = notificationsUnseenProvider,
+                    onNotificationsSeen = onNotificationsSeen,
+                    paddingValues = paddingValues,
+                    noteCallbacks = noteCallbacks,
+                    onGoToWallet = onGoToWallet,
+                    shouldAnimateScrollToTop = sharedState.notificationsShouldAnimateScrollToTop,
+                )
 
-                    PrimalTopLevelDestination.Wallet -> WalletDashboardContent(
-                        currencyMode = sharedState.walletCurrencyMode.value,
-                        onCurrencyModeToggle = { sharedState.walletCurrencyMode.value = it },
-                        onScrolledToTopChanged = { sharedState.walletIsScrolledToTop.value = it },
-                        shouldAnimateScrollToTop = sharedState.walletShouldAnimateScrollToTop,
-                        paddingValues = paddingValues,
-                        navController = navController,
-                    )
-
-                    else -> {}
-                }
+                PrimalTopLevelDestination.Wallet -> WalletDashboardContent(
+                    currencyMode = sharedState.walletCurrencyMode.value,
+                    onCurrencyModeToggle = { sharedState.walletCurrencyMode.value = it },
+                    onScrolledToTopChanged = { sharedState.walletIsScrolledToTop.value = it },
+                    shouldAnimateScrollToTop = sharedState.walletShouldAnimateScrollToTop,
+                    paddingValues = paddingValues,
+                    navController = navController,
+                )
             }
         }
     }
