@@ -4,12 +4,11 @@
 - Tapping the Explore tab now opens search
 
 ## Improvements
-- Faster app startup
-- Improved the profile context menu
+- Faster app startup and performance
 - Faster feed loading and lower memory use
+- Improved the profile context menu
 - Feeds now prefetch on startup for a faster first load
 - Reliable connections with automatic connection recovery
-- Removed the redundant timestamp from the highlighted note in a thread
 - Reserved space for the "Followed by" section to reduce layout shift on profiles
 
 ## Fixes
@@ -23,3 +22,4 @@
 - Fixed request timeouts not being reflected in the UI
 - Fixed invalid entries being pulled in from the follow lists
 - Fixed the transparent avatar background on Profile Details
+- Removed the redundant timestamp from the highlighted note in a thread
