@@ -1,11 +1,13 @@
 package net.primal.data.repository
 
 import net.primal.data.local.db.CachingDatabase
+import net.primal.data.repository.feed.paging.FeedSpecInvalidationTracker
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.shared.data.local.db.withTransaction
 
-class UserDataCleanupRepositoryImpl(
+internal class UserDataCleanupRepositoryImpl(
     private val database: CachingDatabase,
+    private val invalidationTracker: FeedSpecInvalidationTracker,
 ) : UserDataCleanupRepository {
     override suspend fun clearUserData(userId: String) {
         database.withTransaction {
@@ -20,5 +22,6 @@ class UserDataCleanupRepositoryImpl(
             database.feedPostsRemoteKeys().deleteAllByOwnerId(ownerId = userId)
             database.publicBookmarks().deleteAllBookmarks(userId = userId)
         }
+        invalidationTracker.invalidateAll()
     }
 }

@@ -9,7 +9,6 @@ import androidx.room3.paging.PagingSourceDaoReturnTypeConverter
 import net.primal.data.local.dao.bookmarks.PublicBookmark
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.mutes.MutedItemData
-import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 
 /**
  * A [PagingSource] return-type converter for the feed DAO that narrows the observed-table set.
@@ -23,16 +22,21 @@ import net.primal.data.local.dao.notes.FeedPostDataCrossRef
  * the relation-derived ones, so the narrowing has to happen here, at PagingSource construction.
  *
  * The feed must re-query only when its rendered output can actually change live:
- *  - `FeedPostDataCrossRef` — feed membership/order (page persists, refresh, deletes),
  *  - `MutedItemData` — mute filtering in the feed SQL's WHERE clause,
  *  - `EventUserStats` — the user's own interaction flags (liked/replied/reposted/zapped/voted),
  *  - `PublicBookmark` — the card's bookmark state; the bookmark toggle has no optimistic UI
  *    state, so this write is the only signal that flips the indicator. Low-churn table
  *    (bookmark actions + bookmark-list sync only), so observing it is cheap.
  *
+ * `FeedPostDataCrossRef` (feed membership/order) is deliberately NOT observed: the table is
+ * spec-blind, so one feed's page persists invalidated every other live feed (opening a profile
+ * regenerated the home feed identically). Membership changes are instead routed per
+ * `(ownerId, feedSpec)` by `FeedSpecInvalidationTracker` in `:data:caching:repository`, which
+ * every crossref write path notifies after its transaction commits.
+ *
  * Everything else the query or its relations read is refreshed on the next structural
  * invalidation instead of live. Behavior is pinned by `FeedPagingSourceInvalidationTest`
- * in `:data:caching:repository` desktopTest.
+ * and `FeedWritePathInvalidationTest` in `:data:caching:repository` desktopTest.
  */
 class FeedPagingSourceDaoReturnTypeConverter {
 
@@ -56,7 +60,6 @@ class FeedPagingSourceDaoReturnTypeConverter {
     companion object {
         private val FEED_OBSERVED_TABLES =
             arrayOf(
-                FeedPostDataCrossRef::class,
                 MutedItemData::class,
                 EventUserStats::class,
                 PublicBookmark::class,

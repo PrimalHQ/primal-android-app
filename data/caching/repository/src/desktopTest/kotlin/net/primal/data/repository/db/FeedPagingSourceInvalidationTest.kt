@@ -30,23 +30,28 @@ import net.primal.shared.data.local.db.LocalDatabaseFactory
  * Room 3 codegen observes the return POJO's `@Relation` tables ON TOP of the declared `observedEntities`,
  * which made the feed re-query on app-wide writes (profiles, counts, zaps, streams, …) from every screen.
  * The feed's `PagingSource` must instead invalidate ONLY on:
- *  - [FeedPostDataCrossRef] — actual feed membership/order changes (page persists, refresh, deletes),
  *  - [MutedItemData] — mute filtering changes,
  *  - [EventUserStats] — the user's own interaction flags rendered live on feed items,
  *  - [PublicBookmark] — the card's bookmark indicator (the bookmark toggle has no optimistic UI state),
- * and must NOT invalidate on writes to any other table the query or its relations read.
+ * and must NOT invalidate on writes to any other table the query or its relations read — including
+ * [FeedPostDataCrossRef]: the table is spec-blind, so Room-observing it regenerated every live feed
+ * on any other feed's page persist. Feed membership changes are routed per `(ownerId, feedSpec)` by
+ * `FeedSpecInvalidationTracker` instead (pinned by [FeedWritePathInvalidationTest]).
  */
 class FeedPagingSourceInvalidationTest {
 
     @Test
-    fun feedPagingSource_invalidates_on_FeedPostDataCrossRef_write() =
+    fun feedPagingSource_doesNotInvalidate_on_FeedPostDataCrossRef_write() =
         withFeedPagingSource { database, pagingSource ->
             database.feedsConnections().connect(
                 data = listOf(
-                    FeedPostDataCrossRef(ownerId = USER_ID, feedSpec = FEED_SPEC, eventId = "note-2"),
+                    FeedPostDataCrossRef(ownerId = USER_ID, feedSpec = "other-feed-spec", eventId = "note-2"),
                 ),
             )
-            pagingSource.awaitInvalidation(reason = "FeedPostDataCrossRef write (feed membership change)")
+            pagingSource.assertNoInvalidation(
+                reason = "FeedPostDataCrossRef write (another feed's page persist — " +
+                    "membership changes are routed per spec by FeedSpecInvalidationTracker)",
+            )
         }
 
     @Test

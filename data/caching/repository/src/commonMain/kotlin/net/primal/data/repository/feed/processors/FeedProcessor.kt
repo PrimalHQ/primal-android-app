@@ -6,6 +6,7 @@ import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.CachingDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.data.repository.feed.paging.FeedSpecInvalidationTracker
 import net.primal.data.repository.mappers.remote.asFeedResponse
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.nostr.NostrEvent
@@ -15,6 +16,7 @@ import net.primal.shared.data.local.db.withTransaction
 internal class FeedProcessor(
     val feedSpec: String,
     val database: CachingDatabase,
+    private val invalidationTracker: FeedSpecInvalidationTracker,
 ) {
 
     suspend fun processAndPersistToDatabase(
@@ -45,6 +47,7 @@ internal class FeedProcessor(
             feedEvents.orderByPagingIfNotNull(pagingEvent = pagingEvent)
                 .processFeedConnections(userId = userId)
         }
+        invalidationTracker.invalidate(ownerId = userId, feedSpec = feedSpec)
     }
 
     private suspend inline fun List<NostrEvent>.processRemoteKeys(userId: String, pagingEvent: ContentPrimalPaging?) {

@@ -16,6 +16,7 @@ import net.primal.data.repository.events.EventRepositoryImpl
 import net.primal.data.repository.events.EventUriRepositoryImpl
 import net.primal.data.repository.explore.ExploreRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
+import net.primal.data.repository.feed.paging.FeedSpecInvalidationTracker
 import net.primal.data.repository.feeds.FeedsRepositoryImpl
 import net.primal.data.repository.importer.CachingImportRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
@@ -57,6 +58,8 @@ import net.primal.domain.user.UserDataCleanupRepository
 abstract class CommonRepositoryFactory {
 
     private val dispatcherProvider = createDispatcherProvider()
+
+    private val feedSpecInvalidationTracker = FeedSpecInvalidationTracker()
 
     abstract fun resolveCachingDatabase(): CachingDatabase
 
@@ -134,6 +137,7 @@ abstract class CommonRepositoryFactory {
             dispatcherProvider = dispatcherProvider,
             feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
             database = resolveCachingDatabase(),
+            invalidationTracker = feedSpecInvalidationTracker,
             mediaCacher = mediaCacher,
         )
     }
@@ -266,6 +270,7 @@ abstract class CommonRepositoryFactory {
     fun createUserDataCleanupRepository(): UserDataCleanupRepository {
         return UserDataCleanupRepositoryImpl(
             database = resolveCachingDatabase(),
+            invalidationTracker = feedSpecInvalidationTracker,
         )
     }
 

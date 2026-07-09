@@ -38,13 +38,18 @@ internal class NoteFeedRemoteMediator(
     private val userId: String,
     private val feedApi: FeedApi,
     private val database: CachingDatabase,
+    private val invalidationTracker: FeedSpecInvalidationTracker,
     private val mediaCacher: MediaCacher? = null,
     private val kinds: List<Int> = FeedRepository.DEFAULT_FEED_KINDS,
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<MultiKindFeedBySpecRequestBody, Long>> = mutableMapOf()
 
-    private val feedProcessor: FeedProcessor = FeedProcessor(feedSpec = feedSpec, database = database)
+    private val feedProcessor: FeedProcessor = FeedProcessor(
+        feedSpec = feedSpec,
+        database = database,
+        invalidationTracker = invalidationTracker,
+    )
 
     private suspend fun String.isLastCacheTimestampOlderThan(duration: Duration): Boolean {
         val lastCachedAt = withContext(dispatcherProvider.io()) {
@@ -127,11 +132,13 @@ internal class NoteFeedRemoteMediator(
         }
     }
 
-    private suspend fun clearFeedSpec(feedSpec: String) =
+    private suspend fun clearFeedSpec(feedSpec: String) {
         withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
             database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
         }
+        invalidationTracker.invalidate(ownerId = userId, feedSpec = feedSpec)
+    }
 
     private suspend fun NoteFeedRemoteMediator.syncFeed(
         loadType: LoadType,

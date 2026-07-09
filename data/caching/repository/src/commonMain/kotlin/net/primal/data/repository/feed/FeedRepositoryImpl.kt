@@ -22,6 +22,7 @@ import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.MultiKindFeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.MultiKindThreadRequestBody
+import net.primal.data.repository.feed.paging.FeedSpecInvalidationTracker
 import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
 import net.primal.data.repository.feed.processors.FeedProcessor
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
@@ -43,6 +44,7 @@ internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,
     private val database: CachingDatabase,
     private val dispatcherProvider: DispatcherProvider,
+    private val invalidationTracker: FeedSpecInvalidationTracker,
     private val mediaCacher: MediaCacher? = null,
 ) : FeedRepository {
 
@@ -130,6 +132,7 @@ internal class FeedRepositoryImpl(
                 database.eventUserStats().deleteByEventId(eventId = postId)
                 database.feedPostsRemoteKeys().deleteAllByEventId(eventId = postId)
             }
+            invalidationTracker.invalidateAll()
         }
 
     override suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPostDO> =
@@ -169,12 +172,14 @@ internal class FeedRepositoryImpl(
         }
     }
 
-    override suspend fun removeFeedSpec(userId: String, feedSpec: String) =
+    override suspend fun removeFeedSpec(userId: String, feedSpec: String) {
         withContext(dispatcherProvider.io()) {
             database.feedPostsRemoteKeys().deleteByDirective(ownerId = userId, directive = feedSpec)
             database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
             database.articleFeedsConnections().deleteConnectionsBySpec(ownerId = userId, spec = feedSpec)
         }
+        invalidationTracker.invalidate(ownerId = userId, feedSpec = feedSpec)
+    }
 
     override suspend fun replaceFeed(
         userId: String,
@@ -184,6 +189,7 @@ internal class FeedRepositoryImpl(
         FeedProcessor(
             feedSpec = feedSpec,
             database = database,
+            invalidationTracker = invalidationTracker,
         ).processAndPersistToDatabase(
             userId = userId,
             snapshot = snapshot,
@@ -253,10 +259,17 @@ internal class FeedRepositoryImpl(
             userId = userId,
             feedApi = feedApi,
             database = database,
+            invalidationTracker = invalidationTracker,
             mediaCacher = mediaCacher,
             kinds = kinds,
         ),
-        pagingSourceFactory = pagingSourceFactory,
+        pagingSourceFactory = {
+            invalidationTracker.track(
+                ownerId = userId,
+                feedSpec = feedSpec,
+                pagingSource = pagingSourceFactory(),
+            )
+        },
     )
 
     private fun feedQueryBuilder(
