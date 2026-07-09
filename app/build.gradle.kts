@@ -264,6 +264,16 @@ android {
     }
 }
 
+// Opt-in Compose compiler stability/skippability reports: -PcomposeReports.
+// Output lands in app/build/compose_reports (classes.txt = stability, composables.txt = skippability).
+if (project.hasProperty("composeReports")) {
+    composeCompiler {
+        val reportsDir = layout.buildDirectory.dir("compose_reports")
+        reportsDestination = reportsDir
+        metricsDestination = reportsDir
+    }
+}
+
 // Dagger/Hilt 2.59.2 bundles a kotlin-metadata-jvm that only reads metadata up to 2.3.0.
 // Force it to match the Kotlin version so the Hilt processor can read Kotlin 2.4.0 metadata.
 configurations.all {
