@@ -11,8 +11,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -69,7 +70,7 @@ fun NoteFeedLazyColumn(
 ) {
     val streamState = LocalStreamState.current
     val pagingItemsOffset = (if (stickyHeader != null) 1 else 0) + (if (header != null) 1 else 0) + 1
-    var firstVisibleVideoPlayingIndex by rememberFirstVisibleVideoPlayingItemIndex(
+    val firstVisibleVideoPlayingIndex = rememberFirstVisibleVideoPlayingItemIndex(
         listState = listState,
         itemIndexOffset = pagingItemsOffset,
         hasVideo = { index ->
@@ -129,6 +130,9 @@ fun NoteFeedLazyColumn(
             contentType = pagingItems.itemContentType(),
         ) { index ->
             val item = pagingItems[index]
+            val couldAutoPlay by remember(index) {
+                derivedStateOf { index == firstVisibleVideoPlayingIndex.value }
+            }
 
             when {
                 item != null -> Column {
@@ -136,7 +140,7 @@ fun NoteFeedLazyColumn(
                         MediaFeedCard(
                             data = item,
                             noteCallbacks = noteCallbacks,
-                            couldAutoPlay = index == firstVisibleVideoPlayingIndex,
+                            couldAutoPlay = couldAutoPlay,
                             onGoToWallet = onGoToWallet,
                             onUiError = onUiError,
                         )
@@ -149,7 +153,7 @@ fun NoteFeedLazyColumn(
                             forceContentIndent = true,
                             nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                             showReplyTo = showReplyTo,
-                            couldAutoPlay = index == firstVisibleVideoPlayingIndex,
+                            couldAutoPlay = couldAutoPlay,
                             noteCallbacks = noteCallbacks,
                             onGoToWallet = onGoToWallet,
                             onUiError = onUiError,
