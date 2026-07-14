@@ -15,13 +15,13 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.signer.client.AmberSignResult
-import net.primal.android.signer.client.signEventWithAmber
+import net.primal.android.signer.client.AMBER_PACKAGE_NAME
+import net.primal.android.signer.client.ExternalSignResult
+import net.primal.android.signer.client.signEventWithSigner
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.getOrDefault
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -73,7 +73,13 @@ class NostrNotary @Inject constructor(
             SignResult.Signed(result)
         } else {
             signMutex.withLock {
-                setEffect(NotarySideEffect.RequestSignature(unsignedNostrEvent))
+                setEffect(
+                    NotarySideEffect.RequestSignature(
+                        unsignedEvent = unsignedNostrEvent,
+                        signerPackageName = findSignerPackageName(userId = unsignedNostrEvent.pubKey)
+                            ?: AMBER_PACKAGE_NAME,
+                    ),
+                )
                 _responses.receive()
             }
         }
@@ -97,17 +103,20 @@ class NostrNotary @Inject constructor(
             credentialsStore.findOrThrow(npub = npub).nsec
         }.getOrNull() ?: throw SigningKeyNotFoundException()
 
-    private fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent? {
-        val isExternalSignerLogin = runCatching {
-            credentialsStore.isExternalSignerCredential(npub = userId.hexToNpubHrp())
-        }.getOrDefault(false)
+    private fun findSignerPackageName(userId: String): String? =
+        runCatching {
+            credentialsStore.findExternalSignerPackageName(npub = userId.hexToNpubHrp())
+        }.getOrNull()
 
-        if (isExternalSignerLogin) {
-            val result = contentResolver.signEventWithAmber(event = event)
+    private fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent? {
+        val signerPackageName = findSignerPackageName(userId = userId)
+
+        if (signerPackageName != null) {
+            val result = contentResolver.signEventWithSigner(event = event, signerPackageName = signerPackageName)
             return when (result) {
-                AmberSignResult.Rejected -> throw SigningRejectedException()
-                is AmberSignResult.Signed -> result.nostrEvent
-                AmberSignResult.Undecided -> null
+                ExternalSignResult.Rejected -> throw SigningRejectedException()
+                is ExternalSignResult.Signed -> result.nostrEvent
+                ExternalSignResult.Undecided -> null
             }
         }
 
@@ -234,6 +243,9 @@ class NostrNotary @Inject constructor(
     }
 
     sealed class NotarySideEffect {
-        data class RequestSignature(val unsignedEvent: NostrUnsignedEvent) : NotarySideEffect()
+        data class RequestSignature(
+            val unsignedEvent: NostrUnsignedEvent,
+            val signerPackageName: String,
+        ) : NotarySideEffect()
     }
 }

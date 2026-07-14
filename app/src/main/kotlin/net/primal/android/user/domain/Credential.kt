@@ -7,6 +7,7 @@ data class Credential(
     val nsec: String?,
     val npub: String,
     val type: CredentialType = CredentialType.PrivateKey,
+    val signerPackageName: String? = null,
 )
 
 enum class CredentialType {

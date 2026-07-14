@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,12 +73,14 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.utils.pasteText
+import net.primal.android.signer.client.AMBER_PACKAGE_NAME
 import net.primal.android.signer.client.event.buildAppSpecificDataEvent
 import net.primal.android.signer.client.launchGetPublicKey
 import net.primal.android.signer.client.launchSignEvent
-import net.primal.android.signer.client.rememberAmberPubkeyLauncher
-import net.primal.android.signer.client.rememberAmberSignerLauncher
-import net.primal.android.signer.client.utils.isCompatibleAmberVersionInstalled
+import net.primal.android.signer.client.rememberSignerPubkeyLauncher
+import net.primal.android.signer.client.rememberSignerSignLauncher
+import net.primal.android.signer.client.utils.ExternalSignerInfo
+import net.primal.android.signer.client.utils.getInstalledExternalSigners
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -119,19 +122,32 @@ fun LoginScreen(
         callbacks.onClose()
     }
 
-    val signLauncher = rememberAmberSignerLauncher(
+    val context = LocalContext.current
+    val installedSigners = remember { getInstalledExternalSigners(context) }
+
+    val signLauncher = rememberSignerSignLauncher(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
     ) { nostrEvent ->
         eventPublisher(LoginContract.UiEvent.LoginRequestEvent(nostrEvent = nostrEvent))
     }
 
-    val pubkeyLauncher = rememberAmberPubkeyLauncher(
+    val pubkeyLauncher = rememberSignerPubkeyLauncher(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
-    ) { pubkey ->
+    ) { pubkey, signerPackageName ->
+        val resolvedSignerPackageName = signerPackageName
+            ?: installedSigners.singleOrNull()?.packageName
+            ?: AMBER_PACKAGE_NAME
         eventPublisher(
-            LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, credentialType = CredentialType.ExternalSigner),
+            LoginContract.UiEvent.UpdateLoginInput(
+                newInput = pubkey,
+                credentialType = CredentialType.ExternalSigner,
+                signerPackageName = resolvedSignerPackageName,
+            ),
         )
-        signLauncher.launchSignEvent(event = buildAppSpecificDataEvent(pubkey = pubkey))
+        signLauncher.launchSignEvent(
+            event = buildAppSpecificDataEvent(pubkey = pubkey),
+            signerPackageName = resolvedSignerPackageName,
+        )
     }
 
     BackHandler(enabled = state.loading) { }
@@ -169,10 +185,11 @@ fun LoginScreen(
                 .padding(horizontal = 32.dp),
             state = state,
             uiMode = uiMode,
+            installedSigners = installedSigners,
             onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
             onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent()) },
-            onLoginWithAmberClick = {
-                pubkeyLauncher.launchGetPublicKey()
+            onLoginWithSignerClick = { signerPackageName ->
+                pubkeyLauncher.launchGetPublicKey(signerPackageName = signerPackageName)
             },
         )
     }
@@ -183,9 +200,10 @@ fun LoginContent(
     modifier: Modifier = Modifier,
     state: LoginContract.UiState,
     uiMode: UiDensityMode,
+    installedSigners: List<ExternalSignerInfo> = emptyList(),
     onLoginInputChanged: (String) -> Unit,
     onLoginClick: () -> Unit,
-    onLoginWithAmberClick: () -> Unit,
+    onLoginWithSignerClick: (signerPackageName: String?) -> Unit,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -259,15 +277,20 @@ fun LoginContent(
                 },
             )
 
-            if (isCompatibleAmberVersionInstalled(context = context)) {
+            if (installedSigners.isNotEmpty()) {
+                val soleSigner = installedSigners.singleOrNull()
                 PrimalLoadingButton(
                     modifier = Modifier
                         .height(56.dp)
                         .fillMaxWidth(),
                     containerColor = Color.Transparent,
                     contentColor = PrimalDarkTextColor,
-                    onClick = onLoginWithAmberClick,
-                    text = "Login with Amber",
+                    onClick = { onLoginWithSignerClick(soleSigner?.packageName) },
+                    text = if (soleSigner != null) {
+                        stringResource(id = R.string.login_button_login_with_signer, soleSigner.displayName)
+                    } else {
+                        stringResource(id = R.string.login_button_login_with_external_signer)
+                    },
                 )
             }
         }
