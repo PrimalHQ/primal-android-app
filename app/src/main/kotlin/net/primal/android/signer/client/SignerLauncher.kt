@@ -2,7 +2,9 @@ package net.primal.android.signer.client
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
+import android.os.Parcelable
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -103,12 +105,18 @@ fun rememberSignerSignLauncher(onFailure: ((ActivityResult) -> Unit)? = null, on
  * @param signerPackageName The package name of the signer app to use, or `null` to leave the
  * intent unpinned so Android resolves it against all installed NIP-55 signers (showing its
  * disambiguation dialog when there is more than one).
+ * @param excludeComponents Components to keep out of the system chooser when the intent is
+ * unpinned (`signerPackageName` is `null`) -- used to exclude Primal's own signer activity so
+ * it never offers itself as a signer to sign into itself. Ignored when a package is pinned.
  *
  * @see rememberSignerPubkeyLauncher
  * @throws ActivityNotFoundException if no NIP-55 signer is installed on the device.
  */
 @Throws(ActivityNotFoundException::class)
-fun SignerLauncher.launchGetPublicKey(signerPackageName: String? = null) {
+fun SignerLauncher.launchGetPublicKey(
+    signerPackageName: String? = null,
+    excludeComponents: List<ComponentName> = emptyList(),
+) {
     val intent = Intent(Intent.ACTION_VIEW, URI_PREFIX.toUri())
     signerPackageName?.let { intent.`package` = it }
     val permissions = listOf(
@@ -130,7 +138,15 @@ fun SignerLauncher.launchGetPublicKey(signerPackageName: String? = null) {
 
     intent.putExtra("permissions", permissions.encodeToJsonString())
     intent.putExtra("type", SignerMethod.GET_PUBLIC_KEY.method)
-    launch(intent)
+
+    val launchIntent = if (signerPackageName == null && excludeComponents.isNotEmpty()) {
+        Intent.createChooser(intent, null).apply {
+            putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, excludeComponents.toTypedArray<Parcelable>())
+        }
+    } else {
+        intent
+    }
+    launch(launchIntent)
 }
 
 /**

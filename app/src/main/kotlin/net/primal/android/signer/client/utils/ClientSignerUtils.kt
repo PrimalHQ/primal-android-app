@@ -1,5 +1,6 @@
 package net.primal.android.signer.client.utils
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -22,6 +23,16 @@ data class ExternalSignerInfo(
     val displayName: String,
 )
 
+private fun Context.queryNostrSignerActivities() =
+    Intent(Intent.ACTION_VIEW, NOSTRSIGNER_SCHEME_URI.toUri()).let { intent ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0L))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.queryIntentActivities(intent, 0)
+        }
+    }
+
 /**
  * Returns all NIP-55 external signer apps installed on this device, resolved by querying for
  * activities handling the `nostrsigner:` scheme (covered by the `<queries>` declaration in the
@@ -30,15 +41,7 @@ data class ExternalSignerInfo(
  */
 fun getInstalledExternalSigners(context: Context): List<ExternalSignerInfo> {
     val pm = context.packageManager
-    val intent = Intent(Intent.ACTION_VIEW, NOSTRSIGNER_SCHEME_URI.toUri())
-    val resolvedActivities = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0L))
-    } else {
-        @Suppress("DEPRECATION")
-        pm.queryIntentActivities(intent, 0)
-    }
-
-    return resolvedActivities
+    return context.queryNostrSignerActivities()
         .mapNotNull { it.activityInfo?.applicationInfo }
         .distinctBy { it.packageName }
         .filterNot { it.packageName == context.packageName }
@@ -50,6 +53,18 @@ fun getInstalledExternalSigners(context: Context): List<ExternalSignerInfo> {
             )
         }
 }
+
+/**
+ * Returns the [ComponentName]s of Primal's own `nostrsigner:` activities (its external-signer
+ * provider feature). Used to keep Primal out of the system chooser when the `get_public_key`
+ * intent is launched unpinned across several installed signers: without this, Primal offers
+ * itself as a signer to sign into itself.
+ */
+fun getOwnSignerComponents(context: Context): List<ComponentName> =
+    context.queryNostrSignerActivities()
+        .mapNotNull { it.activityInfo }
+        .filter { it.packageName == context.packageName }
+        .map { ComponentName(it.packageName, it.name) }
 
 fun isCompatibleAmberVersionInstalled(context: Context): Boolean =
     runCatching {

@@ -81,6 +81,7 @@ import net.primal.android.signer.client.rememberSignerPubkeyLauncher
 import net.primal.android.signer.client.rememberSignerSignLauncher
 import net.primal.android.signer.client.utils.ExternalSignerInfo
 import net.primal.android.signer.client.utils.getInstalledExternalSigners
+import net.primal.android.signer.client.utils.getOwnSignerComponents
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -124,6 +125,7 @@ fun LoginScreen(
 
     val context = LocalContext.current
     val installedSigners = remember { getInstalledExternalSigners(context) }
+    val ownSignerComponents = remember { getOwnSignerComponents(context) }
 
     val signLauncher = rememberSignerSignLauncher(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
@@ -189,7 +191,10 @@ fun LoginScreen(
             onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
             onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent()) },
             onLoginWithSignerClick = { signerPackageName ->
-                pubkeyLauncher.launchGetPublicKey(signerPackageName = signerPackageName)
+                pubkeyLauncher.launchGetPublicKey(
+                    signerPackageName = signerPackageName,
+                    excludeComponents = ownSignerComponents,
+                )
             },
         )
     }
