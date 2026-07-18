@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
+import net.primal.core.utils.fold
 import net.primal.core.utils.runCatching
 
 @Composable
