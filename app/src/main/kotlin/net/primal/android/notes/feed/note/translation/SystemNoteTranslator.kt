@@ -19,6 +19,8 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 internal data class TranslatedNote(
     val text: String,
@@ -76,7 +78,7 @@ internal class SystemNoteTranslator(
     ): String = suspendCancellableCoroutine { continuation ->
         val manager = context.getSystemService(TranslationManager::class.java)
         if (manager == null) {
-            continuation.resumeWith(Result.failure(NoteTranslationException.Unavailable))
+            continuation.resumeWithException(NoteTranslationException.Unavailable)
             return@suspendCancellableCoroutine
         }
 
@@ -87,7 +89,7 @@ internal class SystemNoteTranslator(
 
         manager.createOnDeviceTranslator(translationContext, context.mainExecutor) { translator ->
             if (translator == null) {
-                continuation.resumeWith(Result.failure(NoteTranslationException.Unavailable))
+                continuation.resumeWithException(NoteTranslationException.Unavailable)
                 return@createOnDeviceTranslator
             }
             if (!continuation.isActive) {
@@ -127,9 +129,9 @@ internal class SystemNoteTranslator(
 
             translator.destroy()
             if (isSuccessful) {
-                continuation.resumeWith(Result.success(translatedText))
+                continuation.resume(translatedText)
             } else {
-                continuation.resumeWith(Result.failure(NoteTranslationException.Failed))
+                continuation.resumeWithException(NoteTranslationException.Failed)
             }
         }
     }

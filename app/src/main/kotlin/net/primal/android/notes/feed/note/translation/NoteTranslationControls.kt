@@ -27,13 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
-
-internal sealed interface NoteTranslationUiState {
-    data object Idle : NoteTranslationUiState
-    data object Loading : NoteTranslationUiState
-    data class Success(val translation: TranslatedNote) : NoteTranslationUiState
-    data class Error(val reason: NoteTranslationException) : NoteTranslationUiState
-}
+import net.primal.core.utils.runCatching
 
 @Composable
 internal fun NoteTranslationControls(
