@@ -36,16 +36,20 @@ private sealed interface TranslateUiState {
 fun NoteTranslateControls(
     noteText: String,
     modifier: Modifier = Modifier,
-    libreTranslateBaseUrl: String = LibreTranslateClient.DEFAULT_BASE_URL,
+    libreTranslateBaseUrl: String? = null,
 ) {
     if (noteText.isBlank()) return
 
     val context = LocalContext.current
+    val appContext = context.applicationContext
+    if (!NoteTranslationPreferences.isEnabled(appContext)) return
+
     var state by remember(noteText) { mutableStateOf<TranslateUiState>(TranslateUiState.Idle) }
     val scope = rememberCoroutineScope()
     val accent = AppTheme.colorScheme.secondary
     val onDeviceCaption = stringResource(id = R.string.note_translation_via_on_device)
     val networkCaption = stringResource(id = R.string.note_translation_via_network)
+    val resolvedBaseUrl = libreTranslateBaseUrl ?: NoteTranslationPreferences.baseUrl(appContext)
 
     Column(modifier = modifier.padding(top = 6.dp)) {
         when (val s = state) {
@@ -59,8 +63,8 @@ fun NoteTranslateControls(
                         scope.launch {
                             state = translateNote(
                                 noteText = noteText,
-                                context = context.applicationContext,
-                                libreTranslateBaseUrl = libreTranslateBaseUrl,
+                                context = appContext,
+                                libreTranslateBaseUrl = resolvedBaseUrl,
                                 onDeviceCaption = onDeviceCaption,
                                 networkCaption = networkCaption,
                             )
@@ -156,10 +160,13 @@ private suspend fun translateNote(
 
     return runCatching {
         val protected = NoteTextSanitizer.protect(noteText)
-        val target = LibreTranslateClient.deviceLanguageCode()
+        val target = NoteTranslationPreferences.targetLanguage(context)
+        val apiKey = NoteTranslationPreferences.apiKey(context)
         val raw = withContext(Dispatchers.IO) {
-            LibreTranslateClient(baseUrl = libreTranslateBaseUrl)
-                .translate(protected.text, targetLang = target)
+            LibreTranslateClient(
+                baseUrl = libreTranslateBaseUrl,
+                apiKey = apiKey,
+            ).translate(protected.text, targetLang = target)
         }
         val restored = NoteTextSanitizer.restore(raw, protected.tokens)
         TranslateUiState.Ready(

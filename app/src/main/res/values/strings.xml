@@ -1881,4 +1881,12 @@
     <string name="note_translation_already_in_target">This note is already in your language.</string>
     <string name="note_translation_via_on_device">Translated on this device</string>
     <string name="note_translation_via_network">Translated via network (LibreTranslate)</string>
+    <string name="settings_content_display_note_translation">Enable note translation</string>
+    <string name="settings_content_display_note_translation_hint">Show a Translate control under notes. Uses on-device translation when available, with LibreTranslate fallback.</string>
+    <string name="settings_content_display_translation_endpoint">LibreTranslate base URL</string>
+    <string name="settings_content_display_translation_endpoint_hint">Self-hosted instances are recommended for privacy. Default is libretranslate.com.</string>
+    <string name="settings_content_display_translation_api_key">LibreTranslate API key (optional)</string>
+    <string name="settings_content_display_translation_language">Target language (ISO 639-1)</string>
+    <string name="settings_content_display_translation_language_hint">Examples: en, es, de, fr, zh. Defaults to your device language.</string>
+    <string name="settings_content_display_translation_section">Note translation</string>
 </resources>
