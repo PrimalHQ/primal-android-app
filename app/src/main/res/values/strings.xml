@@ -1870,4 +1870,12 @@
     <string name="poll_votes_no_voters">Voters will show up here.</string>
     <string name="poll_votes_sats_suffix">sats</string>
     <string name="poll_votes_see_votes">see votes</string>
+
+    <!-- Note translation (issue #1055) -->
+    <string name="note_translation_action">Translate</string>
+    <string name="note_translation_translating">Translating…</string>
+    <string name="note_translation_show_original">Show original</string>
+    <string name="note_translation_show_translation">Show translation</string>
+    <string name="note_translation_failed">Couldn\'t translate this note.</string>
+    <string name="note_translation_retry">Retry</string>
 </resources>
