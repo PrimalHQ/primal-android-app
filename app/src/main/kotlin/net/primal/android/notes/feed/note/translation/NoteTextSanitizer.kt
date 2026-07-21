@@ -11,7 +11,8 @@ object NoteTextSanitizer {
         Regex("""https?://\S+"""),
         Regex("""lnbc[a-z0-9]+""", RegexOption.IGNORE_CASE),
         Regex("""bc1[a-z0-9]+""", RegexOption.IGNORE_CASE),
-        Regex("""#[\w_]+"""),
+        Regex("""(?<!\w)#[\w_]+"""),
+        Regex("""(?<!\w)@[\w.-]+"""),
         Regex(""":[a-z0-9_+-]+:""", RegexOption.IGNORE_CASE),
     )
 

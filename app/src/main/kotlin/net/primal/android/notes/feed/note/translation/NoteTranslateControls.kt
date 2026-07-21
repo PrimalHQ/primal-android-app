@@ -43,6 +43,7 @@ fun NoteTranslateControls(
     val context = LocalContext.current
     val appContext = context.applicationContext
     if (!NoteTranslationPreferences.isEnabled(appContext)) return
+    if (!shouldOfferTranslation(noteText)) return
 
     var state by remember(noteText) { mutableStateOf<TranslateUiState>(TranslateUiState.Idle) }
     val scope = rememberCoroutineScope()
@@ -133,6 +134,12 @@ fun NoteTranslateControls(
     }
 }
 
+internal fun shouldOfferTranslation(noteText: String): Boolean {
+    val trimmed = noteText.trim()
+    if (trimmed.length < MIN_TRANSLATE_LENGTH) return false
+    return trimmed.any { it.isLetter() }
+}
+
 private suspend fun translateNote(
     noteText: String,
     context: android.content.Context,
@@ -159,8 +166,17 @@ private suspend fun translateNote(
     }
 
     return runCatching {
-        val protected = NoteTextSanitizer.protect(noteText)
         val target = NoteTranslationPreferences.targetLanguage(context)
+        val cacheKey = "$libreTranslateBaseUrl|$target|$noteText"
+        TranslationSessionCache.get(cacheKey)?.let { cached ->
+            return@runCatching TranslateUiState.Ready(
+                text = cached,
+                showingTranslation = true,
+                caption = networkCaption,
+            )
+        }
+
+        val protected = NoteTextSanitizer.protect(noteText)
         val apiKey = NoteTranslationPreferences.apiKey(context)
         val raw = withContext(Dispatchers.IO) {
             LibreTranslateClient(
@@ -169,6 +185,7 @@ private suspend fun translateNote(
             ).translate(protected.text, targetLang = target)
         }
         val restored = NoteTextSanitizer.restore(raw, protected.tokens)
+        TranslationSessionCache.put(cacheKey, restored)
         TranslateUiState.Ready(
             text = restored,
             showingTranslation = true,
@@ -178,3 +195,27 @@ private suspend fun translateNote(
         TranslateUiState.Error(R.string.note_translation_failed)
     }
 }
+
+/** Session-scoped LRU cache for network translation results (per process). */
+internal object TranslationSessionCache {
+    private const val MAX_ENTRIES = 64
+    private val map = object : LinkedHashMap<String, String>(32, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?): Boolean =
+            size > MAX_ENTRIES
+    }
+
+    @Synchronized
+    fun get(key: String): String? = map[key]
+
+    @Synchronized
+    fun put(key: String, value: String) {
+        map[key] = value
+    }
+
+    @Synchronized
+    fun clear() {
+        map.clear()
+    }
+}
+
+private const val MIN_TRANSLATE_LENGTH = 12

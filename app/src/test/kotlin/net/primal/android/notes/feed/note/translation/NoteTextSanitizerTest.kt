@@ -44,4 +44,20 @@ class NoteTextSanitizerTest {
         assertFalse(protected.text.contains("nrelay1"))
         assertEquals(input, NoteTextSanitizer.restore(protected.text, protected.tokens))
     }
+
+    @Test
+    fun protect_coversMentionsAndHashtags() {
+        val input = "hello @alice and #nostr world"
+        val protected = NoteTextSanitizer.protect(input)
+        assertFalse(protected.text.contains("@alice"))
+        assertFalse(protected.text.contains("#nostr"))
+        assertEquals(input, NoteTextSanitizer.restore(protected.text, protected.tokens))
+    }
+
+    @Test
+    fun shouldOfferTranslation_requiresLengthAndLetters() {
+        assertFalse(shouldOfferTranslation("hi"))
+        assertFalse(shouldOfferTranslation("123456789012345"))
+        assertTrue(shouldOfferTranslation("This note is long enough to translate."))
+    }
 }
