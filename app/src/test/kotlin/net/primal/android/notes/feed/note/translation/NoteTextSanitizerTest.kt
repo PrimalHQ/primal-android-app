@@ -72,4 +72,16 @@ class NoteTextSanitizerTest {
         assertFalse(shouldOfferTranslation("123456789012345"))
         assertTrue(shouldOfferTranslation("This note is long enough to translate."))
     }
+
+    @Test
+    fun protect_onDeviceStylePlaceholdersSurviveRestore() {
+        // On-device TranslationManager may rewrite unicode brackets to ASCII.
+        val input = "hola https://example.com/x npub1abcxyzdeadbeef fin"
+        val protected = NoteTextSanitizer.protect(input)
+        val mangledByProvider = protected.text
+            .replace("⟦", "[")
+            .replace("⟧", "]")
+        val restored = NoteTextSanitizer.restore(mangledByProvider, protected.tokens)
+        assertEquals(input, restored)
+    }
 }

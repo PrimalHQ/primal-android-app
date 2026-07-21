@@ -148,11 +148,14 @@ private suspend fun translateNote(
     networkCaption: String,
 ): TranslateUiState {
     // Prefer private on-device translation when available (API 31+).
+    // Protect identifiers first so TranslationManager cannot mangle them.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         try {
-            val result = SystemNoteTranslator(context).translate(noteText)
+            val protected = NoteTextSanitizer.protect(noteText)
+            val result = SystemNoteTranslator(context).translate(protected.text)
+            val restored = NoteTextSanitizer.restore(result.text, protected.tokens)
             return TranslateUiState.Ready(
-                text = result.text,
+                text = restored,
                 showingTranslation = true,
                 caption = "$onDeviceCaption (${result.targetLanguage})",
             )
