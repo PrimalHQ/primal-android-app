@@ -55,6 +55,18 @@ class NoteTextSanitizerTest {
     }
 
     @Test
+    fun protect_coversBolt12OfferLnurlCashuAndLightningUri() {
+        val input =
+            "offer lno1offerxyz invoice lightning:lnbc1viauri lnurl1abc cashuAabc123 end"
+        val protected = NoteTextSanitizer.protect(input)
+        assertFalse(protected.text.contains("lno1offer"))
+        assertFalse(protected.text.contains("lightning:"))
+        assertFalse(protected.text.contains("lnurl1"))
+        assertFalse(protected.text.contains("cashuA"))
+        assertEquals(input, NoteTextSanitizer.restore(protected.text, protected.tokens))
+    }
+
+    @Test
     fun shouldOfferTranslation_requiresLengthAndLetters() {
         assertFalse(shouldOfferTranslation("hi"))
         assertFalse(shouldOfferTranslation("123456789012345"))

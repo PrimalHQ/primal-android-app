@@ -9,7 +9,13 @@ object NoteTextSanitizer {
         Regex("""nostr:[a-z0-9]+1[a-z0-9]{6,}""", RegexOption.IGNORE_CASE),
         Regex("""\b(npub|nprofile|note|nevent|naddr|nrelay)1[a-z0-9]{6,}\b""", RegexOption.IGNORE_CASE),
         Regex("""https?://\S+"""),
+        // bolt11 / bolt12 / lnurl / lightning: URIs / cashu tokens / on-chain bech32
+        Regex("""lightning:(?:lnbc|lno|lni|lnurl)[a-z0-9]+""", RegexOption.IGNORE_CASE),
         Regex("""lnbc[a-z0-9]+""", RegexOption.IGNORE_CASE),
+        Regex("""lno1[a-z0-9]+""", RegexOption.IGNORE_CASE),
+        Regex("""lni1[a-z0-9]+""", RegexOption.IGNORE_CASE),
+        Regex("""lnurl1[a-z0-9]+""", RegexOption.IGNORE_CASE),
+        Regex("""cashu[A-Za-z0-9][A-Za-z0-9+/=_-]+"""),
         Regex("""bc1[a-z0-9]+""", RegexOption.IGNORE_CASE),
         Regex("""(?<!\w)#[\w_]+"""),
         Regex("""(?<!\w)@[\w.-]+"""),
