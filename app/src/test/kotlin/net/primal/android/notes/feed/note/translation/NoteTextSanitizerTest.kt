@@ -7,13 +7,15 @@ import org.junit.Test
 
 class NoteTextSanitizerTest {
     @Test
-    fun protectAndRestore_keepsNostrAndUrls() {
+    fun protectAndRestore_keepsNostrUrlsInvoicesAndBc1() {
         val input =
-            "hola nostr:npub1abcxyzdeadbeef https://example.com/x #nostr lnbc1testinvoice :smile:"
+            "hola nostr:npub1abcxyzdeadbeef https://example.com/x #nostr lnbc1testinvoice " +
+                "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh :smile:"
         val protected = NoteTextSanitizer.protect(input)
         assertTrue(protected.text.contains("⟦T"))
         assertFalse(protected.text.contains("https://example.com"))
-        // Simulate a translator that leaves placeholders intact
+        assertFalse(protected.text.contains("bc1qxy"))
+        assertFalse(protected.text.contains("lnbc1testinvoice"))
         val restored = NoteTextSanitizer.restore(protected.text, protected.tokens)
         assertEquals(input, restored)
     }
@@ -25,5 +27,21 @@ class NoteTextSanitizerTest {
         assertEquals(2, protected.tokens.size)
         assertEquals("https://a.test", protected.tokens[0])
         assertEquals("https://b.test", protected.tokens[1])
+    }
+
+    @Test
+    fun restore_toleratesProvidersThatDropUnicodeBrackets() {
+        val tokens = listOf("https://example.com", "npub1abcxyzdeadbeef")
+        val mangled = "hello [T0] and [T1] end"
+        val restored = NoteTextSanitizer.restore(mangled, tokens)
+        assertEquals("hello https://example.com and npub1abcxyzdeadbeef end", restored)
+    }
+
+    @Test
+    fun protect_coversNrelayBech32() {
+        val input = "relay nrelay1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq here"
+        val protected = NoteTextSanitizer.protect(input)
+        assertFalse(protected.text.contains("nrelay1"))
+        assertEquals(input, NoteTextSanitizer.restore(protected.text, protected.tokens))
     }
 }

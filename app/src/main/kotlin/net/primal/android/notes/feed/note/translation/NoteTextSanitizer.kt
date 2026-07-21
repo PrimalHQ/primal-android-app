@@ -10,6 +10,7 @@ object NoteTextSanitizer {
         Regex("""\b(npub|nprofile|note|nevent|naddr|nrelay)1[a-z0-9]{6,}\b""", RegexOption.IGNORE_CASE),
         Regex("""https?://\S+"""),
         Regex("""lnbc[a-z0-9]+""", RegexOption.IGNORE_CASE),
+        Regex("""bc1[a-z0-9]+""", RegexOption.IGNORE_CASE),
         Regex("""#[\w_]+"""),
         Regex(""":[a-z0-9_+-]+:""", RegexOption.IGNORE_CASE),
     )
