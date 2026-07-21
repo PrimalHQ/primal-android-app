@@ -132,7 +132,7 @@ fun NoteContent(
                 onClick = clickHandler,
             )
 
-            // Inline note translation (Lightning Bounty #1055) via LibreTranslate + token sanitizer
+            // Inline note translation (#1055): on-device first, LibreTranslate fallback + token sanitizer
             NoteTranslateControls(noteText = data.content)
         }
 

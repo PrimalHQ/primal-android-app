@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.note.translation
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -22,8 +24,12 @@ import net.primal.android.theme.AppTheme
 private sealed interface TranslateUiState {
     data object Idle : TranslateUiState
     data object Loading : TranslateUiState
-    data class Ready(val text: String, val showingTranslation: Boolean) : TranslateUiState
-    data class Error(val message: String) : TranslateUiState
+    data class Ready(
+        val text: String,
+        val showingTranslation: Boolean,
+        val caption: String?,
+    ) : TranslateUiState
+    data class Error(val messageRes: Int) : TranslateUiState
 }
 
 @Composable
@@ -34,9 +40,12 @@ fun NoteTranslateControls(
 ) {
     if (noteText.isBlank()) return
 
+    val context = LocalContext.current
     var state by remember(noteText) { mutableStateOf<TranslateUiState>(TranslateUiState.Idle) }
     val scope = rememberCoroutineScope()
     val accent = AppTheme.colorScheme.secondary
+    val onDeviceCaption = stringResource(id = R.string.note_translation_via_on_device)
+    val networkCaption = stringResource(id = R.string.note_translation_via_network)
 
     Column(modifier = modifier.padding(top = 6.dp)) {
         when (val s = state) {
@@ -48,20 +57,13 @@ fun NoteTranslateControls(
                     modifier = Modifier.clickable {
                         state = TranslateUiState.Loading
                         scope.launch {
-                            state = runCatching {
-                                val protected = NoteTextSanitizer.protect(noteText)
-                                val target = LibreTranslateClient.deviceLanguageCode()
-                                val raw = withContext(Dispatchers.IO) {
-                                    LibreTranslateClient(baseUrl = libreTranslateBaseUrl)
-                                        .translate(protected.text, targetLang = target)
-                                }
-                                val restored = NoteTextSanitizer.restore(raw, protected.tokens)
-                                TranslateUiState.Ready(text = restored, showingTranslation = true)
-                            }.getOrElse {
-                                TranslateUiState.Error(
-                                    it.message ?: "translation failed",
-                                )
-                            }
+                            state = translateNote(
+                                noteText = noteText,
+                                context = context.applicationContext,
+                                libreTranslateBaseUrl = libreTranslateBaseUrl,
+                                onDeviceCaption = onDeviceCaption,
+                                networkCaption = networkCaption,
+                            )
                         }
                     },
                 )
@@ -79,8 +81,16 @@ fun NoteTranslateControls(
                         text = s.text,
                         style = AppTheme.typography.bodyMedium,
                         color = AppTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 4.dp),
+                        modifier = Modifier.padding(bottom = 2.dp),
                     )
+                    s.caption?.let { caption ->
+                        Text(
+                            text = caption,
+                            style = AppTheme.typography.bodySmall,
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                    }
                     Text(
                         text = stringResource(id = R.string.note_translation_show_original),
                         color = accent,
@@ -102,7 +112,7 @@ fun NoteTranslateControls(
             }
             is TranslateUiState.Error -> {
                 Text(
-                    text = stringResource(id = R.string.note_translation_failed),
+                    text = stringResource(id = s.messageRes),
                     color = AppTheme.colorScheme.error,
                     style = AppTheme.typography.bodySmall,
                 )
@@ -116,5 +126,48 @@ fun NoteTranslateControls(
                 )
             }
         }
+    }
+}
+
+private suspend fun translateNote(
+    noteText: String,
+    context: android.content.Context,
+    libreTranslateBaseUrl: String,
+    onDeviceCaption: String,
+    networkCaption: String,
+): TranslateUiState {
+    // Prefer private on-device translation when available (API 31+).
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        try {
+            val result = SystemNoteTranslator(context).translate(noteText)
+            return TranslateUiState.Ready(
+                text = result.text,
+                showingTranslation = true,
+                caption = "$onDeviceCaption (${result.targetLanguage})",
+            )
+        } catch (_: NoteTranslationException.AlreadyInTargetLanguage) {
+            return TranslateUiState.Error(R.string.note_translation_already_in_target)
+        } catch (_: NoteTranslationException) {
+            // Fall through to LibreTranslate.
+        } catch (_: Throwable) {
+            // Fall through to LibreTranslate.
+        }
+    }
+
+    return runCatching {
+        val protected = NoteTextSanitizer.protect(noteText)
+        val target = LibreTranslateClient.deviceLanguageCode()
+        val raw = withContext(Dispatchers.IO) {
+            LibreTranslateClient(baseUrl = libreTranslateBaseUrl)
+                .translate(protected.text, targetLang = target)
+        }
+        val restored = NoteTextSanitizer.restore(raw, protected.tokens)
+        TranslateUiState.Ready(
+            text = restored,
+            showingTranslation = true,
+            caption = networkCaption,
+        )
+    }.getOrElse {
+        TranslateUiState.Error(R.string.note_translation_failed)
     }
 }

@@ -1878,4 +1878,7 @@
     <string name="note_translation_show_translation">Show translation</string>
     <string name="note_translation_failed">Couldn\'t translate this note.</string>
     <string name="note_translation_retry">Retry</string>
+    <string name="note_translation_already_in_target">This note is already in your language.</string>
+    <string name="note_translation_via_on_device">Translated on this device</string>
+    <string name="note_translation_via_network">Translated via network (LibreTranslate)</string>
 </resources>
