@@ -28,7 +28,7 @@ class LibreTranslateClient(
             root.put("api_key", apiKey)
         }
 
-        val url = baseUrl.trimEnd('/') + "/translate"
+        val url = normalizeBaseUrl(baseUrl) + "/translate"
         val body = root.toString().toRequestBody(JSON_MEDIA)
         val request = Request.Builder().url(url).post(body).build()
         client.newCall(request).execute().use { response ->
@@ -37,7 +37,10 @@ class LibreTranslateClient(
                 throw IOException("LibreTranslate HTTP ${response.code}: $payload")
             }
             val json = JSONObject(payload)
-            return json.optString("translatedText").ifBlank {
+            val translated = json.optString("translatedText")
+                .ifBlank { json.optString("translation") }
+                .ifBlank { json.optString("text") }
+            return translated.ifBlank {
                 throw IOException("LibreTranslate missing translatedText")
             }
         }
@@ -56,6 +59,19 @@ class LibreTranslateClient(
         fun deviceLanguageCode(): String {
             val lang = Locale.getDefault().language
             return if (lang.isNullOrBlank()) "en" else lang
+        }
+
+        /**
+         * Accept base URL or full `/translate` path so settings never hit
+         * `.../translate/translate`.
+         */
+        fun normalizeBaseUrl(raw: String): String {
+            var cleaned = raw.trim().trimEnd('/')
+            if (cleaned.isEmpty()) return DEFAULT_BASE_URL
+            if (cleaned.endsWith("/translate", ignoreCase = true)) {
+                cleaned = cleaned.dropLast("/translate".length).trimEnd('/')
+            }
+            return cleaned.ifEmpty { DEFAULT_BASE_URL }
         }
     }
 }

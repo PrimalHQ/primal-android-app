@@ -23,16 +23,18 @@ object NoteTranslationPreferences {
 
     fun baseUrl(context: Context): String =
         prefs(context).getString(KEY_BASE_URL, null)
-            ?.trim()
+            ?.let { LibreTranslateClient.normalizeBaseUrl(it) }
             ?.takeIf { it.isNotEmpty() }
             ?: LibreTranslateClient.DEFAULT_BASE_URL
 
     fun setBaseUrl(context: Context, url: String) {
-        val cleaned = url.trim().trimEnd('/')
-        if (cleaned.isEmpty()) {
+        val trimmed = url.trim()
+        if (trimmed.isEmpty()) {
             prefs(context).edit().remove(KEY_BASE_URL).apply()
         } else {
-            prefs(context).edit().putString(KEY_BASE_URL, cleaned).apply()
+            prefs(context).edit()
+                .putString(KEY_BASE_URL, LibreTranslateClient.normalizeBaseUrl(trimmed))
+                .apply()
         }
     }
 

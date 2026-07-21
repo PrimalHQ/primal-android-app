@@ -74,6 +74,29 @@ class NoteTextSanitizerTest {
     }
 
     @Test
+    fun shouldOfferTranslation_hidesTokenOnlyNotes() {
+        val tokenOnly =
+            "https://example.com/a/b/c/d/e/f npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+        assertFalse(shouldOfferTranslation(tokenOnly))
+    }
+
+    @Test
+    fun normalizeBaseUrl_stripsTranslatePath() {
+        assertEquals(
+            "https://libretranslate.example",
+            LibreTranslateClient.normalizeBaseUrl("https://libretranslate.example/translate"),
+        )
+        assertEquals(
+            "https://libretranslate.example",
+            LibreTranslateClient.normalizeBaseUrl("https://libretranslate.example/"),
+        )
+        assertEquals(
+            LibreTranslateClient.DEFAULT_BASE_URL,
+            LibreTranslateClient.normalizeBaseUrl(""),
+        )
+    }
+
+    @Test
     fun protect_onDeviceStylePlaceholdersSurviveRestore() {
         // On-device TranslationManager may rewrite unicode brackets to ASCII.
         val input = "hola https://example.com/x npub1abcxyzdeadbeef fin"

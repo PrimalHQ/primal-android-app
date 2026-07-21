@@ -29,6 +29,8 @@ private sealed interface TranslateUiState {
         val showingTranslation: Boolean,
         val caption: String?,
     ) : TranslateUiState
+    /** Non-failure status (e.g. already in target language). */
+    data class Info(val messageRes: Int) : TranslateUiState
     data class Error(val messageRes: Int) : TranslateUiState
 }
 
@@ -115,6 +117,13 @@ fun NoteTranslateControls(
                     )
                 }
             }
+            is TranslateUiState.Info -> {
+                Text(
+                    text = stringResource(id = s.messageRes),
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
             is TranslateUiState.Error -> {
                 Text(
                     text = stringResource(id = s.messageRes),
@@ -137,7 +146,12 @@ fun NoteTranslateControls(
 internal fun shouldOfferTranslation(noteText: String): Boolean {
     val trimmed = noteText.trim()
     if (trimmed.length < MIN_TRANSLATE_LENGTH) return false
-    return trimmed.any { it.isLetter() }
+    if (!trimmed.any { it.isLetter() }) return false
+    // Require real prose after stripping protected identifiers.
+    val prose = NoteTextSanitizer.protect(trimmed).text
+        .replace(Regex("""⟦T\d+⟧"""), " ")
+        .trim()
+    return prose.length >= 4 && prose.any { it.isLetter() }
 }
 
 private suspend fun translateNote(
@@ -160,7 +174,7 @@ private suspend fun translateNote(
                 caption = "$onDeviceCaption (${result.targetLanguage})",
             )
         } catch (_: NoteTranslationException.AlreadyInTargetLanguage) {
-            return TranslateUiState.Error(R.string.note_translation_already_in_target)
+            return TranslateUiState.Info(R.string.note_translation_already_in_target)
         } catch (_: NoteTranslationException) {
             // Fall through to LibreTranslate.
         } catch (_: Throwable) {
@@ -170,7 +184,8 @@ private suspend fun translateNote(
 
     return runCatching {
         val target = NoteTranslationPreferences.targetLanguage(context)
-        val cacheKey = "$libreTranslateBaseUrl|$target|$noteText"
+        val normalizedBase = LibreTranslateClient.normalizeBaseUrl(libreTranslateBaseUrl)
+        val cacheKey = "$normalizedBase|$target|$noteText"
         TranslationSessionCache.get(cacheKey)?.let { cached ->
             return@runCatching TranslateUiState.Ready(
                 text = cached,
@@ -180,10 +195,15 @@ private suspend fun translateNote(
         }
 
         val protected = NoteTextSanitizer.protect(noteText)
+        val prose = protected.text.replace(Regex("""⟦T\d+⟧"""), " ").trim()
+        if (prose.length < 4 || !prose.any { it.isLetter() }) {
+            return@runCatching TranslateUiState.Error(R.string.note_translation_failed)
+        }
+
         val apiKey = NoteTranslationPreferences.apiKey(context)
         val raw = withContext(Dispatchers.IO) {
             LibreTranslateClient(
-                baseUrl = libreTranslateBaseUrl,
+                baseUrl = normalizedBase,
                 apiKey = apiKey,
             ).translate(protected.text, targetLang = target)
         }
