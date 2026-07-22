@@ -3,6 +3,7 @@
 package net.primal.wallet.data.spark
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import net.primal.core.utils.files.excludeFromBackup
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
@@ -26,7 +27,8 @@ internal object IosBreezSdkStorageProvider : BreezSdkStorageProvider {
         val basePath = requireNotNull(documentDirectory?.path) {
             "Failed to get iOS document directory"
         }
-        val path = "$basePath/$BREEZ_SDK_DIR/$walletId"
+        val breezDirectory = "$basePath/$BREEZ_SDK_DIR"
+        val path = "$breezDirectory/$walletId"
 
         // Create directory if it doesn't exist
         val fileManager = NSFileManager.defaultManager
@@ -38,6 +40,7 @@ internal object IosBreezSdkStorageProvider : BreezSdkStorageProvider {
                 error = null,
             )
         }
+        excludeFromBackup(breezDirectory)
 
         return path
     }

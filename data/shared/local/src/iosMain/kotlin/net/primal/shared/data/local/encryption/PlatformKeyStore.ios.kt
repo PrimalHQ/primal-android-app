@@ -5,6 +5,7 @@ package net.primal.shared.data.local.encryption
 import dev.whyoleg.cryptography.CryptographyProviderApi
 import dev.whyoleg.cryptography.providers.base.toByteArray
 import dev.whyoleg.cryptography.providers.base.toNSData
+import io.github.aakira.napier.Napier
 import kotlin.random.Random
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
@@ -23,6 +24,8 @@ import platform.Foundation.NSData
 import platform.Security.SecItemAdd
 import platform.Security.SecItemCopyMatching
 import platform.Security.SecItemDelete
+import platform.Security.errSecInteractionNotAllowed
+import platform.Security.errSecItemNotFound
 import platform.Security.errSecSuccess
 import platform.Security.kSecAttrAccessible
 import platform.Security.kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
@@ -36,6 +39,7 @@ import platform.Security.kSecValueData
 @OptIn(ExperimentalForeignApi::class, CryptographyProviderApi::class)
 object IosPlatformKeyStore : PlatformKeyStore {
 
+    private const val LOG_TAG = "IosPlatformKeyStore"
     private const val SERVICE_NAME = "primal.keystore"
     private const val ACCOUNT_NAME = "encryption_key_v1"
     private const val KEY_SIZE_BYTES = 32
@@ -46,7 +50,9 @@ object IosPlatformKeyStore : PlatformKeyStore {
     override fun getOrCreateKey(): ByteArray {
         getKeyFromKeychain()?.let { return it }
         val newKey = generateRandomKey()
-        saveKeyToKeychain(key = newKey)
+        if (!saveKeyToKeychain(key = newKey)) {
+            Napier.w(tag = LOG_TAG) { "Failed to save encryption key to keychain." }
+        }
         return newKey
     }
 
@@ -58,12 +64,14 @@ object IosPlatformKeyStore : PlatformKeyStore {
         memScoped {
             val query = buildReadQuery() ?: return null
             val result = alloc<CFTypeRefVar>()
-            val status = SecItemCopyMatching(query, result.ptr)
-            if (status == errSecSuccess && result.value != null) {
-                val data = CFBridgingRelease(result.value) as? NSData
-                data?.toByteArray()
-            } else {
-                null
+            when (val status = SecItemCopyMatching(query, result.ptr)) {
+                errSecSuccess -> (CFBridgingRelease(result.value) as? NSData)?.toByteArray()
+                errSecItemNotFound -> null
+                errSecInteractionNotAllowed -> error("Keychain is locked, unable to read encryption key.")
+                else -> {
+                    Napier.w(tag = LOG_TAG) { "Keychain read failed with status $status." }
+                    null
+                }
             }
         }
 
