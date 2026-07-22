@@ -17,6 +17,7 @@ import com.android.billingclient.api.queryProductDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +49,7 @@ class PlayBillingClient @Inject constructor(
     private val billingClient by lazy {
         BillingClient.newBuilder(appContext)
             .setListener(this)
+            .enableAutoServiceReconnection()
             .enablePendingPurchases(
                 PendingPurchasesParams.newBuilder()
                     .enableOneTimeProducts()
@@ -56,6 +58,7 @@ class PlayBillingClient @Inject constructor(
             .build()
     }
 
+    @Volatile
     private var connected: Boolean = false
     private val connectLock: Mutex = Mutex()
 
@@ -107,7 +110,9 @@ class PlayBillingClient @Inject constructor(
                                 )
                             }
 
-                            override fun onBillingServiceDisconnected() = Unit
+                            override fun onBillingServiceDisconnected() {
+                                connected = false
+                            }
                         },
                     )
                 }
