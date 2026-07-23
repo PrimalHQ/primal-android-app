@@ -33,7 +33,7 @@ val unzipBreezFramework by tasks.registering(Copy::class) {
 }
 
 private val xcfName = "PrimalShared"
-private val xcfVersionName = "0.2.7"
+private val xcfVersionName = "0.3.0"
 
 // Shared dependencies exported to iOS
 private val exportedDependencies = listOf(
