@@ -48,6 +48,10 @@
         tools:replace="android:allowBackup"
         tools:targetApi="33">
 
+        <property
+            android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
+            android:value="true" />
+
         <receiver
             android:name=".core.receiver.EndSessionReceiver"
             android:exported="false" />
