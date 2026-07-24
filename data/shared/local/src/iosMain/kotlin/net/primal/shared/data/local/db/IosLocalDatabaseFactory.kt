@@ -9,6 +9,8 @@ import net.primal.core.utils.coroutines.IOSDispatcherProvider
 import net.primal.core.utils.files.excludeFromBackup
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSFileSize
+import platform.Foundation.NSNumber
 import platform.Foundation.NSUserDomainMask
 
 typealias LocalDatabaseFactory = IosLocalDatabaseFactory
@@ -62,6 +64,21 @@ object IosLocalDatabaseFactory {
      */
     fun deleteDatabases(names: List<String>) {
         names.forEach { deleteDatabaseFiles(it) }
+    }
+
+    /**
+     * Deletes the database (with sidecars) if its main file has reached [maxSizeBytes]. Must be
+     * called before the database is opened; intended for cache-only databases whose data is
+     * re-fetchable.
+     */
+    @OptIn(ExperimentalForeignApi::class)
+    fun deleteDatabaseIfOversized(databaseName: String, maxSizeBytes: Long) {
+        val path = "${databasesDirectory()}/$databaseName"
+        val attributes = NSFileManager.defaultManager.attributesOfItemAtPath(path = path, error = null)
+        val fileSize = (attributes?.get(NSFileSize) as? NSNumber)?.longLongValue ?: return
+        if (fileSize >= maxSizeBytes) {
+            deleteDatabaseFiles(databaseName)
+        }
     }
 
     @OptIn(ExperimentalForeignApi::class)

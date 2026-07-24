@@ -237,6 +237,12 @@ abstract class CachingDatabase : RoomDatabase() {
             "primal_v2.db",
             "primal_database.db",
         )
+
+        /**
+         * Caching database file size at which the database is wiped on cold start, before Room
+         * opens it. Safe because this database is a pure cache; all data is re-fetchable.
+         */
+        const val MAX_DATABASE_SIZE_BYTES = 100L * 1024 * 1024
     }
 }
 

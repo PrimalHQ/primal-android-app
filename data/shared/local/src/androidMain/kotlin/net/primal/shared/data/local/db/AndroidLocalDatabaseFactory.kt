@@ -50,4 +50,20 @@ object AndroidLocalDatabaseFactory {
             appContext.getDatabasePath("$name.lck").delete()
         }
     }
+
+    /**
+     * Deletes the database (with sidecars) if its main file has reached [maxSizeBytes]. Must be
+     * called before the database is opened; intended for cache-only databases whose data is
+     * re-fetchable.
+     */
+    fun deleteDatabaseIfOversized(
+        context: Context,
+        databaseName: String,
+        maxSizeBytes: Long,
+    ) {
+        val dbFile = context.applicationContext.getDatabasePath(databaseName)
+        if (dbFile.length() >= maxSizeBytes) {
+            deleteDatabases(context = context, names = listOf(databaseName))
+        }
+    }
 }

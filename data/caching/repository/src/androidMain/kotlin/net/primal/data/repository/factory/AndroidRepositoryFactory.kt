@@ -19,6 +19,11 @@ object AndroidRepositoryFactory : CommonRepositoryFactory() {
             context = appContext,
             names = CachingDatabase.OBSOLETE_FILE_NAMES,
         )
+        LocalDatabaseFactory.deleteDatabaseIfOversized(
+            context = appContext,
+            databaseName = "caching_database.db",
+            maxSizeBytes = CachingDatabase.MAX_DATABASE_SIZE_BYTES,
+        )
         LocalDatabaseFactory.createDatabase<CachingDatabase>(
             context = appContext,
             fallbackToDestructiveMigration = true,

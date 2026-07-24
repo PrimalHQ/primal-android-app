@@ -13,6 +13,10 @@ object IosRepositoryFactory : CommonRepositoryFactory() {
 
     private val cachingDatabase: CachingDatabase by lazy {
         LocalDatabaseFactory.deleteDatabases(CachingDatabase.OBSOLETE_FILE_NAMES)
+        LocalDatabaseFactory.deleteDatabaseIfOversized(
+            databaseName = "caching_database.db",
+            maxSizeBytes = CachingDatabase.MAX_DATABASE_SIZE_BYTES,
+        )
         LocalDatabaseFactory.createDatabase(
             databaseName = "caching_database.db",
             fallbackToDestructiveMigration = true,
