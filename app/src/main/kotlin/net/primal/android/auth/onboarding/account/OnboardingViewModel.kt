@@ -188,7 +188,7 @@ class OnboardingViewModel @Inject constructor(
 
     private fun UiState.asProfileMetadata(): ProfileMetadata =
         ProfileMetadata(
-            username = null,
+            username = "",
             displayName = this.profileDisplayName,
             about = this.profileAboutYou,
             localPictureUri = this.avatarUri,
