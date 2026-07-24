@@ -330,7 +330,7 @@ class CreateAccountHandlerTest {
         }
 
     @Test
-    fun createNostrAccount_setsLightningAddressInProfile_whenWalletCreationSucceeds() =
+    fun createNostrAccount_publishesProfileMetadataWithLightningAddress_whenWalletCreationSucceeds() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val expectedLightningAddress = "user@primal.net"
@@ -358,16 +358,19 @@ class CreateAccountHandlerTest {
             )
             advanceUntilIdle()
 
-            coVerify {
-                userRepository.setLightningAddress(
-                    userId = keyPair.pubKey,
-                    lightningAddress = expectedLightningAddress,
+            coVerify(exactly = 1) {
+                userRepository.setProfileMetadata(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { it.lightningAddress shouldBe expectedLightningAddress },
                 )
+            }
+            coVerify(exactly = 0) {
+                userRepository.setLightningAddress(userId = any(), lightningAddress = any())
             }
         }
 
     @Test
-    fun createNostrAccount_doesNotSetLightningAddress_whenWalletHasNoLightningAddress() =
+    fun createNostrAccount_publishesProfileMetadataWithoutLightningAddress_whenWalletHasNoLightningAddress() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
@@ -394,6 +397,12 @@ class CreateAccountHandlerTest {
             )
             advanceUntilIdle()
 
+            coVerify(exactly = 1) {
+                userRepository.setProfileMetadata(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { it.lightningAddress shouldBe null },
+                )
+            }
             coVerify(exactly = 0) {
                 userRepository.setLightningAddress(userId = any(), lightningAddress = any())
             }
@@ -479,10 +488,12 @@ class CreateAccountHandlerTest {
             val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true) {
                 coEvery { invoke(userId = any()) } returns Result.failure(RuntimeException("Wallet init failed"))
             }
+            val userRepository = mockk<UserRepository>(relaxed = true)
             val handler = createAccountHandler(
                 authRepository = authRepository,
                 credentialsStore = credentialsStore,
                 ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+                userRepository = userRepository,
             )
 
             handler.createNostrAccount(
@@ -495,6 +506,12 @@ class CreateAccountHandlerTest {
             coVerify {
                 ensureSparkWalletExistsUseCase.invoke(userId = keyPair.pubKey)
                 authRepository.loginWithNsec(withArg { it shouldBe keyPair.privateKey })
+            }
+            coVerify(exactly = 1) {
+                userRepository.setProfileMetadata(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { it.lightningAddress shouldBe null },
+                )
             }
         }
 

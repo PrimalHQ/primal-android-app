@@ -21,6 +21,7 @@ import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.mapCatching
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
@@ -63,14 +64,18 @@ class CreateAccountHandler @Inject constructor(
             relayRepository.bootstrapUserRelays(userId, preFetchedRelays ?: FALLBACK_RELAY_URLS)
 
             coroutineScope {
+                val lightningAddress = async { createWalletAndResolveLightningAddress(userId = userId) }
                 awaitAll(
                     async { blossomRepository.ensureBlossomServerList(userId) },
-                    async { userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata) },
-                    async { userRepository.setFollowList(userId = userId, contacts = setOf(userId) + followedUserIds) },
                     async {
-                        ensureSparkWalletExistsUseCase.invoke(userId = userId)
-                            .onSuccess { walletId -> setLightningAddress(userId = userId, walletId = walletId) }
+                        userRepository.setProfileMetadata(
+                            userId = userId,
+                            profileMetadata = lightningAddress.await()
+                                ?.let { profileMetadata.copy(lightningAddress = it) }
+                                ?: profileMetadata,
+                        )
                     },
+                    async { userRepository.setFollowList(userId = userId, contacts = setOf(userId) + followedUserIds) },
                 )
             }
 
@@ -111,16 +116,14 @@ class CreateAccountHandler @Inject constructor(
         }
     }
 
-    private suspend fun setLightningAddress(userId: String, walletId: String) {
-        runCatching {
-            val lightningAddress = sparkWalletAccountRepository.getLightningAddress(userId, walletId)
-            if (!lightningAddress.isNullOrBlank()) {
-                userRepository.setLightningAddress(userId = userId, lightningAddress = lightningAddress)
+    private suspend fun createWalletAndResolveLightningAddress(userId: String): String? =
+        ensureSparkWalletExistsUseCase.invoke(userId = userId)
+            .mapCatching { walletId -> sparkWalletAccountRepository.getLightningAddress(userId, walletId) }
+            .onFailure { error ->
+                Napier.w(throwable = error) { "Failed to resolve lightning address for profile metadata." }
             }
-        }.onFailure { error ->
-            Napier.w(throwable = error) { "Failed to set lightning address in profile metadata." }
-        }
-    }
+            .getOrNull()
+            ?.takeIf { it.isNotBlank() }
 
     class AccountCreationException(cause: Throwable) : IOException(cause)
 
