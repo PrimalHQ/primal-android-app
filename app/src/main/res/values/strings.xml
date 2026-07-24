@@ -33,8 +33,8 @@
     <string name="app_invalid_nip05_address">Invalid nostr verification address.</string>
     <string name="app_error_invalid_naddr">Unable to load content. The address is invalid.</string>
     <string name="app_error_missing_private_key">Unable to perform operation due to missing private key.</string>
-    <string name="app_error_sign_unauthorized">Unable to sign event. If you are logged in with Amber check that we have permission to sign this event.</string>
-    <string name="app_error_amber_unavailable">Amber Signer is not installed.</string>
+    <string name="app_error_sign_unauthorized">Unable to sign event. If you are logged in with an external signer check that it has permission to sign this event.</string>
+    <string name="app_error_signer_unavailable">External signer app is not installed.</string>
     <string name="app_error_unable_to_update_follow_list">Unable to update follow list. Please try again.</string>
     <string name="app_error_unable_to_set_nostr_address">Unable to set nostr address. Please try again.</string>
     <string name="app_error_unable_to_set_lightning_address">Unable to set lightning address. Please try again.</string>
@@ -89,6 +89,8 @@
     <string name="login_button_sign_in">Sign In</string>
     <string name="login_button_paste_your_key">Paste Your Key</string>
     <string name="login_button_paste_new_key">Paste New Key</string>
+    <string name="login_button_login_with_signer">Login with %1$s</string>
+    <string name="login_button_login_with_external_signer">Login with external signer</string>
     <string name="login_enter_nsec_key">Enter your Nostr key to sign in:</string>
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key,\nstarting with “nsec”:</string>
 

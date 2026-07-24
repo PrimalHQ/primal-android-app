@@ -3,8 +3,8 @@ package net.primal.android.messages.security
 import android.content.ContentResolver
 import javax.inject.Inject
 import kotlin.io.encoding.ExperimentalEncodingApi
-import net.primal.android.signer.client.decryptNip04WithAmber
-import net.primal.android.signer.client.encryptNip04WithAmber
+import net.primal.android.signer.client.decryptNip04WithSigner
+import net.primal.android.signer.client.encryptNip04WithSigner
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.utils.getOrDefault
 import net.primal.core.utils.runCatching
@@ -23,8 +23,8 @@ class Nip04MessageCipher @Inject constructor(
     /**
      * Encrypts the given [content] for the specified [userId] and [participantId].
      *
-     * If the user is logged in via an external signer (Amber), encryption is delegated to
-     * [ContentResolver.encryptNip04WithAmber]. Otherwise, encryption is performed locally using
+     * If the user is logged in via a NIP-55 external signer (e.g. Amber, Cambium), encryption is
+     * delegated to [ContentResolver.encryptNip04WithSigner]. Otherwise, encryption is performed locally using
      * the user’s private key and the participant's public key. If the encryption process fails,
      * a [MessageEncryptException] is thrown.
      *
@@ -45,11 +45,13 @@ class Nip04MessageCipher @Inject constructor(
         content: String,
     ): String {
         val npub = userId.hexToNpubHrp()
-        return if (credentialsStore.isExternalSignerCredential(npub = npub)) {
-            contentResolver.encryptNip04WithAmber(
+        val signerPackageName = credentialsStore.findExternalSignerPackageName(npub = npub)
+        return if (signerPackageName != null) {
+            contentResolver.encryptNip04WithSigner(
                 content = content,
                 participantId = participantId,
                 userNpub = npub,
+                signerPackageName = signerPackageName,
             ) ?: throw MessageEncryptException()
         } else {
             encryptMessageLocally(userId = userId, participantId = participantId, content = content)
@@ -59,8 +61,8 @@ class Nip04MessageCipher @Inject constructor(
     /**
      * Attempts to decrypt the given [content] for the specified [userId] and [participantId].
      *
-     * If the user is logged in with an external signer (Amber), decryption is delegated to
-     * [ContentResolver.decryptNip04WithAmber]. Otherwise, decryption is performed locally using
+     * If the user is logged in with a NIP-55 external signer (e.g. Amber, Cambium), decryption is
+     * delegated to [ContentResolver.decryptNip04WithSigner]. Otherwise, decryption is performed locally using
      * the user's private key (retrieved via [credentialsStore]) and the participant's public key.
      *
      * In either case, if decryption fails or is not authorized, the original [content] is returned
@@ -81,11 +83,13 @@ class Nip04MessageCipher @Inject constructor(
     ): String {
         val npub = userId.hexToNpubHrp()
 
-        return if (credentialsStore.isExternalSignerCredential(npub = npub)) {
-            contentResolver.decryptNip04WithAmber(
+        val signerPackageName = credentialsStore.findExternalSignerPackageName(npub = npub)
+        return if (signerPackageName != null) {
+            contentResolver.decryptNip04WithSigner(
                 content = content,
                 participantId = participantId,
                 userNpub = npub,
+                signerPackageName = signerPackageName,
             ) ?: content
         } else {
             runCatching {

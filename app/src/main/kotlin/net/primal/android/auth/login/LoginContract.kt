@@ -13,6 +13,7 @@ interface LoginContract {
         val fetchingProfileDetails: Boolean = false,
         val isValidKey: Boolean = false,
         val credentialType: CredentialType? = null,
+        val signerPackageName: String? = null,
         val error: LoginError? = null,
         val isExternalSignerInstalled: Boolean = false,
     ) {
@@ -24,7 +25,11 @@ interface LoginContract {
     sealed class UiEvent {
         data object ResetLoginState : UiEvent()
         data class LoginRequestEvent(val nostrEvent: NostrEvent? = null) : UiEvent()
-        data class UpdateLoginInput(val newInput: String, val credentialType: CredentialType? = null) : UiEvent()
+        data class UpdateLoginInput(
+            val newInput: String,
+            val credentialType: CredentialType? = null,
+            val signerPackageName: String? = null,
+        ) : UiEvent()
     }
 
     sealed class SideEffect {

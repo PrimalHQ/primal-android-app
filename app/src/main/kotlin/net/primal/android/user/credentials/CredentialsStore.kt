@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
+import net.primal.android.signer.client.AMBER_PACKAGE_NAME
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asCredential
@@ -19,6 +20,7 @@ import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOr
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @Singleton
+@Suppress("TooManyFunctions")
 class CredentialsStore @Inject constructor(
     private val persistence: DataStore<Set<Credential>>,
 ) {
@@ -39,6 +41,21 @@ class CredentialsStore @Inject constructor(
     fun isExternalSignerCredential(npub: String) =
         checkCredentialType(npub = npub, credentialType = CredentialType.ExternalSigner)
 
+    /**
+     * Returns the package name of the NIP-55 signer app the given npub logged in with, or `null`
+     * if the credential does not exist or is not an external signer login. Credentials saved
+     * before signer packages were tracked resolve to Amber, which was the only supported signer
+     * at the time.
+     */
+    fun findExternalSignerPackageName(npub: String): String? {
+        val credential = credentials.value.find { it.npub == npub }
+        return if (credential?.type == CredentialType.ExternalSigner) {
+            credential.signerPackageName ?: AMBER_PACKAGE_NAME
+        } else {
+            null
+        }
+    }
+
     fun isNpubCredential(npub: String) = checkCredentialType(npub = npub, credentialType = CredentialType.PublicKey)
 
     suspend fun getOrCreateInternalSignerCredentials() =
@@ -56,14 +73,23 @@ class CredentialsStore @Inject constructor(
         return pubkey.bech32ToHexOrThrow()
     }
 
-    suspend fun saveExternalSignerNpub(npub: String): String {
+    suspend fun saveExternalSignerNpub(npub: String, signerPackageName: String?): String {
         val (hexKey, bech32Key) = if (npub.startsWith("npub")) {
             npub.bech32ToHexOrThrow() to npub
         } else {
             npub to npub.hexToNpubHrp()
         }
 
-        addCredential(Credential(nsec = null, npub = bech32Key, type = CredentialType.ExternalSigner))
+        val credential = Credential(
+            nsec = null,
+            npub = bech32Key,
+            type = CredentialType.ExternalSigner,
+            signerPackageName = signerPackageName,
+        )
+
+        persistence.updateData { credentials ->
+            credentials.filterNot { it.npub == bech32Key }.toSet() + credential
+        }
         return hexKey
     }
 

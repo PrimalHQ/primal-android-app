@@ -32,7 +32,7 @@ import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
 import net.primal.android.nostrconnect.utils.isNostrConnectUrl
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
 import net.primal.android.signer.client.launchSignEvent
-import net.primal.android.signer.client.rememberAmberSignerLauncher
+import net.primal.android.signer.client.rememberSignerSignLauncher
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
 import net.primal.domain.profile.Nip05VerificationService
@@ -69,21 +69,24 @@ class MainActivity : PrimalActivity() {
         setContent {
             val context = LocalContext.current
 
-            val signLauncher = rememberAmberSignerLauncher(
+            val signLauncher = rememberSignerSignLauncher(
                 onFailure = { nostrNotary.onFailure() },
                 onSuccess = nostrNotary::onSuccess,
             )
-            val amberUnavailableMessage = stringResource(id = R.string.app_error_amber_unavailable)
+            val signerUnavailableMessage = stringResource(id = R.string.app_error_signer_unavailable)
             LaunchedEffect(nostrNotary, nostrNotary.effects) {
                 nostrNotary.effects.collect {
                     when (it) {
                         is NotarySideEffect.RequestSignature -> {
                             try {
-                                signLauncher.launchSignEvent(it.unsignedEvent)
+                                signLauncher.launchSignEvent(
+                                    event = it.unsignedEvent,
+                                    signerPackageName = it.signerPackageName,
+                                )
                             } catch (_: ActivityNotFoundException) {
                                 Toast.makeText(
                                     context,
-                                    amberUnavailableMessage,
+                                    signerUnavailableMessage,
                                     Toast.LENGTH_SHORT,
                                 ).show()
                             }
