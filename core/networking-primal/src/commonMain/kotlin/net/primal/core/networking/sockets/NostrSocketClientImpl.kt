@@ -90,9 +90,10 @@ internal class NostrSocketClientImpl(
      * Whether the connection has been silent long enough to be treated as dead.
      *
      * Stale when a send is still outstanding — nothing received since the last send — and that
-     * silence has lasted at least [SILENCE_TIMEOUT], measured from the last received frame, or
-     * from the last send when nothing has ever come back. Only the most recent outstanding send
-     * is tracked.
+     * send has gone unanswered for at least [SILENCE_TIMEOUT]. The window is measured from the
+     * send, not from the last received frame: a reply can only arrive after the request, so
+     * measuring from the older receive mark would charge preceding idle time against the request
+     * and cut its response window short. Only the most recent outstanding send is tracked.
      *
      * Transport-level death that outlives this window is caught separately by the keepalive ping.
      */
@@ -100,7 +101,7 @@ internal class NostrSocketClientImpl(
         val sent = lastSentMark ?: return false
         val received = lastReceivedMark
         return (received == null || sent > received) &&
-            (received ?: sent).elapsedNow() >= SILENCE_TIMEOUT
+            sent.elapsedNow() >= SILENCE_TIMEOUT
     }
 
     private suspend fun acquireWebSocketSession(url: String): WebSocketSession {
