@@ -63,6 +63,8 @@ class MainActivity : PrimalActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        intent?.optOutOfNavigationTaskRestart()
+
         // Emit cold-start intent for tab/connect deep links (Navigation handles everything else)
         if (intent?.data != null && isSpecialMainScreenDeepLink(intent)) {
             deepLinkIntents.tryEmit(intent)
@@ -125,7 +127,21 @@ class MainActivity : PrimalActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        intent.optOutOfNavigationTaskRestart()
         deepLinkIntents.tryEmit(intent)
+    }
+
+    /**
+     * androidx Navigation restarts the whole task when it handles a deep link that arrives with
+     * [Intent.FLAG_ACTIVITY_NEW_TASK] and without [Intent.FLAG_ACTIVITY_CLEAR_TASK]: it re-launches
+     * through a TaskStackBuilder and finishes this Activity, so onCreate runs twice per deep link.
+     * Pre-setting the flag opts out of that restart. Navigation still treats it as a new task and
+     * rebuilds the back stack from the graph root.
+     */
+    private fun Intent.optOutOfNavigationTaskRestart() {
+        if (data != null) {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
     }
 
     private fun handleSpecialDeepLinks(navController: NavController, intent: Intent) {
