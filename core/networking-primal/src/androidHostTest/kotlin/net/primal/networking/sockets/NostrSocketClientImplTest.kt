@@ -291,6 +291,90 @@ class NostrSocketClientImplTest {
             advanceUntilIdle()
         }
 
+    /**
+     * Regression: the watchdog window must be measured from the outstanding send, not from the
+     * older receive mark. Measuring from the receive mark charged the preceding idle time against
+     * the request, so the first send after any idle period got a response window of
+     * `SILENCE_TIMEOUT - idleGap` — here one second instead of ten — and the next send on the same
+     * socket tore it down while that request was still in flight.
+     */
+    @Test
+    fun ensureConnection_whenSendFollowsIdlePeriod_doesNotRebuildWhileRequestIsStillYoung() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            every { mockWebSocketSession.incoming } returns incomingChannel
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            // A healthy exchange: request answered, so the socket is known good.
+            client.ensureSocketConnectionOrThrow()
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+            timeSource += 1.seconds
+            incomingChannel.send(Frame.Text(text = "noop"))
+            advanceUntilIdle()
+
+            // The app idles well past the watchdog window — nothing sent, nothing received.
+            timeSource += 60.seconds
+
+            // First request after the idle period goes out on the existing socket.
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+
+            // A second request one second later must not judge the socket stale: the outstanding
+            // request has had one second to answer, not sixty.
+            timeSource += 1.seconds
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+
+            coVerify(exactly = 1) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
+    @Test
+    fun ensureConnection_whenSendAfterIdlePeriodStaysUnanswered_rebuildsSocket() =
+        runTest {
+            val timeSource = TestTimeSource()
+            val incomingChannel = Channel<Frame>(capacity = Channel.UNLIMITED)
+            every { mockWebSocketSession.incoming } returns incomingChannel
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient(timeSource = timeSource)
+
+            client.ensureSocketConnectionOrThrow()
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+            timeSource += 1.seconds
+            incomingChannel.send(Frame.Text(text = "noop"))
+            advanceUntilIdle()
+
+            timeSource += 60.seconds
+
+            // Same idle period as above, but this time the request itself goes unanswered past
+            // the window — the watchdog must still fire.
+            client.sendREQ(
+                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
+                data = buildJsonObject {},
+            )
+            timeSource += 11.seconds
+            client.ensureSocketConnectionOrThrow()
+
+            coVerify(exactly = 2) { mockHttpClient.webSocketSession(urlString = any<String>()) }
+
+            incomingChannel.close()
+            advanceUntilIdle()
+        }
+
     @Test
     fun query_afterUnansweredRequest_rebuildsSocketAndServesNextQuery() =
         runTest {
