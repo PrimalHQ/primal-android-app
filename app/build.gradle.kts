@@ -344,6 +344,7 @@ dependencies {
     implementation(libs.markwon.linkify)
     implementation(libs.markwon.simple)
 
+    implementation(libs.navigation.compose)
     implementation(libs.navigation.material)
 
     implementation(libs.paging.runtime)
