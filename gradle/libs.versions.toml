@@ -149,7 +149,6 @@ markwon-simple = { module = "io.noties.markwon:simple-ext", version.ref = "markw
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "compose-lottie" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 navigation-hilt = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt" }
-navigation-material = { module = "com.google.accompanist:accompanist-navigation-material", version.ref = "accompanist" }
 permissions-accompanist = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
 # Paging
