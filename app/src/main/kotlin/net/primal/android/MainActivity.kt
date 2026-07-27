@@ -21,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
 import net.primal.android.core.activity.PrimalActivity
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.main.REQUESTED_TAB_KEY
@@ -95,6 +96,8 @@ class MainActivity : PrimalActivity() {
             val navController = rememberNavController()
 
             LaunchedEffect(navController) {
+                // Suspends until NavHost sets the graph; deep links can not resolve against an empty back stack.
+                navController.currentBackStackEntryFlow.first()
                 deepLinkIntents.collect { intent ->
                     handleSpecialDeepLinks(navController, intent)
                 }
