@@ -11,6 +11,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -108,10 +109,15 @@ class MainActivity : PrimalActivity() {
                     LocalQrCodeDecoder provides qrCodeResultDecoder,
                     LocalNip05VerificationService provides nip05VerificationService,
                 ) {
-                    PrimalAppNavigation(
-                        navController = navController,
-                        startDestination = if (isLoggedIn) "main" else "welcome",
-                    )
+                    // Building the nav graph before the auth check completes would pick a start destination
+                    // that then changes, rebuilding the graph and discarding any deep link destination.
+                    val isAuthCheckComplete = splashViewModel.isAuthCheckComplete.collectAsState()
+                    if (isAuthCheckComplete.value) {
+                        PrimalAppNavigation(
+                            navController = navController,
+                            startDestination = if (isLoggedIn) "main" else "welcome",
+                        )
+                    }
                 }
             }
         }
