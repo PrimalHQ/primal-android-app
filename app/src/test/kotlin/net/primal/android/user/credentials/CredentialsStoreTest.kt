@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.android.security.NoEncryption
 import net.primal.android.user.domain.Credential
+import net.primal.android.user.domain.CredentialType
 import net.primal.core.testing.CoroutinesTestRule
 import net.primal.core.testing.advanceUntilIdleAndDelay
 import net.primal.domain.nostr.cryptography.utils.Bech32
@@ -101,6 +102,62 @@ class CredentialsStoreTest {
             credentialsStore.findOrThrow(npub = "missing npub")
         }
     }
+
+    @Test
+    fun `saveExternalSignerNpub stores signer package name on credential`() =
+        runTest {
+            val credentialsStore = CredentialsStore(persistence = persistence)
+            credentialsStore.saveExternalSignerNpub(
+                npub = expectedCredential.npub,
+                signerPackageName = "dev.forgesworn.cambium",
+            )
+            advanceUntilIdleAndDelay()
+
+            val actual = credentialsStore.credentials.value
+            actual.size shouldBe 1
+            actual.first().signerPackageName shouldBe "dev.forgesworn.cambium"
+            credentialsStore.findExternalSignerPackageName(npub = expectedCredential.npub)
+                .shouldBe("dev.forgesworn.cambium")
+        }
+
+    @Test
+    fun `saveExternalSignerNpub replaces existing credential with same npub`() =
+        runTest {
+            persistence.updateData {
+                setOf(Credential(nsec = null, npub = expectedCredential.npub, type = CredentialType.ExternalSigner))
+            }
+            val credentialsStore = CredentialsStore(persistence = persistence)
+            credentialsStore.saveExternalSignerNpub(
+                npub = expectedCredential.npub,
+                signerPackageName = "dev.forgesworn.cambium",
+            )
+            advanceUntilIdleAndDelay()
+
+            val actual = credentialsStore.credentials.value
+            actual.size shouldBe 1
+            actual.first().signerPackageName shouldBe "dev.forgesworn.cambium"
+        }
+
+    @Test
+    fun `findExternalSignerPackageName defaults to Amber for legacy external signer credentials`() =
+        runTest {
+            persistence.updateData {
+                setOf(Credential(nsec = null, npub = expectedCredential.npub, type = CredentialType.ExternalSigner))
+            }
+            val credentialsStore = CredentialsStore(persistence = persistence)
+
+            credentialsStore.findExternalSignerPackageName(npub = expectedCredential.npub)
+                .shouldBe("com.greenart7c3.nostrsigner")
+        }
+
+    @Test
+    fun `findExternalSignerPackageName returns null for non external signer credentials`() =
+        runTest {
+            persistence.updateData { setOf(expectedCredential) }
+            val credentialsStore = CredentialsStore(persistence = persistence)
+
+            credentialsStore.findExternalSignerPackageName(npub = expectedCredential.npub) shouldBe null
+        }
 
     @Test
     fun `clearCredentials removes all credentials from data store`() =

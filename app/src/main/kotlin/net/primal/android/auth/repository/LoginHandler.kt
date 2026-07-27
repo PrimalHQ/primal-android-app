@@ -34,9 +34,14 @@ class LoginHandler @Inject constructor(
         nostrKey: String,
         credentialType: CredentialType,
         authorizationEvent: NostrEvent?,
+        signerPackageName: String? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
-            val userId = saveCredentials(credentialType = credentialType, nostrKey = nostrKey)
+            val userId = saveCredentials(
+                credentialType = credentialType,
+                nostrKey = nostrKey,
+                signerPackageName = signerPackageName,
+            )
             val authorizationEvent = authorizationEvent ?: nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
                 description = "Sync app settings",
@@ -57,7 +62,10 @@ class LoginHandler @Inject constructor(
             throw exception
         }.onSuccess {
             when (credentialType) {
-                CredentialType.ExternalSigner -> authRepository.loginWithExternalSignerNpub(npub = nostrKey)
+                CredentialType.ExternalSigner -> authRepository.loginWithExternalSignerNpub(
+                    npub = nostrKey,
+                    signerPackageName = signerPackageName,
+                )
 
                 CredentialType.PublicKey -> authRepository.loginWithNpub(npub = nostrKey)
 
@@ -68,9 +76,16 @@ class LoginHandler @Inject constructor(
         }
     }
 
-    private suspend fun saveCredentials(credentialType: CredentialType, nostrKey: String): String {
+    private suspend fun saveCredentials(
+        credentialType: CredentialType,
+        nostrKey: String,
+        signerPackageName: String? = null,
+    ): String {
         return when (credentialType) {
-            CredentialType.ExternalSigner -> credentialsStore.saveExternalSignerNpub(npub = nostrKey)
+            CredentialType.ExternalSigner -> credentialsStore.saveExternalSignerNpub(
+                npub = nostrKey,
+                signerPackageName = signerPackageName,
+            )
 
             CredentialType.PublicKey -> credentialsStore.saveNpub(npub = nostrKey)
 

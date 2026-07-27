@@ -11,6 +11,8 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.coroutines.test.runTest
 import net.primal.android.security.Encryption
+import net.primal.android.user.domain.Credential
+import net.primal.android.user.domain.CredentialType
 import org.junit.Test
 
 class CredentialsSerializationTest {
@@ -41,6 +43,26 @@ class CredentialsSerializationTest {
                     withArg { it shouldBe inputStream },
                 )
             }
+        }
+
+    @Test
+    fun `readFrom decodes legacy credentials without signerPackageName`() =
+        runTest {
+            val encryptionMock = encryptionMock(
+                decryptResult = """[{"npub":"dummyNpub","nsec":null,"type":"ExternalSigner"}]""",
+            )
+            val serializer = CredentialsSerialization(encryption = encryptionMock)
+
+            val actual = serializer.readFrom(mockk())
+
+            actual shouldBe setOf(
+                Credential(
+                    nsec = null,
+                    npub = "dummyNpub",
+                    type = CredentialType.ExternalSigner,
+                    signerPackageName = null,
+                ),
+            )
         }
 
     @Test

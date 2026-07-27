@@ -62,6 +62,7 @@ class LoginViewModel @Inject constructor(
                     is UiEvent.UpdateLoginInput -> changeLoginInput(
                         input = it.newInput,
                         credentialType = it.credentialType,
+                        signerPackageName = it.signerPackageName,
                     )
                     UiEvent.ResetLoginState -> resetLoginState()
                 }
@@ -77,6 +78,7 @@ class LoginViewModel @Inject constructor(
                         nostrKey = nostrKey,
                         credentialType = loginType,
                         authorizationEvent = authorizationEvent,
+                        signerPackageName = state.value.signerPackageName,
                     )
                     setEffect(SideEffect.LoginSuccess)
                 }
@@ -103,18 +105,34 @@ class LoginViewModel @Inject constructor(
 
     private fun resetLoginState() = changeLoginInput(input = "")
 
-    private fun changeLoginInput(input: String, credentialType: CredentialType? = null) {
+    private fun changeLoginInput(
+        input: String,
+        credentialType: CredentialType? = null,
+        signerPackageName: String? = null,
+    ) {
         setState { copy(loginInput = input) }
         viewModelScope.launch {
             when {
                 input.isValidNostrPrivateKey() -> {
-                    setState { copy(isValidKey = true, credentialType = credentialType ?: CredentialType.PrivateKey) }
+                    setState {
+                        copy(
+                            isValidKey = true,
+                            credentialType = credentialType ?: CredentialType.PrivateKey,
+                            signerPackageName = signerPackageName,
+                        )
+                    }
                     val (_, npub) = input.extractKeyPairFromPrivateKeyOrThrow()
                     fetchProfileDetails(npub = npub)
                 }
 
                 input.isValidNostrPublicKey() -> {
-                    setState { copy(isValidKey = true, credentialType = credentialType ?: CredentialType.PublicKey) }
+                    setState {
+                        copy(
+                            isValidKey = true,
+                            credentialType = credentialType ?: CredentialType.PublicKey,
+                            signerPackageName = signerPackageName,
+                        )
+                    }
                     fetchProfileDetails(npub = input)
                 }
 
@@ -125,6 +143,7 @@ class LoginViewModel @Inject constructor(
                             profileDetails = null,
                             isValidKey = false,
                             credentialType = null,
+                            signerPackageName = null,
                         )
                     }
                 }

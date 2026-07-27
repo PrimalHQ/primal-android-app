@@ -23,8 +23,8 @@ class AuthRepository @Inject constructor(
         return userId
     }
 
-    suspend fun loginWithExternalSignerNpub(npub: String): String {
-        val userId = credentialsStore.saveExternalSignerNpub(npub = npub)
+    suspend fun loginWithExternalSignerNpub(npub: String, signerPackageName: String?): String {
+        val userId = credentialsStore.saveExternalSignerNpub(npub = npub, signerPackageName = signerPackageName)
         activeAccountStore.setActiveUserId(userId)
 
         return userId
