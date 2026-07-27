@@ -65,8 +65,10 @@ class MainActivity : PrimalActivity() {
 
         intent?.optOutOfNavigationTaskRestart()
 
-        // Emit cold-start intent for tab/connect deep links (Navigation handles everything else)
-        if (intent?.data != null && isSpecialMainScreenDeepLink(intent)) {
+        // Emit cold-start intent for tab/connect deep links (Navigation handles everything else).
+        // Only on a fresh launch: the Activity keeps its launch intent across re-creations, so re-emitting
+        // it after a configuration change would re-open the connect sheet or snap back to the linked tab.
+        if (savedInstanceState == null && intent?.data != null && isSpecialMainScreenDeepLink(intent)) {
             deepLinkIntents.tryEmit(intent)
         }
 
