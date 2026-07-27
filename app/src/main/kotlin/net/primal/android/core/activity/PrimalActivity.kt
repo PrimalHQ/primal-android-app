@@ -47,7 +47,7 @@ abstract class PrimalActivity : FragmentActivity() {
     @Inject
     lateinit var exchangeRateHandler: ExchangeRateHandler
 
-    private val splashViewModel: SplashViewModel by viewModels()
+    protected val splashViewModel: SplashViewModel by viewModels()
 
     protected open val prefetchFeedsOnSplash: Boolean = false
 
@@ -106,7 +106,6 @@ abstract class PrimalActivity : FragmentActivity() {
             ) {
                 ApplyEdgeToEdge()
                 val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
-
                 content(isLoggedIn.value)
             }
         }
