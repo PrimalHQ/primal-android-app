@@ -73,6 +73,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalUploadResponse(value = 10_000_121),
     PrimalDefaultRelaysList(value = 10_000_124),
     PrimalIsUserFollowing(value = 10_000_125),
+    PrimalImportEventsResult(value = 10_000_127),
     PrimalLinkPreview(value = 10_000_128),
     PrimalNotificationsSummary2(value = 10_000_132),
     PrimalUserFollowersCounts(value = 10_000_133),
