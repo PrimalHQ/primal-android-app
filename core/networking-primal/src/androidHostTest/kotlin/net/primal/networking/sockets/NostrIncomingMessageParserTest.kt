@@ -1,6 +1,7 @@
 package net.primal.networking.sockets
 
 import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.beInstanceOf
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
@@ -57,14 +58,34 @@ class NostrIncomingMessageParserTest {
     }
 
     @org.junit.Test
-    fun `NOTICE message parsed as NoticeMessage`() {
+    fun `NOTICE without subscription id parsed with null subscriptionId and message`() {
         val jsonMessage = buildJsonArray {
             add("NOTICE")
             add("Your pubkey is not registered.")
         }
 
         val actual = jsonMessage.toString().parseIncomingMessage()
+
         actual should beInstanceOf<NostrIncomingMessage.NoticeMessage>()
+        val notice = actual as NostrIncomingMessage.NoticeMessage
+        notice.subscriptionId shouldBe null
+        notice.message shouldBe "Your pubkey is not registered."
+    }
+
+    @org.junit.Test
+    fun `NOTICE with subscription id parsed with both subscriptionId and message`() {
+        val jsonMessage = buildJsonArray {
+            add("NOTICE")
+            add("android-fca5c468")
+            add("error")
+        }
+
+        val actual = jsonMessage.toString().parseIncomingMessage()
+
+        actual should beInstanceOf<NostrIncomingMessage.NoticeMessage>()
+        val notice = actual as NostrIncomingMessage.NoticeMessage
+        notice.subscriptionId shouldBe "android-fca5c468"
+        notice.message shouldBe "error"
     }
 
     @org.junit.Test
