@@ -9,11 +9,13 @@ fun Flow<NostrIncomingMessage>.filterBySubscriptionId(id: String) =
             (it is NostrIncomingMessage.EoseMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.CountMessage && it.subscriptionId == id) ||
             (it is NostrIncomingMessage.EventsMessage && it.subscriptionId == id) ||
-            (it is NostrIncomingMessage.NoticeMessage)
+            // An addressed NOTICE belongs to one subscription; only unaddressed ones are socket-wide.
+            (it is NostrIncomingMessage.NoticeMessage && (it.subscriptionId == null || it.subscriptionId == id))
     }
 
 fun Flow<NostrIncomingMessage>.filterByEventId(id: String) =
     filter {
         (it is NostrIncomingMessage.OkMessage && it.eventId == id) ||
-            (it is NostrIncomingMessage.NoticeMessage)
+            // [id] is an event id, so a subscription-addressed NOTICE can never concern this publish.
+            (it is NostrIncomingMessage.NoticeMessage && it.subscriptionId == null)
     }
