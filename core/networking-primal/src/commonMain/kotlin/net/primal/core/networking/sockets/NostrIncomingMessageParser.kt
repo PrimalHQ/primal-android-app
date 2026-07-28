@@ -142,9 +142,14 @@ private fun JsonObject.getMessageNostrEventKind(): NostrEventKind {
 }
 
 private fun JsonArray.takeAsNoticeIncomingMessage(): NostrIncomingMessage {
-    val subscriptionId = elementAtOrNull(1)?.toSubscriptionId()
-    val messageText = elementAtOrNull(2)?.jsonPrimitive?.content
-    return NostrIncomingMessage.NoticeMessage(subscriptionId = subscriptionId, message = messageText)
+    // Primal's cache server sends ["NOTICE", subscriptionId, message]; the Nostr spec form is
+    // ["NOTICE", message]. Only the 3-element form is addressed to a subscription - without this
+    // check the spec form's text lands in subscriptionId and the message itself is lost.
+    val hasSubscriptionId = size >= 3
+    return NostrIncomingMessage.NoticeMessage(
+        subscriptionId = if (hasSubscriptionId) elementAtOrNull(1)?.toSubscriptionId() else null,
+        message = elementAtOrNull(if (hasSubscriptionId) 2 else 1)?.jsonPrimitive?.content,
+    )
 }
 
 private fun JsonArray.takeAsOkIncomingMessage(): NostrIncomingMessage? {
