@@ -27,6 +27,9 @@ import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.SparkWalletAccountRepository
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.PrimalFeed
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
@@ -48,6 +51,7 @@ class CreateAccountHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
+    private val feedsRepository: FeedsRepository,
 ) {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -57,6 +61,7 @@ class CreateAccountHandler @Inject constructor(
         profileMetadata: ProfileMetadata,
         followedUserIds: Set<String>,
         preFetchedRelays: List<String>? = null,
+        preFetchedNoteFeeds: List<PrimalFeed> = emptyList(),
     ) = withContext(dispatchers.io()) {
         runCatching {
             val userId = credentialsStore.saveNsec(nostrKey = privateKey)
@@ -76,6 +81,9 @@ class CreateAccountHandler @Inject constructor(
                         )
                     },
                     async { userRepository.setFollowList(userId = userId, contacts = setOf(userId) + followedUserIds) },
+                    async {
+                        persistDefaultNoteFeeds(userId = userId, preFetchedNoteFeeds = preFetchedNoteFeeds)
+                    },
                 )
             }
 
@@ -86,6 +94,31 @@ class CreateAccountHandler @Inject constructor(
             throw AccountCreationException(cause = exception)
         }.onSuccess {
             authRepository.loginWithNsec(nostrKey = privateKey)
+        }
+    }
+
+    /**
+     * Seeds the default note feeds for the freshly created account, both locally and remotely.
+     *
+     * Persisting locally before the account becomes active keeps the home top app bar populated the
+     * moment we land on the main screen. Publishing them makes sure the subsequent user feeds fetch
+     * finds a real feed list instead of an empty one, which would wipe what we just persisted.
+     *
+     * Passing an empty [preFetchedNoteFeeds] is not a request to persist nothing: it makes
+     * [FeedsRepository.fetchAndPersistDefaultFeeds] fetch the defaults inline instead. That is the
+     * fallback for when onboarding could not prefetch them in time.
+     *
+     * Failures are swallowed on purpose - feeds are cosmetic and must never fail account creation.
+     */
+    private suspend fun persistDefaultNoteFeeds(userId: String, preFetchedNoteFeeds: List<PrimalFeed>) {
+        runCatching {
+            feedsRepository.fetchAndPersistDefaultFeeds(
+                userId = userId,
+                specKind = FeedSpecKind.Notes,
+                givenDefaultFeeds = preFetchedNoteFeeds,
+            )
+        }.onFailure { error ->
+            Napier.w(throwable = error) { "Failed to persist default note feeds during account creation." }
         }
     }
 

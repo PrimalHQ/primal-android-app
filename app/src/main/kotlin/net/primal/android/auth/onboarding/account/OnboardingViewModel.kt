@@ -24,6 +24,9 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.PrimalFeed
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
@@ -34,6 +37,7 @@ class OnboardingViewModel @Inject constructor(
     private val onboardingRepository: OnboardingRepository,
     private val createAccountHandler: CreateAccountHandler,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
+    private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
     private val keyPair = CryptoUtils.generateHexEncodedKeypair()
@@ -42,6 +46,9 @@ class OnboardingViewModel @Inject constructor(
     private var bannerUploadJob: UploadJob? = null
 
     private var defaultRelays: List<String>? = null
+
+    /** Empty until the prefetch lands, or if it fails - [CreateAccountHandler] fetches them inline in that case. */
+    private var defaultNoteFeeds: List<PrimalFeed> = emptyList()
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -56,6 +63,7 @@ class OnboardingViewModel @Inject constructor(
         observeEvents()
         fetchFollowPacks()
         fetchDefaultRelays()
+        fetchDefaultNoteFeeds()
     }
 
     private fun observeEvents() =
@@ -101,6 +109,19 @@ class OnboardingViewModel @Inject constructor(
                 }
         }
 
+    private fun fetchDefaultNoteFeeds() =
+        viewModelScope.launch {
+            runCatching {
+                feedsRepository.fetchDefaultFeeds(userId = keyPair.pubKey, specKind = FeedSpecKind.Notes)
+            }
+                .onSuccess { feeds ->
+                    defaultNoteFeeds = feeds.orEmpty()
+                }
+                .onFailure { error ->
+                    Napier.w(throwable = error) { "Failed to pre-fetch default note feeds." }
+                }
+        }
+
     private fun createNostrAccount() =
         viewModelScope.launch {
             try {
@@ -113,6 +134,7 @@ class OnboardingViewModel @Inject constructor(
                     profileMetadata = uiState.asProfileMetadata(),
                     followedUserIds = uiState.followedUserIds,
                     preFetchedRelays = defaultRelays,
+                    preFetchedNoteFeeds = defaultNoteFeeds,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: BlossomException) {
