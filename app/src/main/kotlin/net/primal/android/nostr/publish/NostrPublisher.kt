@@ -13,6 +13,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
+import net.primal.domain.common.exception.QueryTimeoutException
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
@@ -36,7 +37,14 @@ class NostrPublisher @Inject constructor(
             runCatching {
                 cachingImportRepository.importEvents(events = listOf(event))
             }.onFailure { error ->
-                Napier.w(throwable = error) { "Failed to import event ${event.id} to caching server." }
+                when (error) {
+                    // The server keeps ingesting after we stop reading, so this is not a failure.
+                    is QueryTimeoutException -> Napier.i {
+                        "Stopped waiting for import of event ${event.id} by the caching server."
+                    }
+
+                    else -> Napier.w(throwable = error) { "Failed to import event ${event.id} to caching server." }
+                }
             }
         }
     }

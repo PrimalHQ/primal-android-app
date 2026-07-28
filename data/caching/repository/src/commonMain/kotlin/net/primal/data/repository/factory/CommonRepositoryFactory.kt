@@ -1,6 +1,7 @@
 package net.primal.data.repository.factory
 
 import net.primal.core.caching.MediaCacher
+import net.primal.core.networking.factory.PrimalHttpApiClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.local.db.CachingDatabase
@@ -36,6 +37,7 @@ import net.primal.domain.events.EventRepository
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.global.CachingImportRepository
+import net.primal.domain.global.PrimalServerType
 import net.primal.domain.links.EventUriRepository
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.mutes.MutedItemRepository
@@ -90,7 +92,9 @@ abstract class CommonRepositoryFactory {
         return CachingImportRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = resolveCachingDatabase(),
-            importApi = PrimalApiServiceFactory.createImportApi(cachingPrimalApiClient),
+            importApi = PrimalApiServiceFactory.createImportApi(
+                primalHttpApiClient = PrimalHttpApiClientFactory.getDefault(PrimalServerType.Caching),
+            ),
             broadcastApi = PrimalApiServiceFactory.createBroadcastApi(cachingPrimalApiClient),
         )
     }
