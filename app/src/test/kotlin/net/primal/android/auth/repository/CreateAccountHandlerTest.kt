@@ -26,6 +26,9 @@ import net.primal.core.utils.Result
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.PrimalFeed
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -54,6 +57,7 @@ class CreateAccountHandlerTest {
             coEvery { invoke(userId = any()) } returns Result.success("walletId")
         },
         sparkWalletAccountRepository: SparkWalletAccountRepository = mockk(relaxed = true),
+        feedsRepository: FeedsRepository = mockk(relaxed = true),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -66,6 +70,7 @@ class CreateAccountHandlerTest {
             blossomRepository = blossomRepository,
             ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
             sparkWalletAccountRepository = sparkWalletAccountRepository,
+            feedsRepository = feedsRepository,
         )
     }
 
@@ -541,6 +546,106 @@ class CreateAccountHandlerTest {
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(any())
+                authRepository.loginWithNsec(withArg { it shouldBe keyPair.privateKey })
+            }
+        }
+
+    @Test
+    fun createNostrAccount_persistsDefaultNoteFeeds_usingPreFetchedFeeds() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val feedsRepository = mockk<FeedsRepository>(relaxed = true)
+            val expectedFeeds = listOf(
+                PrimalFeed(
+                    ownerId = keyPair.pubKey,
+                    spec = """{"id":"latest","kind":"notes"}""",
+                    specKind = FeedSpecKind.Notes,
+                    feedKind = "primal",
+                    title = "Latest",
+                    description = "Latest notes",
+                ),
+            )
+
+            val handler = createAccountHandler(
+                credentialsStore = credentialsStore,
+                feedsRepository = feedsRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+                preFetchedNoteFeeds = expectedFeeds,
+            )
+
+            coVerify(exactly = 1) {
+                feedsRepository.fetchAndPersistDefaultFeeds(
+                    userId = keyPair.pubKey,
+                    specKind = FeedSpecKind.Notes,
+                    givenDefaultFeeds = expectedFeeds,
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_persistsDefaultNoteFeeds_withEmptyFeeds_whenPrefetchUnavailable() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val feedsRepository = mockk<FeedsRepository>(relaxed = true)
+
+            val handler = createAccountHandler(
+                credentialsStore = credentialsStore,
+                feedsRepository = feedsRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+                preFetchedNoteFeeds = emptyList(),
+            )
+
+            coVerify(exactly = 1) {
+                feedsRepository.fetchAndPersistDefaultFeeds(
+                    userId = keyPair.pubKey,
+                    specKind = FeedSpecKind.Notes,
+                    givenDefaultFeeds = emptyList(),
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_succeedsEvenWhenDefaultNoteFeedsFail() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val authRepository = mockk<AuthRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val feedsRepository = mockk<FeedsRepository>(relaxed = true) {
+                coEvery { fetchAndPersistDefaultFeeds(any(), any(), any()) } throws NetworkException()
+            }
+
+            val handler = createAccountHandler(
+                authRepository = authRepository,
+                credentialsStore = credentialsStore,
+                feedsRepository = feedsRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+            )
+            advanceUntilIdle()
+
+            coVerify {
                 authRepository.loginWithNsec(withArg { it shouldBe keyPair.privateKey })
             }
         }
