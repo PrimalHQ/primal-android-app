@@ -1,14 +1,17 @@
 package net.primal.android.settings.appearance
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.notes.feed.note.ui.TranslationPreferences
 import net.primal.android.theme.active.ActiveThemeStore
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.theme.findThemeOrDefault
@@ -18,6 +21,7 @@ import net.primal.android.user.repository.UserRepository
 
 class AppearanceSettingsViewModel @AssistedInject constructor(
     @Assisted private var lastUserPickedPrimalTheme: PrimalTheme,
+    @ApplicationContext private val context: Context,
     private val activeThemeStore: ActiveThemeStore,
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
@@ -38,6 +42,9 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
         initThemes()
         observeActiveThemeStore()
         observeEvents()
+        setState {
+            copy(translationLanguage = TranslationPreferences.getTranslateLanguage(context))
+        }
     }
 
     private fun initThemes() =
@@ -77,6 +84,11 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
 
                     is AppearanceSettingsContract.UiEvent.ChangeContentAppearance -> {
                         setContentAppearance(contentAppearance = event.contentAppearance)
+                    }
+
+                    is AppearanceSettingsContract.UiEvent.ChangeTranslationLanguage -> {
+                        TranslationPreferences.setTranslateLanguage(context, event.language)
+                        setState { copy(translationLanguage = event.language) }
                     }
                 }
             }
