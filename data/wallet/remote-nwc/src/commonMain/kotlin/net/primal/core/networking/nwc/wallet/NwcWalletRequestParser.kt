@@ -11,6 +11,7 @@ import net.primal.core.networking.nwc.nip47.NwcEncryptionScheme
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayKeysendParams
+import net.primal.core.networking.nwc.wallet.model.NwcRequestUnauthenticatedException
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.Result
@@ -24,9 +25,14 @@ import net.primal.domain.nostr.findFirstEncryptionTag
 
 class NwcWalletRequestParser(
     private val encryptionService: NostrEncryptionService,
+    private val requestAuthenticator: NwcRequestAuthenticator,
 ) {
 
     fun parseNostrEvent(event: NostrEvent, connection: NwcConnection): Result<WalletNwcRequest> {
+        if (!requestAuthenticator.authenticate(event = event, connection = connection)) {
+            return Result.failure(NwcRequestUnauthenticatedException(eventId = event.id))
+        }
+
         return runCatching {
             val encryptionTag = event.tags.findFirstEncryptionTag()
             val encryptionScheme = NwcEncryptionScheme.fromValueOrDefault(encryptionTag)
@@ -45,7 +51,7 @@ class NwcWalletRequestParser(
             }
 
             val request = decryptedContent.decodeFromJsonStringOrNull<NwcWalletRequestRaw>()
-                ?: return Result.failure(IllegalArgumentException("Failed to parse NWC JSON."))
+                ?: throw IllegalArgumentException("Failed to parse NWC JSON.")
 
             val walletRequest = parseMethod(
                 method = request.method,

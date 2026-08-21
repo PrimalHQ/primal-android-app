@@ -38,6 +38,7 @@ import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.cryptography.utils.toNpub
@@ -79,9 +80,14 @@ class NostrNotary @Inject constructor(
         }
     }
 
-    override fun verifySignature(nostrEvent: NostrEvent): Boolean {
-        throw NotImplementedError()
-    }
+    override fun verifySignature(nostrEvent: NostrEvent): Boolean =
+        runCatching {
+            CryptoUtils.verify(
+                signature = Hex.decode(nostrEvent.sig),
+                hash = Hex.decode(nostrEvent.id),
+                pubKey = Hex.decode(nostrEvent.pubKey),
+            )
+        }.getOrDefault(false)
 
     fun onSuccess(nostrEvent: NostrEvent) {
         setResponse(SignResult.Signed(nostrEvent))

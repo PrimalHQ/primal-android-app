@@ -86,6 +86,12 @@ kotlin {
         val desktopMain by getting
         desktopMain.dependencies {
         }
+
+        val desktopTest by getting
+        desktopTest.dependencies {
+            // Native bindings required to run Schnorr sign/verify on the JVM test runtime
+            implementation(libs.secp256k1.kmp.jni.jvm)
+        }
     }
 
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets

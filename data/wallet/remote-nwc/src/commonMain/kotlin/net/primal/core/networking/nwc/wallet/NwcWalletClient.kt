@@ -16,6 +16,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import net.primal.core.networking.nwc.wallet.model.NwcRequestUnauthenticatedException
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequestException
 import net.primal.core.networking.sockets.NostrIncomingMessage
@@ -127,17 +128,20 @@ class NwcWalletClient(
 
     private suspend fun processNwcRequestEvent(event: NostrEvent) {
         val targetPtag = event.tags.findFirstProfileId()
-        val connection = connectionMapMutex.withLock { connectionMap[targetPtag] }
+        val connection = connectionMapMutex.withLock { connectionMap[targetPtag] } ?: return
 
-        if (connection != null) {
-            requestParser.parseNostrEvent(
-                event = event,
-                connection = connection,
-            ).fold(
-                onSuccess = { request ->
-                    scope.launch { _incomingRequests.send(request) }
-                },
-                onFailure = { error ->
+        requestParser.parseNostrEvent(
+            event = event,
+            connection = connection,
+        ).fold(
+            onSuccess = { request ->
+                scope.launch { _incomingRequests.send(request) }
+            },
+            onFailure = { error ->
+                if (error is NwcRequestUnauthenticatedException) {
+                    // Drop silently: never respond to a sender we could not authenticate.
+                    Napier.w(tag = "NwcWalletClient") { "Dropped unauthenticated NWC request ${event.id}." }
+                } else {
                     Napier.w(tag = "NwcWalletClient", throwable = error) { "Failed to parse NWC request." }
                     scope.launch {
                         _errors.send(
@@ -148,9 +152,9 @@ class NwcWalletClient(
                             ),
                         )
                     }
-                },
-            )
-        }
+                }
+            },
+        )
     }
 
     suspend fun destroy() {

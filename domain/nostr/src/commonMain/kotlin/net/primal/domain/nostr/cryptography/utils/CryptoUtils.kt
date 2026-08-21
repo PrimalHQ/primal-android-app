@@ -41,6 +41,12 @@ object CryptoUtils {
 
     fun sign(data: ByteArray, privateKey: ByteArray): ByteArray = secp256k1.signSchnorr(data, privateKey, null)
 
+    fun verify(
+        signature: ByteArray,
+        hash: ByteArray,
+        pubKey: ByteArray,
+    ): Boolean = secp256k1.verifySchnorr(signature, hash, pubKey)
+
     @ExperimentalEncodingApi
     fun encrypt(
         msg: String,
