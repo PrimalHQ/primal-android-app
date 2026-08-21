@@ -25,6 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import net.primal.core.networking.nwc.nip47.NwcError
 import net.primal.core.networking.nwc.wallet.NwcWalletClient
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
+import net.primal.core.networking.nwc.wallet.model.NwcRequestUnauthenticatedException
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequestException
 import net.primal.core.networking.nwc.wallet.signNwcErrorResponseNostrEvent
@@ -367,14 +368,19 @@ class NwcServiceImpl internal constructor(
                             connection = connection.asDO(),
                         ).onSuccess { nwcRequest ->
                             processRequest(nwcRequest)
-                        }.onFailure {
-                            sendErrorResponse(
-                                error = WalletNwcRequestException(
-                                    nostrEvent = nostrEvent,
-                                    connection = connection.asDO(),
-                                    cause = it,
-                                ),
-                            )
+                        }.onFailure { error ->
+                            if (error is NwcRequestUnauthenticatedException) {
+                                // Drop silently: never respond to a sender we could not authenticate.
+                                Napier.w(tag = TAG) { "Dropped unauthenticated pending NWC request $eventId." }
+                            } else {
+                                sendErrorResponse(
+                                    error = WalletNwcRequestException(
+                                        nostrEvent = nostrEvent,
+                                        connection = connection.asDO(),
+                                        cause = error,
+                                    ),
+                                )
+                            }
                         }
                     }.also { pendingEvents ->
                         internalNwcRepository

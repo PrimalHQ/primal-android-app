@@ -1,6 +1,7 @@
 package net.primal.wallet.data.repository.factory
 
 import net.primal.core.lightning.LightningPayHelper
+import net.primal.core.networking.nwc.wallet.NwcRequestAuthenticator
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.nips.encryption.service.NostrEncryptionService
@@ -253,6 +254,7 @@ abstract class RepositoryFactory {
             encryptionService = nostrEncryptionService,
             requestParser = NwcWalletRequestParser(
                 encryptionService = nostrEncryptionService,
+                requestAuthenticator = NwcRequestAuthenticator(),
             ),
             requestProcessor = NwcRequestProcessor(
                 walletRepository = walletRepository,

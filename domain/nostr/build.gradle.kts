@@ -102,5 +102,11 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+
+        val desktopTest by getting
+        desktopTest.dependencies {
+            // Native bindings required to run Schnorr sign/verify on the JVM test runtime
+            implementation(libs.secp256k1.kmp.jni.jvm)
+        }
     }
 }
