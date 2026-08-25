@@ -580,6 +580,8 @@
     <string name="feed_context_bookmark_removed">Note removed from your bookmarks.</string>
     <string name="feed_context_copy_note_text">Copy Note Text</string>
     <string name="feed_context_copy_poll_question">Copy Poll Question</string>
+    <string name="feed_context_translate_note">Translate Note</string>
+    <string name="feed_context_translate_poll">Translate Poll</string>
     <string name="feed_context_copy_note_id">Copy Note ID</string>
     <string name="feed_context_copy_poll_id">Copy Poll ID</string>
     <string name="feed_context_copy_raw_data">Copy Raw Data</string>
