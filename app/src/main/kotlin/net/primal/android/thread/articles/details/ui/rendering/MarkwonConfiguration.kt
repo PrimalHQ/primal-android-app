@@ -4,6 +4,7 @@ package net.primal.android.thread.articles.details.ui.rendering
 
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.text.util.Linkify
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
@@ -22,7 +23,6 @@ import io.noties.markwon.Markwon
 import io.noties.markwon.MarkwonConfiguration
 import io.noties.markwon.MarkwonSpansFactory
 import io.noties.markwon.SoftBreakAddsNewLinePlugin
-import io.noties.markwon.core.CorePlugin
 import io.noties.markwon.core.CoreProps.HEADING_LEVEL
 import io.noties.markwon.core.MarkwonTheme
 import io.noties.markwon.core.spans.CustomTypefaceSpan
@@ -35,6 +35,7 @@ import io.noties.markwon.image.ImageSizeResolver
 import io.noties.markwon.image.coil.CoilImagesPlugin
 import io.noties.markwon.inlineparser.BangInlineProcessor
 import io.noties.markwon.inlineparser.MarkwonInlineParser
+import io.noties.markwon.linkify.LinkifyPlugin
 import io.noties.markwon.movement.MovementMethodPlugin
 import net.primal.android.R
 import net.primal.android.articles.highlights.JoinedHighlightsUi
@@ -77,11 +78,11 @@ fun rememberPrimalMarkwon(
         extraColorScheme,
     ) {
         Markwon.builder(context)
-            .usePlugin(CorePlugin.create())
             .usePlugin(CoilImagesPlugin.create(context, context.imageLoader))
             .usePlugin(SoftBreakAddsNewLinePlugin.create())
             .usePlugin(HtmlPlugin.create())
             .usePlugin(StrikethroughPlugin.create())
+            .usePlugin(LinkifyPlugin.create(Linkify.WEB_URLS))
             .usePlugin(MovementMethodPlugin.create(TableAwareMovementMethod.create()))
             .usePlugin(
                 MarkwonHighlightsPlugin(
