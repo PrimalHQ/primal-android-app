@@ -72,6 +72,18 @@ sealed class LocalSignerMethod {
         val signedEvent: NostrEvent,
     ) : LocalSignerMethod()
 
+    /**
+     * Guards against cross-account signature confusion: the account a caller declares (and that the
+     * permission check is keyed on) must match the author of the event that will actually be signed.
+     * For [SignEvent] the signing key is resolved from [SignEvent.unsignedEvent]'s own pubkey, so a
+     * request where that differs from [SignEvent.userPubKey] is malformed and must be rejected.
+     */
+    fun hasConsistentSigningIdentity(): Boolean =
+        when (this) {
+            is SignEvent -> unsignedEvent.pubKey.equals(userPubKey, ignoreCase = true)
+            else -> true
+        }
+
     fun getPermissionId() =
         when (this) {
             is DecryptZapEvent -> "decrypt_zap_event"
