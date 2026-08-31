@@ -58,10 +58,6 @@ fun List<JsonArray>.findFirstClient() = firstOrNull { it.isClientTag() }?.getTag
 
 fun List<JsonArray>.findFirstEncryptionTag() = firstOrNull { it.isEncryptionTag() }?.getTagValueOrNull()
 
-fun List<JsonArray>.findFirstUnmarkedPubkey(): String? =
-    firstOrNull { it.getOrNull(0)?.jsonPrimitive?.content == "p" && it.size <= 3 }
-        ?.getOrNull(1)?.jsonPrimitive?.content
-
 fun JsonArray.isContextTag() = getOrNull(0)?.jsonPrimitive?.content == "context"
 
 fun JsonArray.isEncryptionTag() = getOrNull(0)?.jsonPrimitive?.content == "encryption"

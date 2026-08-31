@@ -1595,47 +1595,7 @@ class NotePublishHandlerTest {
         }
 
     @Test
-    fun publishPoll_createsPTagWithRelay_forZapPoll() =
-        runTest {
-            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
-            val firstRelayUrl = "wss://relay1.example.com"
-            val relayRepository = mockk<RelayRepository> {
-                every { findRelays(any(), any()) } returns buildWriteRelayPOs(
-                    expectedUserId,
-                    firstRelayUrl,
-                    "wss://relay2.example.com",
-                )
-            }
-            val notePublishHandler = buildNotePublishHandler(
-                nostrPublisher = nostrPublisher,
-                relayRepository = relayRepository,
-            )
-
-            notePublishHandler.publishPoll(
-                userId = expectedUserId,
-                content = "Zap poll",
-                pollRequest = PollPublishRequest(
-                    isZapPoll = true,
-                    choices = listOf(PollOption(id = "1", label = "A")),
-                    endsAt = 1700000000,
-                ),
-            )
-
-            coVerify {
-                nostrPublisher.signPublishImportNostrEvent(
-                    withArg { event ->
-                        val pTags = event.tags.filter { it.isPubKeyTag() }
-                        val pollPTag = pTags.find { it[1].jsonPrimitive.content == expectedUserId }
-                        pollPTag.shouldNotBeNull()
-                        pollPTag[2].jsonPrimitive.content shouldBe firstRelayUrl
-                    },
-                    any(),
-                )
-            }
-        }
-
-    @Test
-    fun publishPoll_createsPTagWithoutRelay_forZapPollWithNoWriteRelays() =
+    fun publishPoll_doesNotAddSelfPTag_forZapPoll() =
         runTest {
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
             val notePublishHandler = buildNotePublishHandler(nostrPublisher = nostrPublisher)
@@ -1653,10 +1613,7 @@ class NotePublishHandlerTest {
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { event ->
-                        val pTags = event.tags.filter { it.isPubKeyTag() }
-                        val pollPTag = pTags.find { it[1].jsonPrimitive.content == expectedUserId }
-                        pollPTag.shouldNotBeNull()
-                        pollPTag.size shouldBe 2
+                        event.tags.none { it.isPubKeyTag() } shouldBe true
                     },
                     any(),
                 )
