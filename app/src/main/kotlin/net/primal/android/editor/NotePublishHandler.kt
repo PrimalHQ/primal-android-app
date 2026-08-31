@@ -183,7 +183,6 @@ class NotePublishHandler @Inject constructor(
 
             val pollTags = if (pollRequest.isZapPoll) {
                 buildZapPollTags(
-                    userId = userId,
                     choices = pollRequest.choices,
                     endsAt = pollRequest.endsAt,
                     minZapAmountInSats = pollRequest.minZapAmountInSats,
@@ -232,9 +231,7 @@ class NotePublishHandler @Inject constructor(
         return tags
     }
 
-    @Suppress("LongParameterList")
     private fun buildZapPollTags(
-        userId: String,
         choices: List<PollOption>,
         endsAt: Long,
         minZapAmountInSats: Long?,
@@ -246,8 +243,6 @@ class NotePublishHandler @Inject constructor(
         choices.forEachIndexed { index, choice ->
             tags.add(index.toString().asPollOptionTag(label = choice.label))
         }
-
-        tags.add(userId.asPubkeyTag(relayHint = writeRelayUrls.firstOrNull()))
 
         tags.add(endsAt.toString().asClosedAtTag())
 
