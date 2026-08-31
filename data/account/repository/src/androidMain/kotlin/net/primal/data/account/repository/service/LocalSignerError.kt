@@ -9,4 +9,8 @@ sealed class LocalSignerError(override val message: String) : Throwable(message 
 
     data class AppNotFound(override val message: String = "App not found. User might have deleted it.") :
         LocalSignerError(message = message)
+
+    data class IdentityMismatch(
+        override val message: String = "Requested signing identity does not match the event author.",
+    ) : LocalSignerError(message = message)
 }

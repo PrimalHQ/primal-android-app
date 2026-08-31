@@ -45,6 +45,20 @@ internal class LocalSignerServiceImpl internal constructor(
     private val allResponses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
 
     override suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse> {
+        if (!method.hasConsistentSigningIdentity()) {
+            val response = LocalSignerMethodResponse.Error(
+                eventId = method.eventId,
+                message = "Request rejected: signing identity does not match the event author.",
+            )
+            allResponses.add(response)
+            insertNewSessionEvent(
+                method = method,
+                requestState = AppRequestState.Rejected,
+                response = response,
+            )
+            return Result.failure(LocalSignerError.IdentityMismatch())
+        }
+
         return localAppRepository.getPermissionActionForMethod(
             appIdentifier = method.getIdentifier(),
             permissionId = method.getPermissionId(),
