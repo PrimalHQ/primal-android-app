@@ -246,6 +246,7 @@ internal class SparkWalletServiceImpl(
                         amountSats = amountSats,
                         expirySecs = DEFAULT_INVOICE_EXPIRY_SECS,
                         paymentHash = null,
+                        receiverIdentityPublicKey = null,
                     ),
                 ),
             )

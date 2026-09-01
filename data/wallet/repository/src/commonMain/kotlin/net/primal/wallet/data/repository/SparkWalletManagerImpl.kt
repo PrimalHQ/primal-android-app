@@ -122,6 +122,10 @@ internal class SparkWalletManagerImpl(
                 is SdkEvent.NewDeposits -> {
                     Napier.d { "SdkEvent.NewDeposits walletId=$walletId" }
                 }
+
+                is SdkEvent.UnilateralExitStateChanged -> {
+                    Napier.d { "SdkEvent.UnilateralExitStateChanged walletId=$walletId" }
+                }
             }
         }
     }
