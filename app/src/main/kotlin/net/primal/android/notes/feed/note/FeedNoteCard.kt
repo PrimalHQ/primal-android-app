@@ -76,6 +76,7 @@ import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
+import net.primal.android.notes.feed.note.ui.NoteTranslate
 import net.primal.android.notes.feed.note.ui.RepostedNotice
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.ZapPollBottomSheet
@@ -608,6 +609,16 @@ private fun FeedNote(
                     onVideoSoundToggle = onVideoSoundToggle,
                     onPollOptionSelected = onPollOptionSelected,
                 )
+
+                if (data.kind == NostrEventKind.ShortTextNote.value && data.content.isNotBlank()) {
+                    NoteTranslate(
+                        modifier = Modifier
+                            .padding(horizontal = if (fullWidthContent && !forceContentIndent) 10.dp else 8.dp)
+                            .padding(start = contentIndentDp),
+                        noteId = data.postId,
+                        content = data.content,
+                    )
+                }
 
                 if (isFeedLayout) {
                     Box(modifier = Modifier.padding(start = contentIndentDp)) {
