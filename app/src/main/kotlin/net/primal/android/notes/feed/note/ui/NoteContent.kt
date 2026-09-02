@@ -42,6 +42,7 @@ import net.primal.android.notes.feed.model.URL_ANNOTATION_TAG
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.computeRenderedNoteContent
 import net.primal.android.notes.feed.model.toAnnotatedString
+import net.primal.android.notes.feed.note.translation.NoteTranslationControls
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -91,6 +92,14 @@ fun NoteContent(
                 highlightColor = highlightColor,
             )
     }
+    val translationText = remember(data, seeMoreText, highlightColor) {
+        renderContentAsAnnotatedString(
+            data = data,
+            expanded = true,
+            seeMoreText = seeMoreText,
+            highlightColor = highlightColor,
+        ).text
+    }
 
     Column(modifier = modifier) {
         if (contentText.isNotEmpty()) {
@@ -129,6 +138,11 @@ fun NoteContent(
                 overflow = overflow,
                 textSelectable = textSelectable,
                 onClick = clickHandler,
+            )
+
+            NoteTranslationControls(
+                noteId = data.noteId,
+                text = translationText,
             )
         }
 
