@@ -1,5 +1,6 @@
 package net.primal.android.notes.feed.note.ui
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import java.util.Locale
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -38,6 +40,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.ext.openUriInExternalBrowser
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareImage
@@ -149,6 +152,14 @@ fun NoteDropdownMenuIcon(
                             )
                         }
                     }
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                text = stringResource(id = R.string.feed_context_translate_note),
+                onClick = {
+                    context.openUriInExternalBrowser(uri = buildGoogleTranslateUrl(noteContent = noteContent))
                     menuVisible = false
                 },
             )
@@ -271,4 +282,17 @@ fun NoteDropdownMenuIcon(
             }
         }
     }
+}
+
+private fun buildGoogleTranslateUrl(noteContent: String): String {
+    val targetLanguage = Locale.getDefault().language.takeIf { it.isNotBlank() } ?: "en"
+    return Uri.Builder()
+        .scheme("https")
+        .authority("translate.google.com")
+        .appendQueryParameter("sl", "auto")
+        .appendQueryParameter("tl", targetLanguage)
+        .appendQueryParameter("text", noteContent)
+        .appendQueryParameter("op", "translate")
+        .build()
+        .toString()
 }
