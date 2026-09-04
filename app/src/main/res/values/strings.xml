@@ -1062,6 +1062,19 @@
     <string name="settings_appearance_font_section_title">Font</string>
     <string name="settings_appearance_note_preview_section_title">Preview</string>
 
+    <string name="settings_translation_title">Translation</string>
+    <string name="settings_translation_enabled_title">Note translation</string>
+    <string name="settings_translation_enabled_description">Show inline translation controls below notes.</string>
+    <string name="settings_translation_endpoint_title">LibreTranslate endpoint</string>
+    <string name="settings_translation_endpoint_hint">https://libretranslate.com/translate</string>
+    <string name="settings_translation_api_key_title">API key</string>
+    <string name="settings_translation_api_key_hint">Optional</string>
+    <string name="settings_translation_target_language_title">Target language</string>
+    <string name="settings_translation_target_language_hint">en</string>
+    <string name="settings_translation_save">Save</string>
+    <string name="settings_translation_saved">Translation settings saved.</string>
+    <string name="settings_translation_restore_defaults">Restore defaults</string>
+
     <string name="settings_content_display_title">Content Display</string>
     <string name="settings_content_display_auto_play_videos">Auto play videos</string>
     <string name="settings_content_display_auto_play_videos_hint">Start playing videos automatically as you scroll the feed. Turn this off to use less network data.</string>
@@ -1740,6 +1753,12 @@
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
+    <string name="feed_note_translate">Translate</string>
+    <string name="feed_note_translation_loading">Translating...</string>
+    <string name="feed_note_translation_show_original">Show original</string>
+    <string name="feed_note_translation_show_translation">Show translation</string>
+    <string name="feed_note_translation_detected_language">Detected %1$s</string>
+    <string name="feed_note_translation_error">Translation unavailable. Tap to retry.</string>
 
     <string name="signer_connect_unknown_app">Unknown App</string>
     <string name="signer_connect_login_tab">Login</string>
