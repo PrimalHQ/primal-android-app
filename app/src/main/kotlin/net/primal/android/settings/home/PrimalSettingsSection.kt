@@ -7,6 +7,7 @@ enum class PrimalSettingsSection {
     Appearance,
     ConnectedApps,
     ContentDisplay,
+    Translation,
     MutedAccounts,
     MediaUploads,
     Notifications,

@@ -37,6 +37,7 @@ import net.primal.android.settings.connected.session.local.LocalSessionDetailsVi
 import net.primal.android.settings.connected.session.remote.RemoteSessionDetailsScreen
 import net.primal.android.settings.connected.session.remote.RemoteSessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
+import net.primal.android.settings.translation.TranslationSettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.developer.DeveloperToolsScreen
 import net.primal.android.settings.developer.DeveloperToolsViewModel
@@ -75,6 +76,7 @@ private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "walle
 private fun NavController.navigateToCreateNewWalletConnection() = navigate(route = "wallet_settings/create_new_nwc")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
+private fun NavController.navigateToTranslationSettings() = navigate(route = "translation_settings")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
@@ -132,6 +134,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     PrimalSettingsSection.Wallet -> navController.navigateToWalletSettings()
                     PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
                     PrimalSettingsSection.ContentDisplay -> navController.navigateToContentDisplaySettings()
+                    PrimalSettingsSection.Translation -> navController.navigateToTranslationSettings()
                     PrimalSettingsSection.Notifications -> navController.navigateToNotificationsSettings()
                     PrimalSettingsSection.Zaps -> navController.navigateToZapsSettings()
                     PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
@@ -173,6 +176,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         network(route = "network", navController = navController)
         appearance(route = "appearance_settings", navController = navController)
         contentDisplay(route = "content_display", navController = navController)
+        translation(route = "translation_settings", navController = navController)
         mutedAccounts(route = "muted_accounts_settings", navController = navController)
         mediaUploads(route = "media_uploads_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
@@ -461,6 +465,18 @@ private fun NavGraphBuilder.contentDisplay(route: String, navController: NavCont
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
+    }
+
+private fun NavGraphBuilder.translation(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        LockToOrientationPortrait()
+        TranslationSettingsScreen(onClose = { navController.navigateUp() })
     }
 
 private fun NavGraphBuilder.zaps(route: String, navController: NavController) =
