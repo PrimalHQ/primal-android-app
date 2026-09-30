@@ -183,7 +183,7 @@ fun NostrUserText(
                     drawContent()
                 }
             },
-        text = titleText,
+        text = if (isTranslated) translatedText else titleText,
         fontSize = fontSize,
         textAlign = TextAlign.Start,
         overflow = overflow,
@@ -207,6 +207,14 @@ fun NostrUserText(
             }
         },
     )
+
+    // Add a 'Translate' button
+    Button(
+        onClick = { onTranslateClick() },
+        modifier = Modifier.padding(top = 8.dp)
+    ) {
+        Text(text = "Translate")
+    }
 }
 
 @Preview
