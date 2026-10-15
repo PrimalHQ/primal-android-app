@@ -1,6 +1,10 @@
 package net.primal.wallet.data.repository
 
+import breez_sdk_spark.BreezSdk
+import breez_sdk_spark.ClaimDepositRequest
+import breez_sdk_spark.DepositInfo
 import breez_sdk_spark.EventListener
+import breez_sdk_spark.MaxFee
 import breez_sdk_spark.SdkEvent
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
@@ -9,6 +13,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.core.utils.Result
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.UnclaimedDeposit
@@ -46,7 +52,7 @@ internal class SparkWalletManagerImpl(
                 if (walletId !in eventListenerIds) {
                     val sdk = breezSdkInstanceManager.requireInstance(walletId)
                     eventListenerIds[walletId] = sdk.addEventListener(
-                        SdkEventListener(walletId = walletId),
+                        SdkEventListener(walletId = walletId, sdk = sdk),
                     )
                 }
                 walletId
@@ -67,6 +73,7 @@ internal class SparkWalletManagerImpl(
 
     private inner class SdkEventListener(
         private val walletId: String,
+        private val sdk: BreezSdk,
     ) : EventListener {
         override suspend fun onEvent(event: SdkEvent) {
             _sdkEvents.emit(SparkSdkEvent(walletId = walletId, event = event))
@@ -120,7 +127,10 @@ internal class SparkWalletManagerImpl(
                 }
 
                 is SdkEvent.NewDeposits -> {
-                    Napier.d { "SdkEvent.NewDeposits walletId=$walletId" }
+                    Napier.d { "SdkEvent.NewDeposits walletId=$walletId count=${event.newDeposits.size}" }
+                    event.newDeposits
+                        .filterNot { it.isMature }
+                        .forEach { capEarlyClaimFee(deposit = it) }
                 }
 
                 is SdkEvent.UnilateralExitStateChanged -> {
@@ -132,5 +142,27 @@ internal class SparkWalletManagerImpl(
                 }
             }
         }
+
+        private suspend fun capEarlyClaimFee(deposit: DepositInfo) {
+            runCatching {
+                sdk.claimDeposit(
+                    ClaimDepositRequest(
+                        txid = deposit.txid,
+                        vout = deposit.vout,
+                        maxFee = MaxFee.Fixed(amount = EARLY_CLAIM_MAX_FEE_SATS),
+                    ),
+                )
+            }.onSuccess { response ->
+                Napier.i {
+                    "Early claim fee capped walletId=$walletId txid=${deposit.txid} outcome=${response.outcome}"
+                }
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to cap early claim fee walletId=$walletId txid=${deposit.txid}" }
+            }
+        }
+    }
+
+    private companion object {
+        private const val EARLY_CLAIM_MAX_FEE_SATS = 1UL
     }
 }
