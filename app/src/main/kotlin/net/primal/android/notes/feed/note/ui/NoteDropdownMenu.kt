@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import java.util.Locale
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -38,10 +39,12 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.ext.openUriInExternalBrowser
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareImage
 import net.primal.android.core.utils.systemShareText
+import net.primal.android.notes.translation.NoteTranslate
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.Nevent
@@ -149,6 +152,20 @@ fun NoteDropdownMenuIcon(
                             )
                         }
                     }
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                text = stringResource(id = R.string.feed_context_translate_note),
+                onClick = {
+                    val target = NoteTranslate.resolveTargetLanguage(deviceLocale = Locale.getDefault())
+                    context.openUriInExternalBrowser(
+                        uri = NoteTranslate.buildGoogleTranslateWebUrl(
+                            text = noteContent,
+                            targetLang = target,
+                        ),
+                    )
                     menuVisible = false
                 },
             )

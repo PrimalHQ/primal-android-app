@@ -572,6 +572,7 @@
     <string name="feed_context_share_note">Share Note</string>
     <string name="feed_context_share_poll">Share Poll</string>
     <string name="feed_context_share_note_as_image">Share as Image</string>
+    <string name="feed_context_translate_note">Translate Note</string>
     <string name="feed_context_copy_note_link">Copy Note Link</string>
     <string name="feed_context_copy_poll_link">Copy Poll Link</string>
     <string name="feed_context_add_to_bookmark">Add Bookmark</string>
@@ -588,6 +589,12 @@
     <string name="feed_context_mute_thread">Mute Thread</string>
     <string name="feed_context_request_delete">Request Delete</string>
     <string name="feed_context_copied_toast">Copied!</string>
+
+    <string name="feed_note_translate_action">Translate</string>
+    <string name="feed_note_translate_translating">Translating…</string>
+    <string name="feed_note_translate_show_original">Show original</string>
+    <string name="feed_note_translate_translated_from">Translated from %1$s</string>
+    <string name="feed_note_translate_failed">Translation failed: %1$s</string>
 
     <string name="feed_lightning_invoice_title">Lightning Invoice</string>
     <string name="feed_lightning_invoice_pay_button">Pay</string>
