@@ -1,5 +1,8 @@
 package net.primal.android.notes.feed.note.ui
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -48,6 +51,7 @@ import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.withNostrPrefix
+import java.util.Locale
 
 @Composable
 fun NoteDropdownMenuIcon(
@@ -187,6 +191,16 @@ fun NoteDropdownMenuIcon(
                 },
             )
             DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                text = stringResource(
+                    id = if (isPoll) R.string.feed_context_translate_poll else R.string.feed_context_translate_note,
+                ),
+                onClick = {
+                    context.openGoogleTranslate(text = noteContent)
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteId,
                 text = stringResource(
                     id = if (isPoll) R.string.feed_context_copy_poll_id else R.string.feed_context_copy_note_id,
@@ -271,4 +285,22 @@ fun NoteDropdownMenuIcon(
             }
         }
     }
+}
+
+private fun Context.openGoogleTranslate(text: String) {
+    val noteText = text.trim()
+    if (noteText.isEmpty()) return
+
+    val targetLanguage = Locale.getDefault().language.ifBlank { "en" }
+    val translateUri = Uri.Builder()
+        .scheme("https")
+        .authority("translate.google.com")
+        .path("/")
+        .appendQueryParameter("sl", "auto")
+        .appendQueryParameter("tl", targetLanguage)
+        .appendQueryParameter("text", noteText)
+        .appendQueryParameter("op", "translate")
+        .build()
+
+    startActivity(Intent(Intent.ACTION_VIEW, translateUri))
 }
