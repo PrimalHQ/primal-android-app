@@ -43,6 +43,8 @@ import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareImage
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.theme.AppTheme
+import net.primal.android.translation.NoteTranslationPrefsStore
+import net.primal.android.translation.NoteTranslationService
 import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
@@ -183,6 +185,30 @@ fun NoteDropdownMenuIcon(
                             copyConfirmationText,
                             Toast.LENGTH_SHORT,
                         ).show()
+                    }
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                text = stringResource(id = R.string.feed_context_translate_note),
+                onClick = {
+                    menuVisible = false
+                    uiScope.launch {
+                        try {
+                            val prefs = NoteTranslationPrefsStore.read(context)
+                            NoteTranslationService.translate(noteId, noteContent, prefs)
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.feed_note_show_original),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        } catch (t: Throwable) {
+                            Toast.makeText(
+                                context,
+                                t.message ?: "Translation failed",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
                     }
                 },
             )
