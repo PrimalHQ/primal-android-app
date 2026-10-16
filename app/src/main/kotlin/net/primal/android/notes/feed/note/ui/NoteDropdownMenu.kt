@@ -1,5 +1,8 @@
 package net.primal.android.notes.feed.note.ui
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,8 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -38,6 +44,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShareImage
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.ext.openUriInExternalBrowser
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.resolvePrimalNoteLink
 import net.primal.android.core.utils.systemShareImage
@@ -73,6 +80,7 @@ fun NoteDropdownMenuIcon(
     var menuVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val targetLanguage = LocalLocale.current.platformLocale.language.ifBlank { "en" }
     val uiScope = rememberCoroutineScope()
     val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
 
@@ -149,6 +157,14 @@ fun NoteDropdownMenuIcon(
                             )
                         }
                     }
+                    menuVisible = false
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = PrimalIcons.ContextCopyNoteText,
+                text = stringResource(id = R.string.feed_context_translate_note),
+                onClick = {
+                    context.translateNote(noteContent, targetLanguage)
                     menuVisible = false
                 },
             )
@@ -271,4 +287,30 @@ fun NoteDropdownMenuIcon(
             }
         }
     }
+}
+
+internal fun Context.translateNote(noteContent: String, targetLanguage: String) {
+    if (
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+        runCatching {
+            startActivity(
+                Intent(Intent.ACTION_TRANSLATE)
+                    .putExtra(Intent.EXTRA_TEXT, noteContent),
+            )
+        }.isSuccess
+    ) {
+        return
+    }
+
+    openUriInExternalBrowser(
+        uri = buildGoogleTranslateUrl(
+            noteContent = noteContent,
+            targetLanguage = targetLanguage,
+        ),
+    )
+}
+
+internal fun buildGoogleTranslateUrl(noteContent: String, targetLanguage: String): String {
+    val encodedText = URLEncoder.encode(noteContent, StandardCharsets.UTF_8.toString())
+    return "https://translate.google.com/?sl=auto&tl=$targetLanguage&text=$encodedText&op=translate"
 }
