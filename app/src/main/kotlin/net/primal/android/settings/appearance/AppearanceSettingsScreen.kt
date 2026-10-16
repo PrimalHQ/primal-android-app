@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -73,6 +76,8 @@ import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.ui.TRANSLATION_LANGUAGES
+import net.primal.android.notes.feed.note.ui.defaultTranslateLanguage
 import net.primal.android.settings.appearance.AppearanceSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -163,6 +168,16 @@ fun AppearanceSettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     onNoteAppearanceChanged = {
                         eventPublisher(UiEvent.ChangeContentAppearance(contentAppearance = it))
+                    },
+                )
+
+                PrimalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+
+                TranslationLanguageSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedLanguageCode = state.translationLanguage,
+                    onLanguageChange = {
+                        eventPublisher(UiEvent.ChangeTranslationLanguage(language = it))
                     },
                 )
 
@@ -506,6 +521,89 @@ private fun NotePreviewSection(modifier: Modifier) {
             colors = CardDefaults.cardColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
+        )
+    }
+}
+
+@Composable
+private fun TranslationLanguageSection(
+    modifier: Modifier = Modifier,
+    selectedLanguageCode: String?,
+    onLanguageChange: (String) -> Unit,
+) {
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
+    val effectiveLanguageCode = selectedLanguageCode ?: defaultTranslateLanguage()
+    val selectedLanguageName = TRANSLATION_LANGUAGES
+        .firstOrNull { it.code == effectiveLanguageCode }
+        ?.name
+        ?: effectiveLanguageCode
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+            text = stringResource(id = R.string.settings_appearance_translation_section_title).uppercase(),
+            fontWeight = FontWeight.W500,
+            fontSize = 14.sp,
+            lineHeight = 16.sp,
+        )
+
+        SettingsItem(
+            headlineText = stringResource(id = R.string.settings_appearance_translation_language),
+            supportText = stringResource(id = R.string.settings_appearance_translation_language_hint),
+            trailingContent = {
+                Text(
+                    text = selectedLanguageName,
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                )
+            },
+            onClick = { showLanguageDialog = true },
+        )
+    }
+
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = {
+                Text(text = stringResource(id = R.string.settings_appearance_translation_language))
+            },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                ) {
+                    TRANSLATION_LANGUAGES.forEach { language ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onLanguageChange(language.code)
+                                    showLanguageDialog = false
+                                }
+                                .padding(vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = language.name,
+                                modifier = Modifier.weight(1f),
+                                style = AppTheme.typography.bodyMedium,
+                            )
+                            if (language.code == effectiveLanguageCode) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = AppTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
         )
     }
 }

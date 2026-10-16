@@ -94,6 +94,7 @@ import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
+import net.primal.android.notes.feed.note.ui.NoteTranslate
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachmentVideoPreview
 import net.primal.android.notes.feed.note.ui.attachment.findMediaFeedCardMediaSize
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
@@ -302,6 +303,7 @@ private fun MediaFeedCardBody(
         Spacer(modifier = Modifier.height(MediumSpacing))
 
         MediaFeedContentSection(
+            noteId = data.postId,
             authorName = data.authorName,
             content = data.content,
             hashtags = data.hashtags,
@@ -542,6 +544,7 @@ private fun PageIndicatorDots(pageCount: Int, currentPage: Int) {
 
 @Composable
 private fun MediaFeedContentSection(
+    noteId: String,
     authorName: String,
     content: String,
     hashtags: List<String>,
@@ -602,6 +605,14 @@ private fun MediaFeedContentSection(
                 modifier = Modifier.clickable { onExpandClick() },
                 style = contentTextStyle,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+
+        if (content.isNotBlank()) {
+            NoteTranslate(
+                modifier = Modifier.padding(top = 8.dp),
+                noteId = noteId,
+                content = content,
             )
         }
 
