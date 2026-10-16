@@ -11,7 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -71,6 +74,7 @@ fun NoteContent(
     textSelectable: Boolean = false,
     referencedEventsHaveBorder: Boolean = true,
     couldAutoPlay: Boolean = false,
+    enableTranslation: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedEventsContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -82,14 +86,28 @@ fun NoteContent(
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val displaySettings = LocalContentDisplaySettings.current
     val seeMoreText = stringResource(id = R.string.feed_see_more)
-    val contentText = remember(data, rendered, expanded, seeMoreText, highlightColor) {
-        rendered?.toAnnotatedString(seeMoreText = seeMoreText, highlightColor = highlightColor)
-            ?: renderContentAsAnnotatedString(
-                data = data,
-                expanded = expanded,
+    var translatedContent by remember(data.noteId, data.content) { mutableStateOf<String?>(null) }
+    val displayData = remember(data, translatedContent) {
+        val translated = translatedContent
+        if (translated != null) data.copy(content = translated) else data
+    }
+    val contentText = remember(displayData, rendered, expanded, seeMoreText, highlightColor, translatedContent) {
+        if (translatedContent != null) {
+            renderContentAsAnnotatedString(
+                data = displayData,
+                expanded = true,
                 seeMoreText = seeMoreText,
                 highlightColor = highlightColor,
             )
+        } else {
+            rendered?.toAnnotatedString(seeMoreText = seeMoreText, highlightColor = highlightColor)
+                ?: renderContentAsAnnotatedString(
+                    data = displayData,
+                    expanded = expanded,
+                    seeMoreText = seeMoreText,
+                    highlightColor = highlightColor,
+                )
+        }
     }
 
     Column(modifier = modifier) {
@@ -129,6 +147,14 @@ fun NoteContent(
                 overflow = overflow,
                 textSelectable = textSelectable,
                 onClick = clickHandler,
+            )
+        }
+
+        if (enableTranslation) {
+            NoteTranslationControls(
+                noteId = data.noteId,
+                sourceText = data.content,
+                onTranslatedContentChange = { translatedContent = it },
             )
         }
 

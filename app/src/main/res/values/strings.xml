@@ -1070,6 +1070,38 @@
     <string name="settings_content_display_full_screen_feed_display">Full screen feed display</string>
     <string name="settings_content_display_full_screen_feed_display_hint">Maximize screen real estate by hiding app header &amp; footer as you scroll down the feed.</string>
 
+    <string name="settings_note_translation_title">Note translation</string>
+    <string name="settings_note_translation_entry_hint">Translate notes into your preferred language using on-device translation or a provider you configure.</string>
+    <string name="settings_note_translation_enable">Show Translate on notes</string>
+    <string name="settings_note_translation_enable_hint">Adds a Translate control on notes with enough readable text. Nothing is sent to a network provider unless you configure one.</string>
+    <string name="settings_note_translation_target_language">Target language</string>
+    <string name="settings_note_translation_provider">Translation provider</string>
+    <string name="settings_note_translation_provider_on_device">Prefer on-device, then your provider</string>
+    <string name="settings_note_translation_provider_libre">LibreTranslate (your URL)</string>
+    <string name="settings_note_translation_provider_deepl">DeepL (your API key)</string>
+    <string name="settings_note_translation_provider_google">Google Cloud Translation (your API key)</string>
+    <string name="settings_note_translation_libre_url">LibreTranslate URL</string>
+    <string name="settings_note_translation_libre_url_placeholder">https://translate.example.com</string>
+    <string name="settings_note_translation_optional_api_key">Optional API key</string>
+    <string name="settings_note_translation_deepl_key">DeepL API key</string>
+    <string name="settings_note_translation_google_key">Google Cloud API key</string>
+    <string name="settings_note_translation_api_key_placeholder">Your key stays on this device</string>
+    <string name="settings_note_translation_status_ready">Ready. Translation uses only the provider you selected.</string>
+    <string name="settings_note_translation_status_not_configured">Not configured. Translation is fail-closed until you add a URL or API key. Primal does not provide a default endpoint.</string>
+    <string name="settings_note_translation_fail_closed_policy">Primal never ships a public translation endpoint or API key. On-device translation stays on the device. Network translation requires your LibreTranslate URL or your DeepL/Google key.</string>
+
+    <string name="feed_note_translate">Translate</string>
+    <string name="feed_note_translating">Translating…</string>
+    <string name="feed_note_show_original">Show original</string>
+    <string name="feed_note_already_in_language">Already in your language</string>
+    <string name="feed_note_translation_not_configured">Translation isn’t set up. Add a LibreTranslate URL or your own DeepL/Google key in Settings → Content Display → Note translation.</string>
+    <string name="feed_note_translation_failed">Couldn’t translate this note.</string>
+    <string name="feed_note_translation_retry">Try again</string>
+    <string name="feed_note_translated_on_device">Translated on this device</string>
+    <string name="feed_note_translated_libre">Translated with LibreTranslate</string>
+    <string name="feed_note_translated_deepl">Translated with DeepL</string>
+    <string name="feed_note_translated_google">Translated with Google</string>
+
     <string name="settings_network_title">Network</string>
     <string name="settings_network_relays_section">Relays</string>
     <string name="settings_network_add_a_relay_section">Add a relay</string>

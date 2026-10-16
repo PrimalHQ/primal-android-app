@@ -607,6 +607,7 @@ private fun FeedNote(
                     noteCallbacks = noteCallbacks,
                     onVideoSoundToggle = onVideoSoundToggle,
                     onPollOptionSelected = onPollOptionSelected,
+                    enableTranslation = true,
                 )
 
                 if (isFeedLayout) {
