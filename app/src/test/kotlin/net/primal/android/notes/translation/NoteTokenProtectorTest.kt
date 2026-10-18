@@ -104,4 +104,19 @@ class NoteTokenProtectorTest {
         val translated = protected.masked.replace("A", "X").replace("B", "Y").replace("C", "Z")
         protected.restore(translated) shouldBe "X https://a.example Y https://b.example Z"
     }
+
+    @Test
+    fun `restore treats dollar signs and backslashes in urls literally`() {
+        val original = "Visit https://example.test/\u00241/path\\file and read the article"
+        val protected = NoteTokenProtector.protect(original)
+        protected.restore(protected.masked) shouldBe original
+        protected.restore(protected.masked.replace("⟦", "").replace("⟧", "")) shouldBe original
+    }
+
+    @Test
+    fun `protected tokens do not make a short sentence eligible`() {
+        NoteTokenProtector.shouldOfferTranslation("ok https://example.test/long-article") shouldBe false
+        NoteTokenProtector.shouldOfferTranslation("hi #averylonghashtag") shouldBe false
+        NoteTokenProtector.shouldOfferTranslation("Hello friends https://example.test") shouldBe true
+    }
 }

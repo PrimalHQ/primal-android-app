@@ -45,7 +45,7 @@ object NoteTranslationConfig {
 
     @Suppress("ReturnCount")
     fun resolveNetworkRoute(settings: NoteTranslationSettings): NetworkTranslationRoute? {
-        val apiKey = settings.apiKey.trim().ifBlank { null }
+        val apiKey = settings.apiKeyForProvider()
         return when (settings.provider) {
             NoteTranslationProvider.PreferOnDevice,
             NoteTranslationProvider.LibreTranslate,
@@ -88,6 +88,7 @@ object NoteTranslationConfig {
         val scheme = uri.scheme?.lowercase()
         if (scheme != "http" && scheme != "https") return null
         if (uri.host.isNullOrBlank()) return null
+        if (uri.rawQuery != null || uri.rawFragment != null || uri.rawUserInfo != null) return null
         return withoutTranslate
     }
 
@@ -100,7 +101,8 @@ object NoteTranslationConfig {
     }
 
     fun isReady(settings: NoteTranslationSettings): Boolean {
-        if (!settings.enabled) return false
-        return resolve(settings) !is TranslationPlan.Unavailable
+        // Network configuration is independent of the enable toggle. Device capability is
+        // checked per request and must not be presented as verified configuration here.
+        return resolveNetworkRoute(settings) != null
     }
 }

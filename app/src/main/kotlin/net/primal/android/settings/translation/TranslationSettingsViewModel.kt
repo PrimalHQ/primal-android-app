@@ -24,7 +24,7 @@ class TranslationSettingsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = viewModelScope.launch { _uiState.update(reducer) }
+    private fun setState(reducer: UiState.() -> UiState) = _uiState.update(reducer)
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -40,9 +40,19 @@ class TranslationSettingsViewModel @Inject constructor(
                 when (event) {
                     is UiEvent.UpdateEnabled -> persist { copy(enabled = event.enabled) }
                     is UiEvent.UpdateTargetLanguage -> persist { copy(targetLanguageCode = event.languageCode) }
-                    is UiEvent.UpdateProvider -> persist { copy(provider = event.provider) }
-                    is UiEvent.UpdateLibreTranslateUrl -> persist { copy(libreTranslateUrl = event.url) }
-                    is UiEvent.UpdateApiKey -> persist { copy(apiKey = event.apiKey) }
+                    is UiEvent.UpdateProvider -> persist {
+                        copy(provider = event.provider, apiKey = if (provider == event.provider) apiKey else "")
+                    }
+                    is UiEvent.UpdateLibreTranslateUrl -> persist {
+                        copy(libreTranslateUrl = event.url, apiKey = if (libreTranslateUrl == event.url) apiKey else "")
+                    }
+                    is UiEvent.UpdateApiKey -> persist {
+                        copy(
+                            apiKey = event.apiKey,
+                            apiKeyProvider = provider,
+                            apiKeyLibreTranslateUrl = libreTranslateUrl,
+                        )
+                    }
                 }
             }
         }
@@ -55,13 +65,11 @@ class TranslationSettingsViewModel @Inject constructor(
             }
         }
 
-    private fun persist(reducer: NoteTranslationSettings.() -> NoteTranslationSettings) {
+    private suspend fun persist(reducer: NoteTranslationSettings.() -> NoteTranslationSettings) {
         val updated = currentSettings().reducer()
         setState { updated.toUiState() }
-        viewModelScope.launch {
-            userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
-                copy(noteTranslation = updated)
-            }
+        userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
+            copy(noteTranslation = updated)
         }
     }
 
@@ -81,6 +89,6 @@ private fun NoteTranslationSettings.toUiState() =
         targetLanguageCode = targetLanguageCode,
         provider = provider,
         libreTranslateUrl = libreTranslateUrl,
-        apiKey = apiKey,
+        apiKey = apiKeyForProvider().orEmpty(),
         ready = NoteTranslationConfig.isReady(this),
     )

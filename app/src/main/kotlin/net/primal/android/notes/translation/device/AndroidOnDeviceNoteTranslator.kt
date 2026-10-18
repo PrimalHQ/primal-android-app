@@ -37,17 +37,8 @@ class AndroidOnDeviceNoteTranslator(
             TranslationSpec(ULocale.forLanguageTag(targetLanguage), TranslationSpec.DATA_FORMAT_TEXT),
         ).build()
 
+        val translator = awaitTranslator(manager, translationContext, context.mainExecutor) ?: return null
         val executor = Executors.newSingleThreadExecutor()
-        val translator = try {
-            awaitTranslator(manager, translationContext, executor)
-        } catch (_: Throwable) {
-            executor.shutdown()
-            return null
-        }
-        if (translator == null) {
-            executor.shutdown()
-            return null
-        }
 
         return try {
             val request = TranslationRequest.Builder()
@@ -93,8 +84,8 @@ class AndroidOnDeviceNoteTranslator(
                 translationContext,
                 executor,
                 Consumer { translator ->
-                    if (continuation.isActive) {
-                        continuation.resume(translator)
+                    continuation.resume(translator) { _, unused, _ ->
+                        runCatching { unused?.destroy() }
                     }
                 },
             )

@@ -95,7 +95,7 @@ fun NoteContent(
         if (translatedContent != null) {
             renderContentAsAnnotatedString(
                 data = displayData,
-                expanded = true,
+                expanded = expanded,
                 seeMoreText = seeMoreText,
                 highlightColor = highlightColor,
             )

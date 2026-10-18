@@ -22,7 +22,7 @@ class NoteTranslationCache(
     fun clear() = entries.clear()
 
     data class CacheKey(
-        val textHash: Int,
+        val text: String,
         val targetLanguage: String,
         val routeId: String,
     )

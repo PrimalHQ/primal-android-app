@@ -16,10 +16,7 @@ class NoteTranslationEngine(
     private val cache: NoteTranslationCache = NoteTranslationCache(),
 ) {
     @Suppress("ReturnCount")
-    suspend fun translate(
-        text: String,
-        settings: NoteTranslationSettings,
-    ): NoteTranslationOutcome {
+    suspend fun translate(text: String, settings: NoteTranslationSettings): NoteTranslationOutcome {
         if (!settings.enabled || text.isBlank()) {
             return NoteTranslationOutcome.Failed()
         }
@@ -132,7 +129,7 @@ class NoteTranslationEngine(
             is TranslationPlan.NetworkOnly -> plan.network.cacheId()
         }
         return NoteTranslationCache.CacheKey(
-            textHash = text.hashCode(),
+            text = text,
             targetLanguage = targetLanguage,
             routeId = routeId,
         )

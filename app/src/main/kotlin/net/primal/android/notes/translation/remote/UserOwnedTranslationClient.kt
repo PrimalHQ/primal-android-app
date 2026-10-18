@@ -1,6 +1,7 @@
 package net.primal.android.notes.translation.remote
 
 import java.io.IOException
+import java.util.Locale
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -66,14 +67,15 @@ class UserOwnedTranslationClient(
         val body = buildJsonObject {
             put("q", text)
             put("source", "auto")
-            put("target", targetLanguage)
+            put("target", toLibreTranslateLanguage(targetLanguage))
             put("format", "text")
             val apiKey = route.apiKey
             if (!apiKey.isNullOrBlank()) {
                 put("api_key", apiKey)
             }
         }
-        val payload = postJson(url = "${route.endpoint}/translate", json = body.toString())
+        val url = route.endpoint.toHttpUrl().newBuilder().addPathSegment("translate").build()
+        val payload = postJson(url = url.toString(), json = body.toString())
         val parsed = decode<LibreTranslateResponse>(payload)
         return parsed.translatedText?.ifBlank { null }
             ?: parsed.translation?.ifBlank { null }
@@ -105,7 +107,7 @@ class UserOwnedTranslationClient(
         val body = CommonJsonImplicitNulls.encodeToString(
             GoogleTranslateRequest(
                 q = listOf(text),
-                target = targetLanguage,
+                target = toGoogleLanguage(targetLanguage),
                 format = "text",
             ),
         )
@@ -152,22 +154,35 @@ class UserOwnedTranslationClient(
 }
 
 internal fun toDeepLLanguage(code: String): String {
-    val normalized = code.trim()
-    return when {
-        normalized.equals("zh-TW", ignoreCase = true) ||
-            normalized.equals("zh-Hant", ignoreCase = true) -> "ZH-HANT"
-        normalized.equals("zh", ignoreCase = true) ||
-            normalized.equals("zh-CN", ignoreCase = true) ||
-            normalized.equals("zh-Hans", ignoreCase = true) -> "ZH-HANS"
-        normalized.equals("pt-PT", ignoreCase = true) -> "PT-PT"
-        normalized.equals("pt", ignoreCase = true) ||
-            normalized.equals("pt-BR", ignoreCase = true) -> "PT-BR"
-        normalized.equals("en-GB", ignoreCase = true) -> "EN-GB"
-        normalized.equals("en", ignoreCase = true) ||
-            normalized.equals("en-US", ignoreCase = true) -> "EN"
-        else -> normalized.uppercase()
+    val locale = Locale.forLanguageTag(code.trim())
+    return when (locale.language) {
+        "zh" -> if (locale.isTraditionalChinese()) "ZH-HANT" else "ZH-HANS"
+        "pt" -> if (locale.country == "PT") "PT-PT" else "PT-BR"
+        "en" -> if (locale.country == "GB") "EN-GB" else "EN"
+        else -> locale.language.ifBlank { code.trim() }.uppercase(Locale.ROOT)
     }
 }
+
+internal fun toGoogleLanguage(code: String): String {
+    val locale = Locale.forLanguageTag(code.trim())
+    return if (locale.language == "pt" && locale.country in setOf("PT", "BR")) {
+        "pt-${locale.country}"
+    } else {
+        toLibreTranslateLanguage(code)
+    }
+}
+
+internal fun toLibreTranslateLanguage(code: String): String {
+    val locale = Locale.forLanguageTag(code.trim())
+    return if (locale.language == "zh" && locale.isTraditionalChinese()) {
+        "zh-TW"
+    } else {
+        locale.language.ifBlank { code.trim() }
+    }
+}
+
+private fun Locale.isTraditionalChinese(): Boolean =
+    script == "Hant" || (script.isBlank() && country in setOf("TW", "HK", "MO"))
 
 @Serializable
 private data class LibreTranslateResponse(

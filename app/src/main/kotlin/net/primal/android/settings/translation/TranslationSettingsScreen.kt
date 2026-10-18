@@ -98,10 +98,7 @@ private fun TranslationSettingsScreen(
 }
 
 @Composable
-private fun EnableTranslationItem(
-    state: TranslationSettingsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
-) {
+private fun EnableTranslationItem(state: TranslationSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
     SettingsItem(
         headlineText = stringResource(id = R.string.settings_note_translation_enable),
         supportText = stringResource(id = R.string.settings_note_translation_enable_hint),
@@ -116,10 +113,7 @@ private fun EnableTranslationItem(
 }
 
 @Composable
-private fun TargetLanguageItem(
-    state: TranslationSettingsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
-) {
+private fun TargetLanguageItem(state: TranslationSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
     var pickerVisible by remember { mutableStateOf(false) }
     SettingsItem(
         headlineText = stringResource(id = R.string.settings_note_translation_target_language),
@@ -138,10 +132,7 @@ private fun TargetLanguageItem(
 }
 
 @Composable
-private fun ProviderItem(
-    state: TranslationSettingsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
-) {
+private fun ProviderItem(state: TranslationSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
     var pickerVisible by remember { mutableStateOf(false) }
     SettingsItem(
         headlineText = stringResource(id = R.string.settings_note_translation_provider),
@@ -164,10 +155,7 @@ private fun ProviderItem(
 }
 
 @Composable
-private fun ProviderFields(
-    state: TranslationSettingsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
-) {
+private fun ProviderFields(state: TranslationSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
     val showLibreUrl = state.provider == NoteTranslationProvider.PreferOnDevice ||
         state.provider == NoteTranslationProvider.LibreTranslate
     val showApiKey = state.provider == NoteTranslationProvider.DeepL ||
@@ -203,13 +191,17 @@ private fun StatusAndPolicy(state: TranslationSettingsContract.UiState) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        text = if (state.ready) {
-            stringResource(id = R.string.settings_note_translation_status_ready)
-        } else {
-            stringResource(id = R.string.settings_note_translation_status_not_configured)
-        },
+        text = stringResource(
+            id = when {
+                !state.enabled -> R.string.settings_note_translation_status_disabled
+                state.ready -> R.string.settings_note_translation_status_ready
+                state.provider == NoteTranslationProvider.PreferOnDevice ->
+                    R.string.settings_note_translation_status_on_device
+                else -> R.string.settings_note_translation_status_not_configured
+            },
+        ),
         style = AppTheme.typography.bodyMedium,
-        color = if (state.ready) {
+        color = if (state.enabled && state.ready) {
             AppTheme.colorScheme.secondary
         } else {
             AppTheme.extraColorScheme.onSurfaceVariantAlt1

@@ -14,11 +14,10 @@ data class ProtectedNoteText(
         return result
     }
 
-    fun letterCount(): Int = original.count { it.isLetter() }
+    fun letterCount(): Int = tokens.fold(original) { acc, token -> acc.replace(token, " ") }.count { it.isLetter() }
 
     fun isTokenOnly(): Boolean {
-        val remainder = tokens.fold(original) { acc, token -> acc.replace(token, " ") }
-        return remainder.none { it.isLetter() }
+        return letterCount() == 0
     }
 }
 
@@ -108,7 +107,11 @@ object NoteTokenProtector {
 
 private val TRAILING_PUNCTUATION = charArrayOf('.', ',', ';', ':', '!', '?', ')', ']', '}', '"', '\'')
 
-private fun restoreToken(text: String, index: Int, token: String): String {
+private fun restoreToken(
+    text: String,
+    index: Int,
+    token: String,
+): String {
     val patterns = listOf(
         Regex("""⟦\s*NT$index\s*⟧""", RegexOption.IGNORE_CASE),
         Regex("""\[\[\s*NT$index\s*]]""", RegexOption.IGNORE_CASE),
@@ -120,9 +123,9 @@ private fun restoreToken(text: String, index: Int, token: String): String {
     )
     patterns.forEach { pattern ->
         if (pattern.containsMatchIn(text)) {
-            return text.replace(pattern, token)
+            return text.replace(pattern) { token }
         }
     }
     val loose = Regex("""(?<![A-Za-z])NT$index(?![A-Za-z0-9])""", RegexOption.IGNORE_CASE)
-    return if (loose.containsMatchIn(text)) text.replace(loose, token) else text
+    return if (loose.containsMatchIn(text)) text.replace(loose) { token } else text
 }

@@ -132,6 +132,26 @@ class NoteTranslationEngineTest {
             outcome.shouldBeInstanceOf<NoteTranslationOutcome.Failed>()
         }
 
+    @Test
+    fun `different note bodies with equal hashes never share a translation`() =
+        runTest(dispatcher) {
+            val first = "Translate Aa"
+            val second = "Translate BB"
+            first.hashCode() shouldBe second.hashCode()
+            var calls = 0
+            val engine = engine(
+                remote = RemoteNoteTranslator { _, text, _ ->
+                    calls += 1
+                    "Translated: $text"
+                },
+            )
+            val settings = NoteTranslationSettings(provider = NoteTranslationProvider.Google, apiKey = "test-key")
+            engine.translate(first, settings)
+            val outcome = engine.translate(second, settings)
+            outcome shouldBe NoteTranslationOutcome.Translated("Translated: $second", NoteTranslationSource.Google)
+            calls shouldBe 2
+        }
+
     private fun engine(
         onDevice: OnDeviceNoteTranslator = OnDeviceNoteTranslator { _, _ -> null },
         remote: RemoteNoteTranslator = RemoteNoteTranslator { _, _, _ -> error("unused") },

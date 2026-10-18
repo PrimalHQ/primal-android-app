@@ -51,8 +51,8 @@ object NoteTranslationLanguages {
     }
 
     fun deviceLanguageCode(): String {
-        val language = Locale.getDefault().language
-        return language.ifBlank { "en" }
+        val tag = Locale.getDefault().toLanguageTag()
+        return tag.takeUnless { it.isBlank() || it == "und" } ?: "en"
     }
 
     fun displayName(code: String): String {

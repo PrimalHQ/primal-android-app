@@ -194,6 +194,13 @@ default network service. If on-device translation is unavailable and no valid
 network provider is configured, the note displays a setup hint. Network
 translation sends the masked note text to the configured service.
 
+Changing provider or editing the LibreTranslate URL clears the saved API key;
+enter the key for the new destination. Stored credentials are bound to their
+provider and LibreTranslate URL. LibreTranslate URLs must not contain query
+parameters, fragments, or embedded usernames/passwords. Device-only settings
+show that availability is checked per note, rather than claiming the service
+is ready before a device translation succeeds.
+
 URLs, Nostr references, Lightning/Bitcoin identifiers, Cashu tokens, mentions,
 hashtags, and emoji shortcodes are masked before either translation path and
 restored afterward. Successful results are cached in memory for the session.

@@ -1087,6 +1087,8 @@
     <string name="settings_note_translation_google_key">Google Cloud API key</string>
     <string name="settings_note_translation_api_key_placeholder">Your key stays on this device</string>
     <string name="settings_note_translation_status_ready">Ready. Translation uses only the provider you selected.</string>
+    <string name="settings_note_translation_status_disabled">Translation is disabled. Your provider settings are saved.</string>
+    <string name="settings_note_translation_status_on_device">On-device availability is checked when you translate. Add your LibreTranslate URL for a network fallback.</string>
     <string name="settings_note_translation_status_not_configured">Not configured. Translation is fail-closed until you add a URL or API key. Primal does not provide a default endpoint.</string>
     <string name="settings_note_translation_fail_closed_policy">Primal never ships a public translation endpoint or API key. On-device translation stays on the device. Network translation requires your LibreTranslate URL or your DeepL/Google key.</string>
 

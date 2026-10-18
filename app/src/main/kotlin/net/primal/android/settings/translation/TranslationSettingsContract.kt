@@ -11,7 +11,7 @@ interface TranslationSettingsContract {
         val provider: NoteTranslationProvider = NoteTranslationProvider.PreferOnDevice,
         val libreTranslateUrl: String = "",
         val apiKey: String = "",
-        val ready: Boolean = true,
+        val ready: Boolean = false,
     )
 
     sealed class UiEvent {
