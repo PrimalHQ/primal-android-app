@@ -82,6 +82,7 @@
         <li><a href="#release-builds">Release builds</a></li>
       </ul>
     </li>
+    <li><a href="#note-translation">Note translation</a></li>
     <li><a href="#development">Development</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -168,6 +169,48 @@ To install release build execute `./gradlew installAospAltRelease` or `./gradlew
 run in AndroidStudio. Please note that `googlePlayRelease` and `aospAltRelease` build variants require
 `config.properties` configured with mandatory properties. If no certificate properties are provided it fallbacks
 to `debug` certificate.
+
+## Note translation
+
+Open **Settings → Content Display → Note translation** to enable or disable
+**Show Translate on notes**, choose a target language, and select a provider.
+The default target is the device language.
+
+| Provider | Setup and behavior |
+| --- | --- |
+| Prefer on-device, then your provider | Tries Android's translation service on Android 12 / API 31 or newer. Availability depends on the device service and language support. Falls back only to the LibreTranslate URL and optional key you configure. |
+| LibreTranslate (your URL) | Enter your instance's base URL or full `/translate` URL, plus an API key if the instance requires one. |
+| DeepL (your API key) | Enter your own DeepL API key. The client selects the Free or Pro endpoint from the key format. |
+| Google Cloud Translation (your API key) | Enter your own Google Cloud Translation API key. |
+
+Tap **Translate** below a note to request a translation, then **Show original**
+to return to the original text. Short notes and notes containing only protected
+tokens do not offer the control. Translation is requested per note; there is no
+feed-wide automatic translation.
+
+No public LibreTranslate endpoint or shared API key is supplied. An empty or
+invalid LibreTranslate URL, or a missing DeepL/Google key, does not select a
+default network service. If on-device translation is unavailable and no valid
+network provider is configured, the note displays a setup hint. Network
+translation sends the masked note text to the configured service.
+
+URLs, Nostr references, Lightning/Bitcoin identifiers, Cashu tokens, mentions,
+hashtags, and emoji shortcodes are masked before either translation path and
+restored afterward. Successful results are cached in memory for the session.
+
+### Translation verification
+
+With the development prerequisites above available, run the focused unit tests:
+
+```sh
+./gradlew :app:testAospDebugUnitTest --tests 'net.primal.android.notes.translation.*'
+```
+
+Device checks should cover an unavailable on-device service with no configured
+network fallback, a supported on-device language pair, a configured network
+provider, preserved identifiers, **Show original**, and short/token-only notes.
+The repository's **Check PR** workflow additionally runs formatting, static
+analysis/lint, the full AOSP and KMP test tasks, and AOSP/Google compilation.
 
 ## Development
 The app is still under the development and changes are frequent. Breaking changes can and will happen in the future.
