@@ -588,6 +588,15 @@
     <string name="feed_context_mute_thread">Mute Thread</string>
     <string name="feed_context_request_delete">Request Delete</string>
     <string name="feed_context_copied_toast">Copied!</string>
+    <string name="note_translation_action">Translate</string>
+    <string name="note_translation_translating">Translating...</string>
+    <string name="note_translation_hide">Hide translation</string>
+    <string name="note_translation_retry">Retry translation</string>
+    <string name="note_translation_target_language">Translated to %1$s on this device</string>
+    <string name="note_translation_already_in_target">This note is already in your language.</string>
+    <string name="note_translation_language_not_detected">Couldn\'t detect the note\'s language.</string>
+    <string name="note_translation_unavailable">On-device translation isn\'t available for this language.</string>
+    <string name="note_translation_failed">Couldn\'t translate this note. Try again.</string>
 
     <string name="feed_lightning_invoice_title">Lightning Invoice</string>
     <string name="feed_lightning_invoice_pay_button">Pay</string>
