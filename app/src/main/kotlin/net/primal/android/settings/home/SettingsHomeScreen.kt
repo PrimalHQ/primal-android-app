@@ -205,6 +205,7 @@ private fun PrimalSettingsSection.title(): String {
         PrimalSettingsSection.Wallet -> stringResource(id = R.string.settings_wallet_title)
         PrimalSettingsSection.Appearance -> stringResource(id = R.string.settings_appearance_title)
         PrimalSettingsSection.ContentDisplay -> stringResource(id = R.string.settings_content_display_title)
+        PrimalSettingsSection.Translation -> stringResource(id = R.string.settings_translation_title)
         PrimalSettingsSection.Notifications -> stringResource(id = R.string.settings_notifications_title)
         PrimalSettingsSection.Zaps -> stringResource(id = R.string.settings_zaps_title)
         PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_content_title)

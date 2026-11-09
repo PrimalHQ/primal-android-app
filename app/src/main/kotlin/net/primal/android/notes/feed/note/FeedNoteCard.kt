@@ -74,6 +74,7 @@ import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteActionsRow
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.NoteTranslateRow
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
 import net.primal.android.notes.feed.note.ui.RepostedNotice
@@ -607,6 +608,14 @@ private fun FeedNote(
                     noteCallbacks = noteCallbacks,
                     onVideoSoundToggle = onVideoSoundToggle,
                     onPollOptionSelected = onPollOptionSelected,
+                )
+
+                NoteTranslateRow(
+                    modifier = Modifier
+                        .padding(horizontal = if (fullWidthContent && !forceContentIndent) 10.dp else 8.dp)
+                        .padding(start = contentIndentDp),
+                    noteId = data.postId,
+                    noteContent = data.content,
                 )
 
                 if (isFeedLayout) {

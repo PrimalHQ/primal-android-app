@@ -1063,6 +1063,20 @@
     <string name="settings_appearance_note_preview_section_title">Preview</string>
 
     <string name="settings_content_display_title">Content Display</string>
+    <string name="settings_translation_title">Translation</string>
+    <string name="settings_translation_caption">Configure on-demand translation of notes into your preferred language. Google and DeepL require your own API key.</string>
+    <string name="settings_translation_enabled">Show Translate on notes</string>
+    <string name="settings_translation_enabled_hint">When enabled, notes offer an inline Translate control</string>
+    <string name="settings_translation_provider">Provider</string>
+    <string name="settings_translation_target_lang">Target language code</string>
+    <string name="settings_translation_libre_url">LibreTranslate base URL</string>
+    <string name="settings_translation_api_key">API key (optional for LibreTranslate)</string>
+    <string name="feed_note_translate">Translate</string>
+    <string name="feed_note_translating">Translating…</string>
+    <string name="feed_note_show_original">Show original</string>
+    <string name="feed_note_show_translation">Show translation</string>
+    <string name="feed_note_detected_language">Detected: %1$s</string>
+    <string name="feed_context_translate_note">Translate Note</string>
     <string name="settings_content_display_auto_play_videos">Auto play videos</string>
     <string name="settings_content_display_auto_play_videos_hint">Start playing videos automatically as you scroll the feed. Turn this off to use less network data.</string>
     <string name="settings_content_display_animated_avatars">Show animated avatars</string>
