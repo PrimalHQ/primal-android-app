@@ -76,6 +76,7 @@ import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
+import net.primal.android.notes.feed.note.ui.NoteTranslationSection
 import net.primal.android.notes.feed.note.ui.RepostedNotice
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.ZapPollBottomSheet
@@ -616,6 +617,14 @@ private fun FeedNote(
                 } else {
                     contentFooter()
                 }
+
+                NoteTranslationSection(
+                    content = data.content,
+                    modifier = Modifier
+                        .padding(horizontal = if (fullWidthContent && !forceContentIndent) 10.dp else 8.dp)
+                        .padding(start = contentIndentDp)
+                        .padding(top = 6.dp),
+                )
 
                 if (!showNoteStatCounts) {
                     PrimalDivider(modifier = Modifier.padding(vertical = 4.dp))
