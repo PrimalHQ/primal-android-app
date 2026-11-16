@@ -457,6 +457,12 @@
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
     <string name="feed_more">more</string>
+    <string name="note_translate_action">Translate</string>
+    <string name="note_translated_from">Translated from %1$s</string>
+    <string name="note_translate_show">Show translation</string>
+    <string name="note_translate_hide">Hide translation</string>
+    <string name="note_translate_failed">Translation failed. Try again.</string>
+    <string name="accessibility_translate_note">Translate note</string>
 
     <string name="timestamp_since_just_now">now</string>
     <string name="timestamp_since_minutes">%1$sm</string>
