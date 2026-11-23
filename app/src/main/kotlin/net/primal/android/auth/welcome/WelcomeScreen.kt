@@ -1,7 +1,7 @@
 package net.primal.android.auth.welcome
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,13 +48,18 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
         backgroundColor = PrimalGradientBackgroundColor,
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
-        Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Column(
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
                     modifier = Modifier
+                        .weight(1f, fill = false)
                         .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
                         .heightIn(
                             0.dp,
@@ -101,7 +106,6 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
             }
             ToSAndPrivacyPolicyText(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .widthIn(0.dp, MAX_COMPONENT_WIDTH.dp)
                     .fillMaxWidth()
                     .padding(bottom = 32.dp, top = 16.dp),
