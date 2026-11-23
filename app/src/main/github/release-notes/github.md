@@ -1,3 +1,2 @@
-## Improvements
-- Upgrade Breez SDK Spark to 0.26.1
-- 
+## Fixes
+- Fix ToS text overlapping Create Account button on small screens
