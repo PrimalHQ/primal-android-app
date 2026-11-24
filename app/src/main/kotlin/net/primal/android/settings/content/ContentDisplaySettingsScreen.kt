@@ -27,14 +27,20 @@ import net.primal.android.settings.content.ContentDisplaySettingsContract.UiEven
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.ContentDisplaySettings
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContentDisplaySettingsScreen(viewModel: ContentDisplaySettingsViewModel, onClose: () -> Unit) {
+fun ContentDisplaySettingsScreen(
+    viewModel: ContentDisplaySettingsViewModel,
+    onClose: () -> Unit,
+    onNoteTranslationClick: () -> Unit,
+) {
     val uiState = viewModel.uiState.collectAsState()
 
     ContentDisplaySettingsScreen(
         state = uiState.value,
         onClose = onClose,
+        onNoteTranslationClick = onNoteTranslationClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -44,6 +50,7 @@ fun ContentDisplaySettingsScreen(viewModel: ContentDisplaySettingsViewModel, onC
 private fun ContentDisplaySettingsScreen(
     state: ContentDisplaySettingsContract.UiState,
     onClose: () -> Unit,
+    onNoteTranslationClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     PrimalScaffold(
@@ -57,85 +64,125 @@ private fun ContentDisplaySettingsScreen(
             )
         },
         content = { paddingValues ->
-            Column(
+            ContentDisplaySettingsItems(
                 modifier = Modifier
                     .background(color = AppTheme.colorScheme.surfaceVariant)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(paddingValues),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                state = state,
+                onNoteTranslationClick = onNoteTranslationClick,
+                eventPublisher = eventPublisher,
+            )
+        },
+    )
+}
 
-                SettingsItem(
-                    headlineText = stringResource(id = R.string.settings_content_display_auto_play_videos),
-                    supportText = stringResource(id = R.string.settings_content_display_auto_play_videos_hint),
-                    trailingContent = {
-                        PrimalSwitch(
-                            checked = state.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS,
-                            onCheckedChange = {
-                                eventPublisher(
-                                    UiEvent.UpdateAutoPlayVideos(
-                                        code = if (it) {
-                                            ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
-                                        } else {
-                                            ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER
-                                        },
-                                    ),
-                                )
+@Composable
+private fun ContentDisplaySettingsItems(
+    modifier: Modifier,
+    state: ContentDisplaySettingsContract.UiState,
+    onNoteTranslationClick: () -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+        AutoPlayVideosItem(state = state, eventPublisher = eventPublisher)
+        Spacer(modifier = Modifier.height(8.dp))
+        AnimatedAvatarsItem(state = state, eventPublisher = eventPublisher)
+        Spacer(modifier = Modifier.height(8.dp))
+        FocusModeItem(state = state, eventPublisher = eventPublisher)
+        Spacer(modifier = Modifier.height(8.dp))
+        SettingsItem(
+            headlineText = stringResource(id = R.string.settings_note_translation_title),
+            supportText = stringResource(id = R.string.settings_note_translation_entry_hint),
+            onClick = onNoteTranslationClick,
+        )
+    }
+}
+
+@Composable
+private fun AutoPlayVideosItem(
+    state: ContentDisplaySettingsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    SettingsItem(
+        headlineText = stringResource(id = R.string.settings_content_display_auto_play_videos),
+        supportText = stringResource(id = R.string.settings_content_display_auto_play_videos_hint),
+        trailingContent = {
+            PrimalSwitch(
+                checked = state.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS,
+                onCheckedChange = {
+                    eventPublisher(
+                        UiEvent.UpdateAutoPlayVideos(
+                            code = if (it) {
+                                ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
+                            } else {
+                                ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER
                             },
-                        )
+                        ),
+                    )
+                },
+            )
+        },
+        onClick = {
+            eventPublisher(
+                UiEvent.UpdateAutoPlayVideos(
+                    code = if (state.autoPlayVideos != ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS) {
+                        ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
+                    } else {
+                        ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER
                     },
-                    onClick = {
-                        eventPublisher(
-                            UiEvent.UpdateAutoPlayVideos(
-                                code = if (state.autoPlayVideos != ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS) {
-                                    ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
-                                } else {
-                                    ContentDisplaySettings.AUTO_PLAY_VIDEO_NEVER
-                                },
-                            ),
-                        )
-                    },
-                )
+                ),
+            )
+        },
+    )
+}
 
-                Spacer(modifier = Modifier.height(8.dp))
+@Composable
+private fun AnimatedAvatarsItem(
+    state: ContentDisplaySettingsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    SettingsItem(
+        headlineText = stringResource(id = R.string.settings_content_display_animated_avatars),
+        supportText = stringResource(id = R.string.settings_content_display_animated_avatars_hint),
+        trailingContent = {
+            PrimalSwitch(
+                checked = state.showAnimatedAvatars,
+                onCheckedChange = {
+                    eventPublisher(UiEvent.UpdateShowAnimatedAvatars(enabled = it))
+                },
+            )
+        },
+        onClick = {
+            eventPublisher(UiEvent.UpdateShowAnimatedAvatars(enabled = !state.showAnimatedAvatars))
+        },
+    )
+}
 
-                SettingsItem(
-                    headlineText = stringResource(id = R.string.settings_content_display_animated_avatars),
-                    supportText = stringResource(id = R.string.settings_content_display_animated_avatars_hint),
-                    trailingContent = {
-                        PrimalSwitch(
-                            checked = state.showAnimatedAvatars,
-                            onCheckedChange = {
-                                eventPublisher(UiEvent.UpdateShowAnimatedAvatars(enabled = it))
-                            },
-                        )
-                    },
-                    onClick = {
-                        eventPublisher(UiEvent.UpdateShowAnimatedAvatars(enabled = !state.showAnimatedAvatars))
-                    },
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                SettingsItem(
-                    headlineText = stringResource(id = R.string.settings_content_display_full_screen_feed_display),
-                    supportText = stringResource(id = R.string.settings_content_display_full_screen_feed_display_hint),
-                    trailingContent = {
-                        PrimalSwitch(
-                            checked = state.focusMode,
-                            onCheckedChange = {
-                                eventPublisher(UiEvent.UpdateShowFocusMode(enabled = it))
-                            },
-                        )
-                    },
-                    onClick = {
-                        eventPublisher(UiEvent.UpdateShowFocusMode(enabled = !state.focusMode))
-                    },
-                )
-            }
+@Composable
+private fun FocusModeItem(
+    state: ContentDisplaySettingsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    SettingsItem(
+        headlineText = stringResource(id = R.string.settings_content_display_full_screen_feed_display),
+        supportText = stringResource(id = R.string.settings_content_display_full_screen_feed_display_hint),
+        trailingContent = {
+            PrimalSwitch(
+                checked = state.focusMode,
+                onCheckedChange = {
+                    eventPublisher(UiEvent.UpdateShowFocusMode(enabled = it))
+                },
+            )
+        },
+        onClick = {
+            eventPublisher(UiEvent.UpdateShowFocusMode(enabled = !state.focusMode))
         },
     )
 }

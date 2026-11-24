@@ -38,6 +38,8 @@ import net.primal.android.settings.connected.session.remote.RemoteSessionDetails
 import net.primal.android.settings.connected.session.remote.RemoteSessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
+import net.primal.android.settings.translation.TranslationSettingsScreen
+import net.primal.android.settings.translation.TranslationSettingsViewModel
 import net.primal.android.settings.developer.DeveloperToolsScreen
 import net.primal.android.settings.developer.DeveloperToolsViewModel
 import net.primal.android.settings.developer.datainspector.DataInspectorScreen
@@ -75,6 +77,7 @@ private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "walle
 private fun NavController.navigateToCreateNewWalletConnection() = navigate(route = "wallet_settings/create_new_nwc")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
+private fun NavController.navigateToTranslationSettings() = navigate(route = "content_display/translation")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
@@ -173,6 +176,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         network(route = "network", navController = navController)
         appearance(route = "appearance_settings", navController = navController)
         contentDisplay(route = "content_display", navController = navController)
+        translationSettings(route = "content_display/translation", navController = navController)
         mutedAccounts(route = "muted_accounts_settings", navController = navController)
         mediaUploads(route = "media_uploads_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
@@ -458,6 +462,23 @@ private fun NavGraphBuilder.contentDisplay(route: String, navController: NavCont
         val viewModel = hiltViewModel<ContentDisplaySettingsViewModel>(it)
         LockToOrientationPortrait()
         ContentDisplaySettingsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onNoteTranslationClick = { navController.navigateToTranslationSettings() },
+        )
+    }
+
+private fun NavGraphBuilder.translationSettings(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<TranslationSettingsViewModel>(it)
+        LockToOrientationPortrait()
+        TranslationSettingsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

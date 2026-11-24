@@ -10,6 +10,7 @@ data class ContentDisplaySettings(
     val showAnimatedAvatars: Boolean = false,
     val focusModeEnabled: Boolean = true,
     @SerialName("noteAppearance") val contentAppearance: ContentAppearance = ContentAppearance.Default,
+    val noteTranslation: NoteTranslationSettings = NoteTranslationSettings(),
 ) {
     companion object {
         const val AUTO_PLAY_VIDEO_NEVER = 0

@@ -94,6 +94,7 @@ import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
+import net.primal.android.notes.feed.note.ui.NoteTranslationControls
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachmentVideoPreview
 import net.primal.android.notes.feed.note.ui.attachment.findMediaFeedCardMediaSize
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
@@ -302,6 +303,7 @@ private fun MediaFeedCardBody(
         Spacer(modifier = Modifier.height(MediumSpacing))
 
         MediaFeedContentSection(
+            noteId = data.postId,
             authorName = data.authorName,
             content = data.content,
             hashtags = data.hashtags,
@@ -542,6 +544,7 @@ private fun PageIndicatorDots(pageCount: Int, currentPage: Int) {
 
 @Composable
 private fun MediaFeedContentSection(
+    noteId: String,
     authorName: String,
     content: String,
     hashtags: List<String>,
@@ -553,6 +556,7 @@ private fun MediaFeedContentSection(
     val localUriHandler = LocalUriHandler.current
     val highlightColor = AppTheme.colorScheme.secondary
     val displaySettings = LocalContentDisplaySettings.current
+    var translatedContent by remember(noteId, content) { mutableStateOf<String?>(null) }
     val contentTextStyle = AppTheme.typography.bodyMedium.copy(
         fontSize = displaySettings.contentAppearance.noteUsernameSize,
         lineHeight = displaySettings.contentAppearance.noteUsernameSize,
@@ -566,10 +570,13 @@ private fun MediaFeedContentSection(
             .padding(bottom = 16.dp),
     ) {
         // Remove URL filtering when kind 20 events are supported.
-        val displayContent = content.lines()
-            .filterNot { it.startsWith("http://") || it.startsWith("https://") }
-            .joinToString(" ")
-            .trim()
+        val originalDisplayContent = remember(content) {
+            content.lines()
+                .filterNot { it.startsWith("http://") || it.startsWith("https://") }
+                .joinToString(" ")
+                .trim()
+        }
+        val displayContent = translatedContent ?: originalDisplayContent
 
         val annotatedText = remember(authorName, displayContent, hashtags, highlightColor) {
             buildMediaFeedAnnotatedString(
@@ -594,6 +601,12 @@ private fun MediaFeedContentSection(
                     else -> if (!expanded && displayContent.isNotEmpty()) onExpandClick()
                 }
             },
+        )
+
+        NoteTranslationControls(
+            noteId = noteId,
+            sourceText = originalDisplayContent,
+            onTranslatedContentChange = { translatedContent = it },
         )
 
         if (!expanded && displayContent.length > MORE_TEXT_THRESHOLD) {
