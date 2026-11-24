@@ -42,6 +42,7 @@ import net.primal.android.notes.feed.model.URL_ANNOTATION_TAG
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.model.computeRenderedNoteContent
 import net.primal.android.notes.feed.model.toAnnotatedString
+import net.primal.android.notes.feed.note.translation.NoteTranslateControls
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -130,6 +131,9 @@ fun NoteContent(
                 textSelectable = textSelectable,
                 onClick = clickHandler,
             )
+
+            // Inline note translation (#1055): on-device first, LibreTranslate fallback + token sanitizer
+            NoteTranslateControls(noteText = data.content)
         }
 
         val referencedStreams = data.partitions.referencedStreams
