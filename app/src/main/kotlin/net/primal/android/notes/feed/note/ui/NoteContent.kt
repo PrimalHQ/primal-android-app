@@ -130,6 +130,8 @@ fun NoteContent(
                 textSelectable = textSelectable,
                 onClick = clickHandler,
             )
+
+            NoteTranslateControl(content = data.content)
         }
 
         val referencedStreams = data.partitions.referencedStreams
