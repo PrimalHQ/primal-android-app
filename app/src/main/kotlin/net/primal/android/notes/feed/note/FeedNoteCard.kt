@@ -321,6 +321,9 @@ private fun FeedNoteCard(
                     onReportContentClick = {
                         dialogsState.showReportDialog = true
                     },
+                    onTranslateClick = {
+                        eventPublisher(UiEvent.TranslateAction(noteContent = data.content))
+                    },
                 )
 
                 Column(
