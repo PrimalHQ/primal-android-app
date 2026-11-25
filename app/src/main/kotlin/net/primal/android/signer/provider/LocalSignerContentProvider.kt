@@ -14,6 +14,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import net.primal.android.PrimalApp
 import net.primal.core.utils.fold
 import net.primal.core.utils.mapCatching
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -48,6 +49,9 @@ class LocalSignerContentProvider : ContentProvider() {
         return SignerContentProviderParser()
             .parse(uri = p0, params = p1?.filterNotNull() ?: emptyList(), callingPackage = callingPackage)
             .mapCatching {
+                check(PrimalApp.awaitInitialization(timeout = 5.seconds)) {
+                    "Application did not finish initializing in time."
+                }
                 Napier.d(tag = TAG) { "We got $it." }
                 val appContext = context?.applicationContext ?: error("Couldn't get application context.")
 

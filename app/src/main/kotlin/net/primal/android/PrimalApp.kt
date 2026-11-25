@@ -8,7 +8,10 @@ import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.Napier
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.time.Duration
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
@@ -20,6 +23,17 @@ import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
 @HiltAndroidApp
 class PrimalApp : Application() {
+
+    companion object {
+        private val initialization = CountDownLatch(1)
+
+        /**
+         * Content providers can be called on a binder thread before [onCreate] has initialized
+         * the repository factories. Blocks until it has, or until [timeout] elapses.
+         */
+        fun awaitInitialization(timeout: Duration): Boolean =
+            initialization.await(timeout.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+    }
 
     @Inject
     lateinit var antilog: Set<@JvmSuppressWildcards Antilog>
@@ -59,6 +73,7 @@ class PrimalApp : Application() {
         }
 
         walletSessionBridge.get().start()
+        initialization.countDown()
     }
 
     private fun initNotificationChannels() {

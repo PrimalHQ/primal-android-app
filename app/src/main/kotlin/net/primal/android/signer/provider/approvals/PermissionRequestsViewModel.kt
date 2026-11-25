@@ -75,8 +75,19 @@ class PermissionRequestsViewModel @Inject constructor(
                 .onFailure { error ->
                     if (error is LocalSignerError.AppNotFound) {
                         setEffect(SideEffect.InvalidRequest)
+                        return@launch
                     }
                 }
+
+            // Requests answered by a stored permission never reach the request queue, so
+            // the queue observer would never send their responses. Reply right away unless
+            // something still waits for the user.
+            if (!localSignerService.hasPendingMethods()) {
+                Napier.d(tag = "LocalSignerForeground") {
+                    "No requests are waiting for user action. Sending responses immediately."
+                }
+                sendResponses()
+            }
         }
 
     private fun observeEvents() {

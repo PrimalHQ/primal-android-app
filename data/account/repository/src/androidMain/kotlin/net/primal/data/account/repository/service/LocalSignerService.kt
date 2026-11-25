@@ -13,6 +13,8 @@ interface LocalSignerService {
 
     fun getAllMethodResponses(): List<LocalSignerMethodResponse>
 
+    fun hasPendingMethods(): Boolean
+
     suspend fun respondToUserActions(eventChoices: List<SessionEventUserChoice>)
 
     suspend fun addNewApp(app: LocalApp): Result<Unit>

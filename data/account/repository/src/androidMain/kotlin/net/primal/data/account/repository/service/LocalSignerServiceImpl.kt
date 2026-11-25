@@ -139,6 +139,8 @@ internal class LocalSignerServiceImpl internal constructor(
 
     override fun getAllMethodResponses() = allResponses.load()
 
+    override fun hasPendingMethods() = pendingMethods.load().isNotEmpty()
+
     override suspend fun respondToUserActions(eventChoices: List<SessionEventUserChoice>) {
         eventChoices.forEach { respondToUserAction(eventChoice = it) }
     }
