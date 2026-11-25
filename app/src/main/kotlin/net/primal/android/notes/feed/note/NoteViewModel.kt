@@ -18,6 +18,8 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.UiError.FailedToPublishZapEvent
 import net.primal.android.core.errors.UiError.GenericError
 import net.primal.android.core.errors.UiError.InvalidZapRequest
+import net.primal.android.core.translation.TranslationPreferences
+import net.primal.android.core.translation.TranslationService
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.PollState
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
@@ -63,6 +65,8 @@ class NoteViewModel @AssistedInject constructor(
     private val relayHintsRepository: EventRelayHintsRepository,
     private val userRepository: UserRepository,
     private val walletAccountRepository: WalletAccountRepository,
+    private val translationService: TranslationService,
+    private val translationPreferences: TranslationPreferences,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -121,6 +125,8 @@ class NoteViewModel @AssistedInject constructor(
 
                     is UiEvent.PollVoteAction -> votePoll(it)
                     is UiEvent.ZapPollVoteAction -> zapPollVote(it)
+                    is UiEvent.TranslateAction -> translateNote(it.noteContent)
+                    UiEvent.DismissTranslation -> setState { copy(translationState = NoteContract.TranslationState.Idle) }
                 }
             }
         }
@@ -585,4 +591,26 @@ class NoteViewModel @AssistedInject constructor(
             )
         }
     }
+
+    private fun translateNote(noteContent: String) =
+        viewModelScope.launch {
+            if (noteContent.isBlank()) {
+                setState { copy(translationState = NoteContract.TranslationState.Error("No text to translate")) }
+                return@launch
+            }
+
+            setState { copy(translationState = NoteContract.TranslationState.Loading) }
+
+            val targetLanguage = translationPreferences.targetLanguage.value
+            translationService.translate(noteContent, targetLanguage)
+                .onSuccess { translatedText ->
+                    setState { copy(translationState = NoteContract.TranslationState.Success(translatedText)) }
+                }
+                .onFailure { error ->
+                    Napier.w(throwable = error) { "Failed to translate note." }
+                    setState {
+                        copy(translationState = NoteContract.TranslationState.Error(error.message ?: "Translation failed"))
+                    }
+                }
+        }
 }

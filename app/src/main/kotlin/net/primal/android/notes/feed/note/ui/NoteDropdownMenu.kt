@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +71,7 @@ fun NoteDropdownMenuIcon(
     onUnmuteThreadClick: (() -> Unit)? = null,
     onReportContentClick: (() -> Unit)? = null,
     onRequestDeleteClick: (() -> Unit)? = null,
+    onTranslateClick: (() -> Unit)? = null,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
 
@@ -222,6 +225,14 @@ fun NoteDropdownMenuIcon(
                             Toast.LENGTH_SHORT,
                         ).show()
                     }
+                },
+            )
+            DropdownPrimalMenuItem(
+                trailingIconVector = Icons.Outlined.Translate,
+                text = stringResource(id = R.string.feed_context_translate),
+                onClick = {
+                    onTranslateClick?.invoke()
+                    menuVisible = false
                 },
             )
             if (!isNoteAuthor) {

@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import net.primal.android.R
 import net.primal.android.core.activity.LocalZappingState
 import net.primal.android.core.compose.ConfirmActionAlertDialog
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -148,5 +149,27 @@ fun NoteCardDialogs(
                 eventPublisher(UiEvent.DismissBookmarkConfirmation(noteId = data.postId))
             },
         )
+    }
+
+    // Translation Dialog
+    when (val translationState = noteState.translationState) {
+        is NoteContract.TranslationState.Loading -> {
+            TranslationLoadingDialog(
+                onDismiss = { eventPublisher(UiEvent.DismissTranslation) },
+            )
+        }
+        is NoteContract.TranslationState.Success -> {
+            TranslationResultDialog(
+                translatedText = translationState.translatedText,
+                onDismiss = { eventPublisher(UiEvent.DismissTranslation) },
+            )
+        }
+        is NoteContract.TranslationState.Error -> {
+            TranslationErrorDialog(
+                errorMessage = translationState.message,
+                onDismiss = { eventPublisher(UiEvent.DismissTranslation) },
+            )
+        }
+        NoteContract.TranslationState.Idle -> { /* No dialog */ }
     }
 }

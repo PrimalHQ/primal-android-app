@@ -588,6 +588,14 @@
     <string name="feed_context_mute_thread">Mute Thread</string>
     <string name="feed_context_request_delete">Request Delete</string>
     <string name="feed_context_copied_toast">Copied!</string>
+    <string name="feed_context_translate">Translate</string>
+
+    <string name="translation_dialog_title">Translation</string>
+    <string name="translation_dialog_copy">Copy</string>
+    <string name="translation_dialog_close">Close</string>
+    <string name="translation_loading">Translating…</string>
+    <string name="translation_error">Translation failed: %1$s</string>
+    <string name="translation_no_text">No text to translate</string>
 
     <string name="feed_lightning_invoice_title">Lightning Invoice</string>
     <string name="feed_lightning_invoice_pay_button">Pay</string>
@@ -1096,6 +1104,11 @@
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
     <string name="settings_wallet_needs_backup">needs backup</string>
+
+    <string name="settings_translation_title">Translation</string>
+    <string name="settings_translation_about">About</string>
+    <string name="settings_translation_description">Uses LibreTranslate (free, open-source) for translating notes. No API key required.</string>
+    <string name="settings_translation_target_language">Target Language</string>
 
     <string name="settings_muted_content_title">Muted Content</string>
     <string name="settings_muted_title">Muted</string>

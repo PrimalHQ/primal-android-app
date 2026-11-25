@@ -64,6 +64,8 @@ import net.primal.android.settings.wallet.settings.WalletSettingsScreen
 import net.primal.android.settings.wallet.settings.WalletSettingsViewModel
 import net.primal.android.settings.zaps.ZapSettingsScreen
 import net.primal.android.settings.zaps.ZapSettingsViewModel
+import net.primal.android.settings.translation.TranslationSettingsScreen
+import net.primal.android.settings.translation.TranslationSettingsViewModel
 import net.primal.android.wallet.restore.RestoreWalletScreen
 import net.primal.android.wallet.restore.RestoreWalletViewModel
 
@@ -79,6 +81,7 @@ fun NavController.navigateToNotificationsSettings() = navigate(route = "notifica
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
+private fun NavController.navigateToTranslationSettings() = navigate(route = "translation_settings")
 fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
 private fun NavController.navigateToDeveloperTools() = navigate(route = "developer_tools")
 private fun NavController.navigateToDataInspector() = navigate(route = "developer_tools_data_inspector")
@@ -137,6 +140,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
                     PrimalSettingsSection.MediaUploads -> navController.navigateToMediaUploads()
                     PrimalSettingsSection.ConnectedApps -> navController.navigateToConnectedApps()
+                    PrimalSettingsSection.Translation -> navController.navigateToTranslationSettings()
                 }
             },
             onDeveloperToolsClick = { navController.navigateToDeveloperTools() },
@@ -177,6 +181,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         mediaUploads(route = "media_uploads_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
         zaps(route = "zaps_settings", navController = navController)
+        translation(route = "translation_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
         developerTools(route = "developer_tools", navController = navController)
         dataInspector(route = "developer_tools_data_inspector", navController = navController)
@@ -474,6 +479,22 @@ private fun NavGraphBuilder.zaps(route: String, navController: NavController) =
         val viewModel = hiltViewModel<ZapSettingsViewModel>(it)
         LockToOrientationPortrait()
         ZapSettingsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.translation(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<TranslationSettingsViewModel>(it)
+        LockToOrientationPortrait()
+        TranslationSettingsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

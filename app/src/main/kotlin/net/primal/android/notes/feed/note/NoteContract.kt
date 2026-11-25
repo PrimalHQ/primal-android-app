@@ -11,7 +11,15 @@ interface NoteContract {
         val relayHints: List<String> = emptyList(),
         val poll: PollUi? = null,
         val error: UiError? = null,
+        val translationState: TranslationState = TranslationState.Idle,
     )
+
+    sealed class TranslationState {
+        data object Idle : TranslationState()
+        data object Loading : TranslationState()
+        data class Success(val translatedText: String) : TranslationState()
+        data class Error(val message: String) : TranslationState()
+    }
 
     sealed class SideEffect {
         data object NoteDeleted : SideEffect()
@@ -93,5 +101,11 @@ interface NoteContract {
         ) : UiEvent()
 
         data object DismissError : UiEvent()
+
+        data class TranslateAction(
+            val noteContent: String,
+        ) : UiEvent()
+
+        data object DismissTranslation : UiEvent()
     }
 }
