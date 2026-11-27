@@ -287,6 +287,7 @@ dependencies {
     implementation(project(":core:nips"))
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
+    implementation(project(":core:networking-http"))
     implementation(project(":core:networking-upload"))
     implementation(project(":core:networking-lightning"))
     implementation(project(":core:caching"))
@@ -305,6 +306,7 @@ dependencies {
     implementation(project(":data:account:signer"))
 
     implementation(libs.bignum)
+    implementation(libs.androidx.security.crypto)
     implementation(libs.core.ktx)
     implementation(libs.core.splashscreen)
     implementation(libs.lifecycle.runtime.ktx)
@@ -430,6 +432,7 @@ dependencies {
 
     testImplementation(project(":core:testing"))
     testImplementation(libs.junit)
+    testImplementation(libs.ktor.client.mock)
     testImplementation(libs.androidx.test.runner)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.test.ext.junit.ktx)

@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
@@ -42,6 +43,7 @@ fun DecoratedSettingsOutlinedTextField(
     onFocus: (() -> Unit)? = null,
     showSupportContent: Boolean = false,
     supportingActionText: String = "",
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -62,6 +64,7 @@ fun DecoratedSettingsOutlinedTextField(
             },
             onFocus = onFocus,
             placeholderText = placeholderText,
+            visualTransformation = visualTransformation,
         )
 
         if (showSupportContent) {
@@ -95,6 +98,7 @@ private fun SettingsOutlinedTextField(
     onButtonClick: () -> Unit,
     placeholderText: String,
     onFocus: (() -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     Row(
         modifier = modifier,
@@ -112,6 +116,7 @@ private fun SettingsOutlinedTextField(
             shape = AppTheme.shapes.medium,
             value = value,
             onValueChange = onValueChange,
+            visualTransformation = visualTransformation,
             singleLine = true,
             textStyle = AppTheme.typography.bodyMedium,
             placeholder = {
