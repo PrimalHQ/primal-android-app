@@ -210,6 +210,7 @@ private fun PrimalSettingsSection.title(): String {
         PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_content_title)
         PrimalSettingsSection.MediaUploads -> stringResource(id = R.string.settings_media_uploads_title)
         PrimalSettingsSection.ConnectedApps -> stringResource(id = R.string.settings_connected_apps_title)
+        PrimalSettingsSection.Translation -> stringResource(id = R.string.settings_translation_title)
     }
 }
 

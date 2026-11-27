@@ -11,4 +11,5 @@ enum class PrimalSettingsSection {
     MediaUploads,
     Notifications,
     Zaps,
+    Translation,
 }

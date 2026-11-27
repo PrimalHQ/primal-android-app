@@ -1062,6 +1062,40 @@
     <string name="settings_appearance_font_section_title">Font</string>
     <string name="settings_appearance_note_preview_section_title">Preview</string>
 
+    <string name="settings_translation_title">Translation</string>
+    <string name="settings_translation_enable">Translate notes</string>
+    <string name="settings_translation_enable_hint">Show a Translate action below notes written in other languages. Notes are only sent to your translation endpoint when you tap Translate.</string>
+    <string name="settings_translation_endpoint">Translation endpoint</string>
+    <string name="settings_translation_endpoint_placeholder">https://libretranslate.com</string>
+    <string name="settings_translation_api_key">API key (optional)</string>
+    <string name="settings_translation_api_key_placeholder">Only if your endpoint requires one</string>
+    <string name="settings_translation_target_language">Translate to (language code)</string>
+    <string name="settings_translation_target_language_placeholder">en</string>
+    <string name="settings_translation_test_connection">Test connection</string>
+    <string name="settings_translation_test_hint">Checks the endpoint and loads the languages it supports.</string>
+    <string name="settings_translation_test_success">Connected. Pick a language above or tap one below.</string>
+    <string name="settings_translation_test_not_configured">Enter an endpoint first.</string>
+    <string name="settings_translation_test_unreachable">Couldn\'t reach the endpoint. Check the URL and your connection.</string>
+    <string name="settings_translation_test_error">The endpoint returned an error.</string>
+    <string name="settings_translation_cache">Translation cache</string>
+    <string name="settings_translation_cache_count">%1$d translations cached on this device</string>
+    <string name="settings_translation_cache_clear">Clear</string>
+    <string name="settings_translation_privacy_note">Note text is sent to the endpoint you configure above — and nowhere else — only when you tap Translate on a note. Nostr and Lightning identifiers, links and hashtags are masked out before sending and restored in the result. The API key is stored only on this device.</string>
+
+    <string name="note_translation_translate">Translate</string>
+    <string name="note_translation_translating">Translating…</string>
+    <string name="note_translation_cancel">Cancel</string>
+    <string name="note_translation_retry">Retry</string>
+    <string name="note_translation_hide_translation">Hide translation</string>
+    <string name="note_translation_show_translation">Show translation</string>
+    <string name="note_translation_translated_from">Translated from %1$s</string>
+    <string name="note_translation_translated">Translated</string>
+    <string name="note_translation_error_not_configured">Set up note translation in Settings → Translation first.</string>
+    <string name="note_translation_error_unreachable">Couldn\'t reach the translation service. Check the endpoint in Settings → Translation.</string>
+    <string name="note_translation_error_provider">The translation service returned an error. Please try again.</string>
+    <string name="note_translation_error_empty">This note has nothing to translate.</string>
+    <string name="note_translation_error_generic">Translation failed. Please try again.</string>
+
     <string name="settings_content_display_title">Content Display</string>
     <string name="settings_content_display_auto_play_videos">Auto play videos</string>
     <string name="settings_content_display_auto_play_videos_hint">Start playing videos automatically as you scroll the feed. Turn this off to use less network data.</string>
